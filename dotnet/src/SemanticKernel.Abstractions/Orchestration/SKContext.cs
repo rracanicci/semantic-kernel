@@ -27,10 +27,12 @@ public sealed class SKContext
     /// </summary>
     public bool IsTrusted
     {
-        get {
+        get
+        {
             return this.Variables.IsAllTrusted();
         }
-        internal set {
+        internal set
+        {
             this.Variables.SensitiveInput = this.Variables.SensitiveInput.UpdateIsTrusted(value);
         }
     }
