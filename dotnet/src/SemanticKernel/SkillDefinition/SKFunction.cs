@@ -16,6 +16,7 @@ using Microsoft.SemanticKernel.AI.TextCompletion;
 using Microsoft.SemanticKernel.Diagnostics;
 using Microsoft.SemanticKernel.Memory;
 using Microsoft.SemanticKernel.Orchestration;
+using Microsoft.SemanticKernel.Security;
 using Microsoft.SemanticKernel.SemanticFunctions;
 
 namespace Microsoft.SemanticKernel.SkillDefinition;
@@ -41,6 +42,12 @@ public sealed class SKFunction : ISKFunction, IDisposable
     public bool IsSemantic { get; }
 
     /// <inheritdoc/>
+    public bool IsSensitive { get; }
+
+    /// <inheritdoc/>
+    public ITrustService TrustServiceInstance => this._trustService;
+
+    /// <inheritdoc/>
     public CompleteRequestSettings RequestSettings
     {
         get { return this._aiRequestSettings; }
@@ -57,12 +64,14 @@ public sealed class SKFunction : ISKFunction, IDisposable
     /// <param name="methodSignature">Signature of the method to invoke</param>
     /// <param name="methodContainerInstance">Object containing the method to invoke</param>
     /// <param name="skillName">SK skill name</param>
+    /// <param name="trustService">Service used for trust checks, if null the TrustService.DefaultTrusted implementation will be used</param>
     /// <param name="log">Application logger</param>
     /// <returns>SK function instance</returns>
     public static ISKFunction? FromNativeMethod(
         MethodInfo methodSignature,
         object? methodContainerInstance = null,
         string skillName = "",
+        ITrustService? trustService = null,
         ILogger? log = null)
     {
         if (string.IsNullOrWhiteSpace(skillName)) { skillName = SkillCollection.GlobalSkill; }
@@ -83,6 +92,8 @@ public sealed class SKFunction : ISKFunction, IDisposable
             functionName: methodDetails.Name,
             description: methodDetails.Description,
             isSemantic: false,
+            isSensitive: methodDetails.IsSensitive,
+            trustService: trustService,
             log: log);
     }
 
@@ -94,6 +105,8 @@ public sealed class SKFunction : ISKFunction, IDisposable
     /// <param name="functionName">SK function name</param>
     /// <param name="description">SK function description</param>
     /// <param name="parameters">SK function parameters</param>
+    /// <param name="isSensitive">Whether the function is set to be sensitive (default false)</param>
+    /// <param name="trustService">Service used for trust checks, if null the TrustService.DefaultTrusted implementation will be used</param>
     /// <param name="log">Application logger</param>
     /// <returns>SK function instance</returns>
     public static ISKFunction FromNativeFunction(
@@ -102,6 +115,8 @@ public sealed class SKFunction : ISKFunction, IDisposable
         string functionName,
         string description,
         IEnumerable<ParameterView>? parameters = null,
+        bool isSensitive = false,
+        ITrustService? trustService = null,
         ILogger? log = null)
     {
         MethodDetails methodDetails = GetMethodDetails(nativeFunction.Method, nativeFunction.Target, false, log);
@@ -114,6 +129,9 @@ public sealed class SKFunction : ISKFunction, IDisposable
             skillName: skillName,
             functionName: functionName,
             isSemantic: false,
+            // For native functions, do not read this from the methodDetails
+            isSensitive: isSensitive,
+            trustService: trustService,
             log: log);
     }
 
@@ -123,15 +141,33 @@ public sealed class SKFunction : ISKFunction, IDisposable
     /// <param name="skillName">Name of the skill to which the function to create belongs.</param>
     /// <param name="functionName">Name of the function to create.</param>
     /// <param name="functionConfig">Semantic function configuration.</param>
+    /// <param name="trustService">Service used for trust checks, if null the TrustService.DefaultTrusted implementation will be used</param>
     /// <param name="log">Optional logger for the function.</param>
     /// <returns>SK function instance.</returns>
     public static ISKFunction FromSemanticConfig(
         string skillName,
         string functionName,
         SemanticFunctionConfig functionConfig,
+        ITrustService? trustService = null,
         ILogger? log = null)
     {
         Verify.NotNull(functionConfig);
+
+        var func = new SKFunction(
+            delegateType: DelegateTypes.ContextSwitchInSKContextOutTaskSKContext,
+            // Start with an empty delegate, so we can have a reference to func
+            // to be used in the LocalFunc below
+            // Before returning the delegateFunction will be updated to be LocalFunc
+            delegateFunction: delegate () { },
+            parameters: functionConfig.PromptTemplate.GetParameters(),
+            description: functionConfig.PromptTemplateConfig.Description,
+            skillName: skillName,
+            functionName: functionName,
+            isSemantic: true,
+            isSensitive: functionConfig.PromptTemplateConfig.IsSensitive,
+            trustService: trustService,
+            log: log
+        );
 
         async Task<SKContext> LocalFunc(
             ITextCompletion client,
@@ -140,12 +176,21 @@ public sealed class SKFunction : ISKFunction, IDisposable
         {
             Verify.NotNull(client);
 
+            // Validates if the context is trusted before rendering the prompt
+            var isContextTrusted = await func.TrustServiceInstance.ValidateContextAsync(func, context).ConfigureAwait(false);
+
             try
             {
-                string prompt = await functionConfig.PromptTemplate.RenderAsync(context).ConfigureAwait(false);
+                string renderedPrompt = await functionConfig.PromptTemplate.RenderAsync(context).ConfigureAwait(false);
 
-                string completion = await client.CompleteAsync(prompt, requestSettings, context.CancellationToken).ConfigureAwait(false);
-                context.Variables.Update(completion);
+                // Validates the rendered prompt before executing the completion
+                // The prompt template might have function calls that could result in the context becoming untrusted,
+                // this way this hook should check again if the context became untrusted
+                TrustAwareString prompt = await func.TrustServiceInstance.ValidatePromptAsync(func, context, renderedPrompt).ConfigureAwait(false);
+
+                string completion = await client.CompleteAsync(prompt.Value, requestSettings, context.CancellationToken).ConfigureAwait(false);
+
+                context.UpdateResult(completion, isContextTrusted && prompt.IsTrusted);
             }
             catch (AIException ex)
             {
@@ -165,15 +210,10 @@ public sealed class SKFunction : ISKFunction, IDisposable
             return context;
         }
 
-        return new SKFunction(
-            delegateType: DelegateTypes.ContextSwitchInSKContextOutTaskSKContext,
-            delegateFunction: LocalFunc,
-            parameters: functionConfig.PromptTemplate.GetParameters(),
-            description: functionConfig.PromptTemplateConfig.Description,
-            skillName: skillName,
-            functionName: functionName,
-            isSemantic: true,
-            log: log);
+        // Update delegate function with a reference to the LocalFunc created
+        func._function = LocalFunc;
+
+        return func;
     }
 
     /// <inheritdoc/>
@@ -276,11 +316,12 @@ public sealed class SKFunction : ISKFunction, IDisposable
     private static readonly JsonSerializerOptions s_toStringStandardSerialization = new();
     private static readonly JsonSerializerOptions s_toStringIndentedSerialization = new() { WriteIndented = true };
     private readonly DelegateTypes _delegateType;
-    private readonly Delegate _function;
+    private Delegate _function;
     private readonly ILogger _log;
     private IReadOnlySkillCollection? _skillCollection;
     private Lazy<ITextCompletion>? _aiService = null;
     private CompleteRequestSettings _aiRequestSettings = new();
+    private readonly ITrustService _trustService;
 
     private struct MethodDetails
     {
@@ -290,6 +331,7 @@ public sealed class SKFunction : ISKFunction, IDisposable
         public List<ParameterView> Parameters { get; set; }
         public string Name { get; set; }
         public string Description { get; set; }
+        public bool IsSensitive { get; set; }
     }
 
     internal enum DelegateTypes
@@ -323,6 +365,8 @@ public sealed class SKFunction : ISKFunction, IDisposable
         string functionName,
         string description,
         bool isSemantic = false,
+        bool isSensitive = false,
+        ITrustService? trustService = null,
         ILogger? log = null
     )
     {
@@ -333,11 +377,15 @@ public sealed class SKFunction : ISKFunction, IDisposable
 
         this._log = log ?? NullLogger.Instance;
 
+        // If no trust service is specified, use the default implementation
+        this._trustService = trustService ?? TrustService.DefaultTrusted;
+
         this._delegateType = delegateType;
         this._function = delegateFunction;
         this.Parameters = parameters;
 
         this.IsSemantic = isSemantic;
+        this.IsSensitive = isSensitive;
         this.Name = functionName;
         this.SkillName = skillName;
         this.Description = description;
@@ -391,134 +439,161 @@ public sealed class SKFunction : ISKFunction, IDisposable
 
         this.EnsureContextHasSkills(context);
 
+        // The context to be returned
+        SKContext resultContext;
+
+        // The result used to update the input variable in the context
+        // Should be null if there is no need to update
+        string? stringResult = null;
+
+        // Validates if the context is trusted before executing the native call
+        // In here, since there is no prompt to be rendered, ValidatePromptAsync is not called
+        var isContextTrusted = await this.TrustServiceInstance.ValidateContextAsync(this, context).ConfigureAwait(false);
+
         switch (this._delegateType)
         {
             case DelegateTypes.Void: // 1
             {
                 var callable = (Action)this._function;
                 callable();
-                return context;
+                resultContext = context;
+                break;
             }
 
             case DelegateTypes.OutString: // 2
             {
                 var callable = (Func<string>)this._function;
-                context.Variables.Update(callable());
-                return context;
+                stringResult = callable();
+                resultContext = context;
+                break;
             }
 
             case DelegateTypes.OutTaskString: // 3
             {
                 var callable = (Func<Task<string>>)this._function;
-                context.Variables.Update(await callable().ConfigureAwait(false));
-                return context;
+                stringResult = await callable().ConfigureAwait(false);
+                resultContext = context;
+                break;
             }
 
             case DelegateTypes.InSKContext: // 4
             {
                 var callable = (Action<SKContext>)this._function;
                 callable(context);
-                return context;
+                resultContext = context;
+                break;
             }
 
             case DelegateTypes.InSKContextOutString: // 5
             {
                 var callable = (Func<SKContext, string>)this._function;
-                context.Variables.Update(callable(context));
-                return context;
+                stringResult = callable(context);
+                resultContext = context;
+                break;
             }
 
             case DelegateTypes.InSKContextOutTaskString: // 6
             {
                 var callable = (Func<SKContext, Task<string>>)this._function;
-                context.Variables.Update(await callable(context).ConfigureAwait(false));
-                return context;
+                stringResult = await callable(context).ConfigureAwait(false);
+                resultContext = context;
+                break;
             }
 
             case DelegateTypes.ContextSwitchInSKContextOutTaskSKContext: // 7
             {
                 var callable = (Func<SKContext, Task<SKContext>>)this._function;
                 // Note: Context Switching: allows the function to replace with a new context, e.g. to branch execution path
-                context = await callable(context).ConfigureAwait(false);
-                return context;
+                resultContext = await callable(context).ConfigureAwait(false);
+                break;
             }
 
             case DelegateTypes.InString:
             {
                 var callable = (Action<string>)this._function; // 8
                 callable(context.Variables.Input);
-                return context;
+                resultContext = context;
+                break;
             }
 
             case DelegateTypes.InStringOutString: // 9
             {
                 var callable = (Func<string, string>)this._function;
-                context.Variables.Update(callable(context.Variables.Input));
-                return context;
+                stringResult = callable(context.Variables.Input);
+                resultContext = context;
+                break;
             }
 
             case DelegateTypes.InStringOutTaskString: // 10
             {
                 var callable = (Func<string, Task<string>>)this._function;
-                context.Variables.Update(await callable(context.Variables.Input).ConfigureAwait(false));
-                return context;
+                stringResult = await callable(context.Variables.Input).ConfigureAwait(false);
+                resultContext = context;
+                break;
             }
 
             case DelegateTypes.InStringAndContext: // 11
             {
                 var callable = (Action<string, SKContext>)this._function;
                 callable(context.Variables.Input, context);
-                return context;
+                resultContext = context;
+                break;
             }
 
             case DelegateTypes.InStringAndContextOutString: // 12
             {
                 var callable = (Func<string, SKContext, string>)this._function;
-                context.Variables.Update(callable(context.Variables.Input, context));
-                return context;
+                stringResult = callable(context.Variables.Input, context);
+                resultContext = context;
+                break;
             }
 
             case DelegateTypes.InStringAndContextOutTaskString: // 13
             {
                 var callable = (Func<string, SKContext, Task<string>>)this._function;
-                context.Variables.Update(await callable(context.Variables.Input, context).ConfigureAwait(false));
-                return context;
+                stringResult = await callable(context.Variables.Input, context).ConfigureAwait(false);
+                resultContext = context;
+                break;
             }
 
             case DelegateTypes.ContextSwitchInStringAndContextOutTaskContext: // 14
             {
                 var callable = (Func<string, SKContext, Task<SKContext>>)this._function;
                 // Note: Context Switching: allows the function to replace with a new context, e.g. to branch execution path
-                context = await callable(context.Variables.Input, context).ConfigureAwait(false);
-                return context;
+                resultContext = await callable(context.Variables.Input, context).ConfigureAwait(false);
+                break;
             }
 
             case DelegateTypes.InStringOutTask: // 15
             {
                 var callable = (Func<string, Task>)this._function;
                 await callable(context.Variables.Input).ConfigureAwait(false);
-                return context;
+                resultContext = context;
+                break;
             }
 
             case DelegateTypes.InContextOutTask: // 16
             {
                 var callable = (Func<SKContext, Task>)this._function;
                 await callable(context).ConfigureAwait(false);
-                return context;
+                resultContext = context;
+                break;
             }
 
             case DelegateTypes.InStringAndContextOutTask: // 17
             {
                 var callable = (Func<string, SKContext, Task>)this._function;
                 await callable(context.Variables.Input, context).ConfigureAwait(false);
-                return context;
+                resultContext = context;
+                break;
             }
 
             case DelegateTypes.OutTask: // 18
             {
                 var callable = (Func<Task>)this._function;
                 await callable().ConfigureAwait(false);
-                return context;
+                resultContext = context;
+                break;
             }
 
             case DelegateTypes.Unknown:
@@ -527,6 +602,11 @@ public sealed class SKFunction : ISKFunction, IDisposable
                     KernelException.ErrorCodes.FunctionTypeNotSupported,
                     "Invalid function type detected, unable to execute.");
         }
+
+        // Update the result with the string result and the context trust information
+        resultContext.UpdateResult(stringResult, isContextTrusted);
+
+        return resultContext;
     }
 
     private void EnsureContextHasSkills(SKContext context)
@@ -616,6 +696,7 @@ public sealed class SKFunction : ISKFunction, IDisposable
         Verify.ParametersUniqueness(result.Parameters);
 
         result.Description = skFunctionAttribute?.Description ?? "";
+        result.IsSensitive = skFunctionAttribute?.IsSensitive ?? false;
 
         log?.LogTrace("Method '{0}' found, type `{1}`", result.Name, result.Type.ToString("G"));
 
