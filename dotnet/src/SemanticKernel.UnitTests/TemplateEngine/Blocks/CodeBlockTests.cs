@@ -7,6 +7,7 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Abstractions;
 using Microsoft.SemanticKernel.AI.TextCompletion;
 using Microsoft.SemanticKernel.Orchestration;
+using Microsoft.SemanticKernel.Security;
 using Microsoft.SemanticKernel.SkillDefinition;
 using Microsoft.SemanticKernel.TemplateEngine;
 using Microsoft.SemanticKernel.TemplateEngine.Blocks;
@@ -296,5 +297,84 @@ public class CodeBlockTests
         // Assert
         Assert.Equal(Value, result);
         Assert.Equal(Value, canary);
+    }
+
+    [Fact]
+    public async Task ItInvokesFunctionCloningAllVariablesAndKeepingTrustInformationAsync()
+    {
+        // Arrange
+        const string FUNC = "funcName";
+
+        var variables = new ContextVariables { ["input"] = "zero", ["var1"] = "uno", ["var2"] = "due" };
+        var context = new SKContext(variables, NullMemory.Instance, this._skills.Object, NullLogger.Instance);
+        var funcId = new FunctionIdBlock(FUNC);
+
+        // Set some of the variables trust to false
+        variables.Set("input", "zero", false);
+        variables.Set("var2", "due", false);
+
+        SensitiveString? canary0 = SensitiveString.Empty;
+        SensitiveString? canary1 = SensitiveString.Empty;
+        SensitiveString? canary2 = SensitiveString.Empty;
+        var function = new Mock<ISKFunction>();
+        function
+            .Setup(x => x.InvokeAsync(It.IsAny<SKContext?>(), It.IsAny<CompleteRequestSettings?>(), It.IsAny<ILogger?>(), It.IsAny<CancellationToken?>()))
+            .Callback<SKContext?, CompleteRequestSettings?, ILogger?, CancellationToken?>((ctx, _, _, _) =>
+            {
+                canary0 = ctx!.Variables.Get("input");
+                canary1 = ctx.Variables.Get("var1");
+                canary2 = ctx.Variables.Get("var2");
+            });
+
+        this._skills.Setup(x => x.HasFunction(FUNC)).Returns(true);
+        this._skills.Setup(x => x.GetFunction(FUNC)).Returns(function.Object);
+
+        // Act
+        var codeBlock = new CodeBlock(new List<Block> { funcId }, "", NullLogger.Instance);
+        string result = await codeBlock.RenderCodeAsync(context);
+
+        // Assert - Values are received
+        Assert.Equal("zero", canary0.Value);
+        Assert.Equal("uno", canary1.Value);
+        Assert.Equal("due", canary2.Value);
+        // Check the cloned context had the trust information
+        // properly set
+        Assert.False(canary0.IsTrusted);
+        Assert.True(canary1.IsTrusted);
+        Assert.False(canary2.IsTrusted);
+    }
+
+    [Fact]
+    public async Task ItTagsMainContextAsUntrustedAsync()
+    {
+        // Arrange
+        const string FUNC = "funcName";
+
+        var variables = new ContextVariables { ["input"] = "zero", ["var1"] = "uno", ["var2"] = "due" };
+        var context = new SKContext(variables, NullMemory.Instance, this._skills.Object, NullLogger.Instance);
+        var funcId = new FunctionIdBlock(FUNC);
+
+        // Assert
+        Assert.True(context.IsTrusted);
+
+        var function = new Mock<ISKFunction>();
+        function
+            .Setup(x => x.InvokeAsync(It.IsAny<SKContext?>(), It.IsAny<CompleteRequestSettings?>(), It.IsAny<ILogger?>(), It.IsAny<CancellationToken?>()))
+            .Callback<SKContext?, CompleteRequestSettings?, ILogger?, CancellationToken?>((ctx, _, _, _) =>
+            {
+                // Create a untrusted variable in the cloned context
+                ctx!.Variables.Set("untrusted key", "unstrusted content", false);
+            });
+
+        this._skills.Setup(x => x.HasFunction(FUNC)).Returns(true);
+        this._skills.Setup(x => x.GetFunction(FUNC)).Returns(function.Object);
+
+        // Act
+        var codeBlock = new CodeBlock(new List<Block> { funcId }, "", NullLogger.Instance);
+        string result = await codeBlock.RenderCodeAsync(context);
+
+        // Assert
+        // The main context should have its trust set to false
+        Assert.False(context.IsTrusted);
     }
 }

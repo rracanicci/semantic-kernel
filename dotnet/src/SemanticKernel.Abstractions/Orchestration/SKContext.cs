@@ -23,6 +23,19 @@ public sealed class SKContext
     public string Result => this.Variables.ToString();
 
     /// <summary>
+    /// Whether all the context variables are trusted or not.
+    /// </summary>
+    public bool IsTrusted
+    {
+        get {
+            return this.Variables.IsAllTrusted();
+        }
+        internal set {
+            this.Variables.SensitiveInput = this.Variables.SensitiveInput.UpdateIsTrusted(value);
+        }
+    }
+
+    /// <summary>
     /// Whether an error occurred while executing functions in the pipeline.
     /// </summary>
     public bool ErrorOccurred { get; private set; }
@@ -184,4 +197,28 @@ public sealed class SKContext
             return display;
         }
     }
+
+    #region internal
+
+    /// <summary>
+    /// Update the current result with a new string result and trust information.
+    /// If the current result is already untrusted, it will be kept untrusted.
+    /// </summary>
+    /// <param name="stringResult">New result value</param>
+    /// <param name="isResultTrusted">Whether the new result is trusted or not</param>
+    internal void UpdateResult(string? stringResult, bool isResultTrusted)
+    {
+        if (stringResult != null)
+        {
+            this.Variables.Update(
+                stringResult,
+                // Use previous trust information to update
+                isTrusted: this.Variables.IsInputTrusted && isResultTrusted
+            );
+        }
+        // Use previous trust information to update
+        this.IsTrusted = this.IsTrusted && isResultTrusted;
+    }
+
+    #endregion
 }
