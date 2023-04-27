@@ -1,6 +1,5 @@
 ﻿// Copyright (c) Microsoft. All rights reserved.
 
-using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Threading.Tasks;
@@ -113,7 +112,7 @@ internal sealed class CodeBlock : Block, ICodeRendering
             throw new TemplateException(TemplateException.ErrorCodes.FunctionNotFound, errorMsg);
         }
 
-        SKContext contextClone = context.Clone();
+        ContextVariables variablesClone = context.Variables.Clone();
 
         // If the code syntax is {{functionName $varName}} use $varName instead of $input
         // If the code syntax is {{functionName 'value'}} use "value" instead of $input
@@ -121,29 +120,39 @@ internal sealed class CodeBlock : Block, ICodeRendering
         {
             // TODO: PII
             this.Log.LogTrace("Passing variable/value: `{0}`", this._tokens[1].Content);
-            string input = ((ITextRendering)this._tokens[1]).Render(contextClone.Variables);
-            contextClone.Variables.Update(input);
+            string input = ((ITextRendering)this._tokens[1]).Render(variablesClone);
+            // Keep previous trust information when updating the input
+            variablesClone.Update(input, variablesClone.IsAllTrusted());
         }
 
-        try
+        SKContext result = await function.InvokeWithCustomInputAsync(
+            variablesClone,
+            context.Memory,
+            context.Skills,
+            this.Log,
+            context.CancellationToken).ConfigureAwait(false);
+
+        // If the output of the function is not trusted, tag the main context as untrusted as well.
+        // This is important for cases where there is a function call within a prompt template and
+        // the result of the function call is untrusted. In such cases, we need to propagate the
+        // untrusted tag back to the main context.
+        // TODO: we might want to evaluate updating the template engine to rely on TrustAwareStrings that already
+        // include trust information. This way, the rendered prompt will be a TrustAwareString that already
+        // carries trust information, so this won't be needed.
+        // (e.g. concatenating strings A (trusted) and B (untrusted), will result in a string that is untrusted)
+        if (!result.IsTrusted)
         {
-            contextClone = await function.InvokeAsync(contextClone).ConfigureAwait(false);
-        }
-        catch (Exception ex) when (!ex.IsCriticalException())
-        {
-            this.Log.LogError(ex, "Something went wrong when invoking function with custom input: {0}.{1}. Error: {2}",
-                function.SkillName, function.Name, ex.Message);
-            contextClone.Fail(ex.Message, ex);
+            context.MakeAllUntrusted();
         }
 
-        if (contextClone.ErrorOccurred)
+        if (result.ErrorOccurred)
         {
-            var errorMsg = $"Function `{fBlock.Content}` execution failed. {contextClone.LastException?.GetType().FullName}: {contextClone.LastErrorDescription}";
+            var errorMsg = $"Function `{fBlock.Content}` execution failed. {result.LastException?.GetType().FullName}: {result.LastErrorDescription}";
             this.Log.LogError(errorMsg);
-            throw new TemplateException(TemplateException.ErrorCodes.RuntimeError, errorMsg, contextClone.LastException);
+            throw new TemplateException(TemplateException.ErrorCodes.RuntimeError, errorMsg, result.LastException);
         }
 
-        return contextClone.Result;
+        return result.Result;
     }
 
     private bool GetFunctionFromSkillCollection(

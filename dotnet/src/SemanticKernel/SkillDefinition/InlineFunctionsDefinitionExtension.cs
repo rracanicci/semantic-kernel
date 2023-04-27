@@ -33,6 +33,10 @@ public static class InlineFunctionsDefinitionExtension
     /// <param name="presencePenalty">Presence Penalty parameter passed to LLM</param>
     /// <param name="frequencyPenalty">Frequency Penalty parameter passed to LLM</param>
     /// <param name="stopSequences">Strings the LLM will detect to stop generating (before reaching max tokens)</param>
+    /// <param name="isPromptTrusted">If true, the prompt template will be considered trusted (default true)</param>
+    /// <param name="forceOutputToBeUntrusted">If true, the output of the function will always considered to be untrusted
+    /// regardless of the input (default false)</param>
+    /// <param name="isSensitive">Whether the function is set to be sensitive or not (default false)</param>
     /// <returns>A function ready to use</returns>
     public static ISKFunction CreateSemanticFunction(
         this IKernel kernel,
@@ -45,6 +49,9 @@ public static class InlineFunctionsDefinitionExtension
         double topP = 0,
         double presencePenalty = 0,
         double frequencyPenalty = 0,
+        bool isPromptTrusted = true,
+        bool forceOutputToBeUntrusted = false,
+        bool isSensitive = false,
         IEnumerable<string>? stopSequences = null)
     {
         functionName ??= RandomFunctionName();
@@ -53,6 +60,9 @@ public static class InlineFunctionsDefinitionExtension
         {
             Description = description ?? "Generic function, unknown purpose",
             Type = "completion",
+            IsPromptTrusted = isPromptTrusted,
+            ForceOutputToBeUntrusted = forceOutputToBeUntrusted,
+            IsSensitive = isSensitive,
             Completion = new PromptTemplateConfig.CompletionConfig
             {
                 Temperature = temperature,

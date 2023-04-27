@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using Microsoft.SemanticKernel;
 using Microsoft.SemanticKernel.AI.TextCompletion;
 using Microsoft.SemanticKernel.Orchestration;
+using Microsoft.SemanticKernel.Security;
 using Microsoft.SemanticKernel.SkillDefinition;
 using Moq;
 using Xunit;
@@ -156,6 +157,31 @@ public class KernelTests
 
         var exception = Assert.Throws<KernelException>(
             () => kernel.CreateSemanticFunction(promptTemplate: "Tell me a joke", functionName: "joker", skillName: "jk", description: "Nice fun"));
+    }
+
+    [Fact]
+    public void ItConfiguresSensitiveHandlerInFunctions()
+    {
+        // Arrange
+        ISensitiveHandler sensitiveHandler = new DefaultSensitiveHandler();
+        var kernel = Kernel.Builder.WithSensitiveHandler(sensitiveHandler).Build();
+        var factory = new Mock<Func<IKernel, ITextCompletion>>();
+
+        kernel.Config.AddTextCompletionService("x", factory.Object);
+
+        // Act
+        var nativeSkill = kernel.ImportSkill(new MySkill(), "mySk");
+        var semanticSkill = kernel.CreateSemanticFunction("Tell me a joke", functionName: "joker", skillName: "jk", description: "Nice fun");
+        var sayHelloFunc = (SKFunction)kernel.Skills.GetFunction("mySk", "SayHello");
+        var jokerFunc = (SKFunction)kernel.Skills.GetFunction("jk", "joker");
+
+        // Assert
+        Assert.NotNull(kernel.SensitiveHandler);
+        Assert.NotNull(sayHelloFunc._sensitiveHandler);
+        Assert.NotNull(jokerFunc._sensitiveHandler);
+        Assert.Equal(sensitiveHandler, kernel.SensitiveHandler);
+        Assert.Equal(sensitiveHandler, sayHelloFunc._sensitiveHandler);
+        Assert.Equal(sensitiveHandler, jokerFunc._sensitiveHandler);
     }
 
     public class MySkill

@@ -37,6 +37,21 @@ public sealed class SKFunctionTests1
     }
 
     [Fact]
+    public void ItHasDefaultTrustSettings()
+    {
+        // Arrange
+        var templateConfig = new PromptTemplateConfig();
+        var functionConfig = new SemanticFunctionConfig(templateConfig, this._promptTemplate.Object);
+
+        // Act
+        var skFunction = SKFunction.FromSemanticConfig("sk", "name", functionConfig);
+
+        // Assert
+        Assert.False(skFunction.ForceOutputToBeUntrusted);
+        Assert.False(skFunction.IsSensitive);
+    }
+
+    [Fact]
     public void ItAllowsToUpdateRequestSettings()
     {
         // Arrange
@@ -69,5 +84,34 @@ public sealed class SKFunctionTests1
         // Assert
         Assert.Equal(settings.Temperature, skFunction.RequestSettings.Temperature);
         Assert.Equal(settings.MaxTokens, skFunction.RequestSettings.MaxTokens);
+    }
+
+    [Fact]
+    public void ItAllowsToUpdateTrustSettings()
+    {
+        // Arrange
+        var templateConfig = new PromptTemplateConfig
+        {
+            IsPromptTrusted = false,
+            ForceOutputToBeUntrusted = true,
+            IsSensitive = true,
+        };
+        var functionConfig = new SemanticFunctionConfig(templateConfig, this._promptTemplate.Object);
+        var skFunction = SKFunction.FromSemanticConfig("sk", "name", functionConfig);
+
+        // Assert
+        Assert.False(templateConfig.IsPromptTrusted);
+        Assert.True(templateConfig.ForceOutputToBeUntrusted);
+        Assert.True(templateConfig.IsSensitive);
+        Assert.True(skFunction.ForceOutputToBeUntrusted);
+        Assert.True(skFunction.IsSensitive);
+
+        // Act
+        skFunction.ForceOutputToBeUntrusted = false;
+        skFunction.IsSensitive = false;
+
+        // Assert
+        Assert.False(skFunction.ForceOutputToBeUntrusted);
+        Assert.False(skFunction.IsSensitive);
     }
 }

@@ -5,7 +5,9 @@ using System.Collections;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Linq;
 using Microsoft.SemanticKernel.Diagnostics;
+using Microsoft.SemanticKernel.Security;
 
 namespace Microsoft.SemanticKernel.Orchestration;
 
@@ -20,15 +22,34 @@ public sealed class ContextVariables : IEnumerable<KeyValuePair<string, string>>
     /// <summary>
     /// In the simplest scenario, the data is an input string, stored here.
     /// </summary>
-    public string Input => this._variables[MainKey];
+    public string Input => this._variables[MainKey].Value;
+
+    /// <summary>
+    /// Checks if the main input is trusted or not.
+    /// </summary>
+    public bool IsInputTrusted
+    {
+        get => this._variables[MainKey].IsTrusted;
+    }
+
+    /// <summary>
+    /// In the simplest scenario, the data is an input string, stored here.
+    /// This also already includes whether the input trusted or not.
+    /// </summary>
+    public SensitiveString SensitiveInput
+    {
+        get => this._variables[MainKey];
+        set => this._variables[MainKey] = value;
+    }
 
     /// <summary>
     /// Constructor for context variables.
     /// </summary>
     /// <param name="content">Optional value for the main variable of the context.</param>
-    public ContextVariables(string? content = null)
+    /// <param name="isTrusted">Whether the content is trusted or not (default true).</param>
+    public ContextVariables(string? content = null, bool isTrusted = true)
     {
-        this._variables[MainKey] = content ?? string.Empty;
+        this._variables[MainKey] = new SensitiveString(content ?? string.Empty, isTrusted);
     }
 
     /// <summary>
@@ -36,10 +57,11 @@ public sealed class ContextVariables : IEnumerable<KeyValuePair<string, string>>
     /// </summary>
     /// <param name="content">The new input value, for the next function in the pipeline, or as a result for the user
     /// if the pipeline reached the end.</param>
+    /// <param name="isTrusted">Whether the content is trusted or not (default true).</param>
     /// <returns>The current instance</returns>
-    public ContextVariables Update(string? content)
+    public ContextVariables Update(string? content, bool isTrusted = true)
     {
-        this._variables[MainKey] = content ?? string.Empty;
+        this._variables[MainKey] = new SensitiveString(content ?? string.Empty, isTrusted);
         return this;
     }
 
@@ -57,7 +79,7 @@ public sealed class ContextVariables : IEnumerable<KeyValuePair<string, string>>
             // If requested, discard old data and keep only the new one.
             if (!merge) { this._variables.Clear(); }
 
-            foreach (KeyValuePair<string, string> varData in newData._variables)
+            foreach (KeyValuePair<string, SensitiveString> varData in newData._variables)
             {
                 this._variables[varData.Key] = varData.Value;
             }
@@ -73,13 +95,14 @@ public sealed class ContextVariables : IEnumerable<KeyValuePair<string, string>>
     /// </summary>
     /// <param name="name">Variable name</param>
     /// <param name="value">Value to store. If the value is NULL the variable is deleted.</param>
+    /// <param name="isTrusted">Whether the value's content is trusted or not (default true).</param>
     /// TODO: support for more complex data types, and plan for rendering these values into prompt templates.
-    public void Set(string name, string? value)
+    public void Set(string name, string? value, bool isTrusted = true)
     {
         Verify.NotNullOrWhiteSpace(name);
         if (value != null)
         {
-            this._variables[name] = value;
+            this._variables[name] = new SensitiveString(value, isTrusted);
         }
         else
         {
@@ -88,17 +111,39 @@ public sealed class ContextVariables : IEnumerable<KeyValuePair<string, string>>
     }
 
     /// <summary>
+    /// Fetch a sensitive variable from the context variables.
+    /// </summary>
+    /// <param name="name">Variable name.</param>
+    /// <returns>The sensitive variable or null.</returns>
+    public SensitiveString? Get(string name)
+    {
+        SensitiveString result;
+
+        if (this._variables.TryGetValue(name, out result!))
+        {
+            return result;
+        }
+        return null;
+    }
+
+    /// <summary>
     /// Fetch a variable value from the context variables.
     /// </summary>
     /// <param name="name">Variable name</param>
     /// <param name="value">Value</param>
     /// <returns>Whether the value exists in the context variables</returns>
-    /// TODO: provide additional method that returns the value without using 'out'.
     public bool Get(string name, out string value)
     {
-        if (this._variables.TryGetValue(name, out value!)) { return true; }
+        SensitiveString result;
+
+        if (this._variables.TryGetValue(name, out result!))
+        {
+            value = result.Value;
+            return true;
+        }
 
         value = string.Empty;
+
         return false;
     }
 
@@ -109,8 +154,12 @@ public sealed class ContextVariables : IEnumerable<KeyValuePair<string, string>>
     /// <returns>The value of the variable.</returns>
     public string this[string name]
     {
-        get => this._variables[name];
-        set => this._variables[name] = value;
+        get => this._variables[name].Value;
+        set
+        {
+            // This will be trusted by default for now
+            this._variables[name] = new SensitiveString(value);
+        }
     }
 
     /// <summary>
@@ -121,6 +170,24 @@ public sealed class ContextVariables : IEnumerable<KeyValuePair<string, string>>
     public bool ContainsKey(string key)
     {
         return this._variables.ContainsKey(key);
+    }
+
+    /// <summary>
+    /// True if all the stored variables have trusted content.
+    /// </summary>
+    /// <returns></returns>
+    public bool IsAllTrusted()
+    {
+        return this._variables.Values.All(v => v.IsTrusted);
+    }
+
+    /// <summary>
+    /// True if any of the stored variables have untrusted content.
+    /// </summary>
+    /// <returns></returns>
+    public bool IsAnyUntrusted()
+    {
+        return this._variables.Values.Any(v => !v.IsTrusted);
     }
 
     /// <summary>
@@ -138,7 +205,10 @@ public sealed class ContextVariables : IEnumerable<KeyValuePair<string, string>>
     /// <returns>An enumerator that iterates through the context variables</returns>
     public IEnumerator<KeyValuePair<string, string>> GetEnumerator()
     {
-        return this._variables.GetEnumerator();
+        foreach (KeyValuePair<string, SensitiveString> kv in this._variables)
+        {
+            yield return new KeyValuePair<string, string>(kv.Key, kv.Value.Value);
+        }
     }
 
     IEnumerator IEnumerable.GetEnumerator()
@@ -153,9 +223,9 @@ public sealed class ContextVariables : IEnumerable<KeyValuePair<string, string>>
     public ContextVariables Clone()
     {
         var clone = new ContextVariables();
-        foreach (KeyValuePair<string, string> x in this._variables)
+        foreach (KeyValuePair<string, SensitiveString> x in this._variables)
         {
-            clone[x.Key] = x.Value;
+            clone.Set(x.Key, x.Value.Value, x.Value.IsTrusted);
         }
 
         return clone;
@@ -165,7 +235,7 @@ public sealed class ContextVariables : IEnumerable<KeyValuePair<string, string>>
 
     [DebuggerBrowsable(DebuggerBrowsableState.Never)]
     internal string DebuggerDisplay =>
-        this._variables.TryGetValue(MainKey, out string input) && !string.IsNullOrEmpty(input) ?
+        this._variables.TryGetValue(MainKey, out var input) && !string.IsNullOrEmpty(input.Value) ?
             $"Variables = {this._variables.Count}, Input = {input}" :
             $"Variables = {this._variables.Count}";
 
@@ -174,7 +244,7 @@ public sealed class ContextVariables : IEnumerable<KeyValuePair<string, string>>
     /// <summary>
     /// Important: names are case insensitive
     /// </summary>
-    private readonly ConcurrentDictionary<string, string> _variables = new(StringComparer.OrdinalIgnoreCase);
+    private readonly ConcurrentDictionary<string, SensitiveString> _variables = new(StringComparer.OrdinalIgnoreCase);
 
     private sealed class TypeProxy
     {
@@ -183,7 +253,7 @@ public sealed class ContextVariables : IEnumerable<KeyValuePair<string, string>>
         public TypeProxy(ContextVariables variables) => _variables = variables;
 
         [DebuggerBrowsable(DebuggerBrowsableState.RootHidden)]
-        public KeyValuePair<string, string>[] Items => _variables._variables.ToArray();
+        public KeyValuePair<string, string>[] Items => _variables._variables.ToDictionary(kv => kv.Key, kv => kv.Value.Value).ToArray();
     }
 
     #endregion

@@ -7,6 +7,7 @@ using Microsoft.Extensions.Logging;
 using Microsoft.SemanticKernel.AI.TextCompletion;
 using Microsoft.SemanticKernel.Memory;
 using Microsoft.SemanticKernel.Orchestration;
+using Microsoft.SemanticKernel.Security;
 
 namespace Microsoft.SemanticKernel.SkillDefinition;
 
@@ -36,6 +37,18 @@ public interface ISKFunction
     /// so when this property is False, executing the function might still involve AI calls.
     /// </summary>
     bool IsSemantic { get; }
+
+    /// <summary>
+    /// If true, the output of the function will always considered to be untrusted
+    /// regardless of the input (default false).
+    /// </summary>
+    public bool ForceOutputToBeUntrusted { get; set; }
+
+    /// <summary>
+    /// Whether the function is set to be sensitive (default false).
+    /// Sensitive functions should not be allowed to run with untrusted input.
+    /// </summary>
+    public bool IsSensitive { get; set; }
 
     /// <summary>
     /// AI service settings
@@ -96,4 +109,11 @@ public interface ISKFunction
     /// <param name="settings">LLM completion settings</param>
     /// <returns>Self instance</returns>
     ISKFunction SetAIConfiguration(CompleteRequestSettings settings);
+
+    /// <summary>
+    /// Sets the sensitive handler used for trust checks.
+    /// </summary>
+    /// <param name="sensitiveHandler">Handler to be set</param>
+    /// <returns>Self instance</returns>
+    ISKFunction SetSensitiveHandler(ISensitiveHandler? sensitiveHandler);
 }
