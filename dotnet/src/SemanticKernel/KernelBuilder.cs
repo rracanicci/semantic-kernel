@@ -8,6 +8,7 @@ using Microsoft.SemanticKernel.Diagnostics;
 using Microsoft.SemanticKernel.Memory;
 using Microsoft.SemanticKernel.Reliability;
 using Microsoft.SemanticKernel.Services;
+using Microsoft.SemanticKernel.Security;
 using Microsoft.SemanticKernel.SkillDefinition;
 using Microsoft.SemanticKernel.TemplateEngine;
 
@@ -26,6 +27,7 @@ public sealed class KernelBuilder
     private IDelegatingHandlerFactory? _httpHandlerFactory = null;
     private IPromptTemplateEngine? _promptTemplateEngine;
     private readonly AIServiceCollection _aiServices = new();
+    private ISensitiveHandler? _sensitiveHandler = null;
 
     /// <summary>
     /// Create a new kernel instance
@@ -54,7 +56,8 @@ public sealed class KernelBuilder
             this._promptTemplateEngine ?? new PromptTemplateEngine(this._logger),
             this._memory,
             this._config,
-            this._logger
+            this._logger,
+            this._sensitiveHandler
         );
 
         // TODO: decouple this from 'UseMemory' kernel extension
@@ -150,6 +153,17 @@ public sealed class KernelBuilder
     {
         Verify.NotNull(config);
         this._config = config;
+        return this;
+    }
+
+    /// <summary>
+    /// Use the given sensitive handler with the kernel to be build.
+    /// </summary>
+    /// <param name="sensitiveHandler">Sensitive handler to use.</param>
+    /// <returns>Updated kernel builder including the given handler.</returns>
+    public KernelBuilder WithSensitiveHandler(ISensitiveHandler? sensitiveHandler)
+    {
+        this._sensitiveHandler = sensitiveHandler;
         return this;
     }
 

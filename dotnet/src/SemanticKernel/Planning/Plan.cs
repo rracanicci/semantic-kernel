@@ -13,6 +13,7 @@ using Microsoft.Extensions.Logging;
 using Microsoft.SemanticKernel.AI.TextCompletion;
 using Microsoft.SemanticKernel.Memory;
 using Microsoft.SemanticKernel.Orchestration;
+using Microsoft.SemanticKernel.Security;
 using Microsoft.SemanticKernel.SkillDefinition;
 
 namespace Microsoft.SemanticKernel.Planning;
@@ -79,6 +80,14 @@ public sealed class Plan : ISKFunction
     /// <inheritdoc/>
     [JsonIgnore]
     public bool IsSemantic { get; private set; }
+
+    /// <inheritdoc/>
+    [JsonIgnore]
+    public bool ForceOutputToBeUntrusted { get; set; } = false;
+
+    /// <inheritdoc/>
+    [JsonIgnore]
+    public bool IsSensitive { get; set; } = false;
 
     /// <inheritdoc/>
     [JsonIgnore]
@@ -381,6 +390,13 @@ public sealed class Plan : ISKFunction
             : this.Function.SetAIConfiguration(settings);
     }
 
+    public ISKFunction SetSensitiveHandler(ISensitiveHandler? sensitiveHandler)
+    {
+        return this.Function is null
+            ? throw new NotImplementedException()
+            : this.Function.SetSensitiveHandler(sensitiveHandler);
+    }
+
     #endregion ISKFunction implementation
 
     /// <summary>
@@ -578,6 +594,8 @@ public sealed class Plan : ISKFunction
         this.SkillName = function.SkillName;
         this.Description = function.Description;
         this.IsSemantic = function.IsSemantic;
+        this.ForceOutputToBeUntrusted = function.ForceOutputToBeUntrusted;
+        this.IsSensitive = function.IsSensitive;
         this.RequestSettings = function.RequestSettings;
     }
 

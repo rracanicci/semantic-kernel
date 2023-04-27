@@ -14,6 +14,7 @@ using Microsoft.SemanticKernel.AI.TextCompletion;
 using Microsoft.SemanticKernel.Diagnostics;
 using Microsoft.SemanticKernel.Memory;
 using Microsoft.SemanticKernel.Orchestration;
+using Microsoft.SemanticKernel.Security;
 using Microsoft.SemanticKernel.SemanticFunctions;
 using Microsoft.SemanticKernel.Services;
 using Microsoft.SemanticKernel.SkillDefinition;
@@ -50,6 +51,9 @@ public sealed class Kernel : IKernel, IDisposable
     /// <inheritdoc/>
     public IPromptTemplateEngine PromptTemplateEngine { get; }
 
+    /// <inheritdoc/>
+    public ISensitiveHandler? SensitiveHandler => this._sensitiveHandler;
+
     /// <summary>
     /// Return a new instance of the kernel builder, used to build and configure kernel instances.
     /// </summary>
@@ -64,13 +68,15 @@ public sealed class Kernel : IKernel, IDisposable
     /// <param name="memory"></param>
     /// <param name="config"></param>
     /// <param name="log"></param>
+    /// <param name="sensitiveHandler"></param>
     public Kernel(
         ISkillCollection skillCollection,
         IAIServiceProvider aiServiceProvider,
         IPromptTemplateEngine promptTemplateEngine,
         ISemanticTextMemory memory,
         KernelConfig config,
-        ILogger log)
+        ILogger log,
+        ISensitiveHandler? sensitiveHandler = null)
     {
         this.Log = log;
         this.Config = config;
@@ -79,6 +85,7 @@ public sealed class Kernel : IKernel, IDisposable
         this._aiServiceProvider = aiServiceProvider;
         this._promptTemplateEngine = promptTemplateEngine;
         this._skillCollection = skillCollection;
+        this._sensitiveHandler = sensitiveHandler;
     }
 
     /// <inheritdoc/>
@@ -117,6 +124,7 @@ public sealed class Kernel : IKernel, IDisposable
         foreach (KeyValuePair<string, ISKFunction> f in skill)
         {
             f.Value.SetDefaultSkillCollection(this.Skills);
+            f.Value.SetSensitiveHandler(this.SensitiveHandler);
             this._skillCollection.AddFunction(f.Value);
         }
 
@@ -131,6 +139,7 @@ public sealed class Kernel : IKernel, IDisposable
         Verify.NotNull(customFunction);
 
         customFunction.SetDefaultSkillCollection(this.Skills);
+        customFunction.SetSensitiveHandler(this.SensitiveHandler);
         this._skillCollection.AddFunction(customFunction);
 
         return customFunction;
@@ -309,6 +318,7 @@ public sealed class Kernel : IKernel, IDisposable
     private ISemanticTextMemory _memory;
     private readonly IPromptTemplateEngine _promptTemplateEngine;
     private readonly IAIServiceProvider _aiServiceProvider;
+    private ISensitiveHandler? _sensitiveHandler;
 
     private ISKFunction CreateSemanticFunction(
         string skillName,
@@ -332,6 +342,8 @@ public sealed class Kernel : IKernel, IDisposable
 
         // Note: the service is instantiated using the kernel configuration state when the function is invoked
         func.SetAIService(() => this.GetService<ITextCompletion>());
+
+        func.SetSensitiveHandler(this.SensitiveHandler);
 
         return func;
     }

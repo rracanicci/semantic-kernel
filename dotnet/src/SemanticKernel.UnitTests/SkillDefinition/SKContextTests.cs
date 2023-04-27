@@ -64,6 +64,56 @@ public class SKContextTests
         Assert.Equal("ciao", result.Result);
     }
 
+    [Fact]
+    public void ItCanUpdateIsTrusted()
+    {
+        // Arrange
+        var variables = new ContextVariables();
+        var target = new SKContext(variables, NullMemory.Instance, this._skills.Object, this._log.Object);
+
+        // Assert
+        Assert.True(target.IsTrusted);
+        Assert.True(target.Variables.IsInputTrusted);
+
+        // Act
+        target.IsTrusted = false;
+
+        // Assert
+        Assert.False(target.IsTrusted);
+        Assert.False(target.Variables.IsInputTrusted);
+    }
+
+    [Fact]
+    public void ItCanUpdateResult()
+    {
+        // Arrange
+        string newResult = Guid.NewGuid().ToString();
+        string someOtherResult = Guid.NewGuid().ToString();
+        var variables = new ContextVariables();
+        var target = new SKContext(variables, NullMemory.Instance, this._skills.Object, this._log.Object);
+
+        // Assert
+        Assert.True(target.IsTrusted);
+        Assert.True(target.Variables.IsInputTrusted);
+
+        // Act
+        target.UpdateResult(newResult, false);
+
+        // Assert
+        Assert.Equal(newResult, target.Result);
+        Assert.False(target.IsTrusted);
+        Assert.False(target.Variables.IsInputTrusted);
+
+        // Act
+        target.UpdateResult(someOtherResult, true);
+
+        // Assert
+        Assert.Equal(someOtherResult, target.Result);
+        // Should be kept false because the previous result it already false
+        Assert.False(target.IsTrusted);
+        Assert.False(target.Variables.IsInputTrusted);
+    }
+
     private sealed class Parrot
     {
         [SKFunction("say something")]

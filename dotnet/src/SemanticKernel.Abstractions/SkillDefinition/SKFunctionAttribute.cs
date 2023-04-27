@@ -19,11 +19,31 @@ public sealed class SKFunctionAttribute : Attribute
     public string Description { get; }
 
     /// <summary>
+    /// If true, the output of the function will always be considered to be untrusted
+    /// regardless of the input (default false).
+    /// </summary>
+    public bool ForceOutputToBeUntrusted { get; }
+
+    /// <summary>
+    /// Whether the function is set to be sensitive (default false).
+    /// Sensitive functions should not be allowed to run with untrusted input.
+    /// </summary>
+    public bool IsSensitive { get; }
+
+    /// <summary>
     /// Tag a C# function as a native function available to SK.
     /// </summary>
     /// <param name="description">Function description, to be used by the planner to auto-discover functions.</param>
-    public SKFunctionAttribute(string description)
+    /// <param name="forceOutputToBeUntrusted">If true, the output of the function will always be considered to be untrusted
+    /// regardless of the input (default false).</param>
+    /// <param name="isSensitive">Whether the function is set to be sensitive (default false).</param>
+    public SKFunctionAttribute(
+        string description,
+        bool forceOutputToBeUntrusted = false,
+        bool isSensitive = false)
     {
         this.Description = description;
+        this.ForceOutputToBeUntrusted = forceOutputToBeUntrusted;
+        this.IsSensitive = isSensitive;
     }
 }

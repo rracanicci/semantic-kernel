@@ -4,6 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using Microsoft.SemanticKernel.Orchestration;
+using Microsoft.SemanticKernel.Security;
 using Xunit;
 
 namespace SemanticKernel.UnitTests.Orchestration;
@@ -183,5 +184,173 @@ public class ContextVariablesTests
 
         // Assert
         Assert.True(target.Get(anyName, out string _));
+    }
+
+    [Fact]
+    public void CreateWithDefaultIsTrustedSucceeds()
+    {
+        // Arrange
+        string anyContent = Guid.NewGuid().ToString();
+        ContextVariables target = new ContextVariables(anyContent);
+
+        // Assert
+        Assert.Equal(anyContent, target.Input);
+        Assert.True(target.IsInputTrusted);
+    }
+
+    [Fact]
+    public void CreateWithNotTrustedValueSucceeds()
+    {
+        // Arrange
+        string anyContent = Guid.NewGuid().ToString();
+        ContextVariables target = new ContextVariables(anyContent, false);
+
+        // Assert
+        Assert.Equal(anyContent, target.Input);
+        Assert.False(target.IsInputTrusted);
+    }
+
+    [Fact]
+    public void SetNotTrustedSucceeds()
+    {
+        // Arrange
+        string anyContent = Guid.NewGuid().ToString();
+        ContextVariables target = new ContextVariables(anyContent);
+
+        // Assert
+        Assert.Equal(anyContent, target.Input);
+        Assert.True(target.IsInputTrusted);
+
+        // Act
+        target.SensitiveInput = target.SensitiveInput.ToUntrusted();
+
+        // Assert
+        Assert.Equal(anyContent, target.Input);
+        Assert.False(target.IsInputTrusted);
+    }
+
+    [Fact]
+    public void UpdateWithNotTrustedSucceeds()
+    {
+        // Arrange
+        string anyContent = Guid.NewGuid().ToString();
+        string newContent = Guid.NewGuid().ToString();
+        ContextVariables target = new ContextVariables(anyContent);
+
+        // Assert
+        Assert.Equal(anyContent, target.Input);
+        Assert.True(target.IsInputTrusted);
+
+        // Act
+        target.Update(newContent, false);
+
+        // Assert
+        Assert.Equal(newContent, target.Input);
+        Assert.False(target.IsInputTrusted);
+    }
+
+    [Fact]
+    public void SetWithNotTrustedSucceeds()
+    {
+        // Arrange
+        string anyName = Guid.NewGuid().ToString();
+        string anyContent = Guid.NewGuid().ToString();
+        ContextVariables target = new ContextVariables();
+
+        // Act
+        target.Set(anyName, anyContent, false);
+
+        // Assert
+        SensitiveString? entry = target.Get(anyName);
+
+        Assert.NotNull(entry);
+        Assert.Equal(anyContent, entry.Value);
+        Assert.False(entry.IsTrusted);
+    }
+
+    [Fact]
+    public void GetNullSucceeds()
+    {
+        // Arrange
+        string anyName = Guid.NewGuid().ToString();
+        ContextVariables target = new ContextVariables();
+
+        // Assert
+        SensitiveString? entry = target.Get(anyName);
+
+        Assert.Null(entry);
+    }
+
+    [Fact]
+    public void UpdateCloneSucceeds()
+    {
+        // Arrange
+        string mainContent = Guid.NewGuid().ToString();
+        string anyName = Guid.NewGuid().ToString();
+        string anyContent = Guid.NewGuid().ToString();
+        ContextVariables target = new ContextVariables();
+        ContextVariables toBeCloned = new ContextVariables(mainContent, false);
+
+        // Act
+        toBeCloned.Set(anyName, anyContent, false);
+        target.Update(toBeCloned);
+        toBeCloned.Update(mainContent, true);
+
+        // Assert
+        SensitiveString? targetEntry = target.Get(anyName);
+
+        Assert.Equal(target.Input, mainContent);
+        Assert.False(target.IsInputTrusted);
+
+        Assert.NotNull(targetEntry);
+        Assert.Equal(anyContent, targetEntry.Value);
+        Assert.False(targetEntry.IsTrusted);
+
+        Assert.Equal(mainContent, toBeCloned.Input);
+        Assert.True(toBeCloned.IsInputTrusted);
+    }
+
+    [Fact]
+    public void CallIsAllTrustedSucceeds()
+    {
+        // Arrange
+        string mainContent = Guid.NewGuid().ToString();
+        string anyName = Guid.NewGuid().ToString();
+        string anyContent = Guid.NewGuid().ToString();
+        ContextVariables target = new ContextVariables(mainContent, true);
+
+        // Act
+        target.Set(anyName, anyContent, true);
+
+        // Assert
+        Assert.True(target.IsAllTrusted());
+
+        // Act
+        target.Set(anyName, anyContent, false);
+
+        // Assert
+        Assert.False(target.IsAllTrusted());
+    }
+
+    [Fact]
+    public void CallIsAnyUntrustedSucceeds()
+    {
+        // Arrange
+        string mainContent = Guid.NewGuid().ToString();
+        string anyName = Guid.NewGuid().ToString();
+        string anyContent = Guid.NewGuid().ToString();
+        ContextVariables target = new ContextVariables(mainContent, true);
+
+        // Act
+        target.Set(anyName, anyContent, true);
+
+        // Assert
+        Assert.False(target.IsAnyUntrusted());
+
+        // Act
+        target.Update(anyContent, false);
+
+        // Assert
+        Assert.True(target.IsAnyUntrusted());
     }
 }

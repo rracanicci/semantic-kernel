@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
 using Microsoft.SemanticKernel.Memory;
 using Microsoft.SemanticKernel.Orchestration;
+using Microsoft.SemanticKernel.Security;
 using Microsoft.SemanticKernel.SemanticFunctions;
 using Microsoft.SemanticKernel.Services;
 using Microsoft.SemanticKernel.SkillDefinition;
@@ -42,6 +43,13 @@ public interface IKernel
     /// Reference to the read-only skill collection containing all the imported functions
     /// </summary>
     IReadOnlySkillCollection Skills { get; }
+
+    /// <summary>
+    /// Handler for trust check events. For example, it gets called
+    /// when a sensitive function tries to run with untrusted content.
+    /// If null, no trust checks will take place.
+    /// </summary>
+    ISensitiveHandler? SensitiveHandler { get; }
 
     /// <summary>
     /// Build and register a function in the internal skill collection, in a global generic skill.
