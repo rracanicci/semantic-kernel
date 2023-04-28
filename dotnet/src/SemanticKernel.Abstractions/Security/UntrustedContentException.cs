@@ -5,18 +5,63 @@ using Microsoft.SemanticKernel.Diagnostics;
 
 namespace Microsoft.SemanticKernel.Security;
 
+#pragma warning disable CA1032 // Implement standard exception constructors
+
 /// <summary>
 /// Untrusted content exception.
 /// </summary>
-public class UntrustedContentException : Exception<UntrustedContentException.ErrorCodes>
+public class UntrustedContentException : SKException
 {
     /// <summary>
-    /// Pure error message without error codes.
+    /// Initializes a new instance of the <see cref="UntrustedContentException"/> class with a provided error code.
     /// </summary>
-    public string? ErrorMessage { get; set; }
+    /// <param name="errorCode">The error code.</param>
+    public UntrustedContentException(ErrorCodes errorCode)
+        : this(errorCode, message: null, innerException: null)
+    {
+    }
 
     /// <summary>
-    /// Error codes for <see cref="UntrustedContentException"/>.
+    /// Initializes a new instance of the <see cref="UntrustedContentException"/> class with a provided error code and message.
+    /// </summary>
+    /// <param name="errorCode">The error code.</param>
+    /// <param name="message">The exception message.</param>
+    public UntrustedContentException(ErrorCodes errorCode, string? message)
+        : this(errorCode, message, innerException: null)
+    {
+    }
+
+    /// <summary>
+    /// Initializes a new instance of the <see cref="UntrustedContentException"/> class with a provided error code, message, and inner exception.
+    /// </summary>
+    /// <param name="errorCode">The error code.</param>
+    /// <param name="message">A string that describes the error.</param>
+    /// <param name="innerException">The exception that is the cause of the current exception.</param>
+    public UntrustedContentException(ErrorCodes errorCode, string? message, Exception? innerException)
+        : base(GetDefaultMessage(errorCode, message), innerException)
+    {
+        this.ErrorCode = errorCode;
+    }
+
+    /// <summary>
+    /// Gets the error code for this exception.
+    /// </summary>
+    public ErrorCodes ErrorCode { get; }
+
+    /// <summary>Translate the error code into a default message.</summary>
+    private static string GetDefaultMessage(ErrorCodes errorCode, string? message)
+    {
+        string description = errorCode switch
+        {
+            ErrorCodes.SensitiveFunctionWithUntrustedContent => "Sensitive function with untrusted content",
+            _ => $"Unknown error ({errorCode:G})",
+        };
+
+        return message is not null ? $"{description}: {message}" : description;
+    }
+
+    /// <summary>
+    /// Error codes for <see cref="ValidationException"/>.
     /// </summary>
     public enum ErrorCodes
     {
@@ -30,51 +75,4 @@ public class UntrustedContentException : Exception<UntrustedContentException.Err
         /// </summary>
         SensitiveFunctionWithUntrustedContent = 0,
     }
-
-    /// <summary>
-    /// Gets the error code of the exception.
-    /// </summary>
-    public ErrorCodes ErrorCode { get; }
-
-    /// <summary>
-    /// Initializes a new instance of the <see cref="UntrustedContentException"/> class.
-    /// </summary>
-    /// <param name="errCode">The error code.</param>
-    /// <param name="message">The message.</param>
-    public UntrustedContentException(ErrorCodes errCode, string? message = null) : base(errCode, message)
-    {
-        this.ErrorCode = errCode;
-        this.ErrorMessage = message;
-    }
-
-    /// <summary>
-    /// Initializes a new instance of the <see cref="UntrustedContentException"/> class.
-    /// </summary>
-    /// <param name="errCode">The error code.</param>
-    /// <param name="message">The message.</param>
-    /// <param name="e">The inner exception.</param>
-    public UntrustedContentException(ErrorCodes errCode, string message, Exception? e) : base(errCode, message, e)
-    {
-        this.ErrorCode = errCode;
-        this.ErrorMessage = message;
-    }
-
-    #region private ================================================================================
-
-    private UntrustedContentException()
-    {
-        // Not allowed, error code is required
-    }
-
-    private UntrustedContentException(string message) : base(message)
-    {
-        // Not allowed, error code is required
-    }
-
-    private UntrustedContentException(string message, Exception innerException) : base(message, innerException)
-    {
-        // Not allowed, error code is required
-    }
-
-    #endregion
 }
