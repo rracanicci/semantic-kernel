@@ -202,7 +202,7 @@ public sealed class SKFunctionTests4
         );
     }
 
-    private class MySkill
+    private sealed class MySkill
     {
         [SKFunction("Function1", isSensitive: true)]
         public void Function1()

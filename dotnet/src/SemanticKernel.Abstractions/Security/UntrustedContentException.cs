@@ -73,6 +73,6 @@ public class UntrustedContentException : SKException
         /// <summary>
         /// Sensitive function was called with untrusted content.
         /// </summary>
-        SensitiveFunctionWithUntrustedContent = 0,
+        SensitiveFunctionWithUntrustedContent,
     }
 }
