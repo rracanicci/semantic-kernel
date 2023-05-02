@@ -318,7 +318,7 @@ public class CodeBlockTests
         SensitiveString? canary2 = SensitiveString.Empty;
         var function = new Mock<ISKFunction>();
         function
-            .Setup(x => x.InvokeAsync(It.IsAny<SKContext?>(), It.IsAny<CompleteRequestSettings?>(), It.IsAny<ILogger?>(), It.IsAny<CancellationToken?>()))
+            .Setup(x => x.InvokeAsync(It.IsAny<SKContext?>(), It.IsAny<CompleteRequestSettings?>(), It.IsAny<ILogger?>(), It.IsAny<CancellationToken>()))
             .Callback<SKContext?, CompleteRequestSettings?, ILogger?, CancellationToken?>((ctx, _, _, _) =>
             {
                 canary0 = ctx!.Variables.Get("input");
@@ -359,7 +359,7 @@ public class CodeBlockTests
 
         var function = new Mock<ISKFunction>();
         function
-            .Setup(x => x.InvokeAsync(It.IsAny<SKContext?>(), It.IsAny<CompleteRequestSettings?>(), It.IsAny<ILogger?>(), It.IsAny<CancellationToken?>()))
+            .Setup(x => x.InvokeAsync(It.IsAny<SKContext?>(), It.IsAny<CompleteRequestSettings?>(), It.IsAny<ILogger?>(), It.IsAny<CancellationToken>()))
             .Callback<SKContext?, CompleteRequestSettings?, ILogger?, CancellationToken?>((ctx, _, _, _) =>
             {
                 // Create a untrusted variable in the cloned context

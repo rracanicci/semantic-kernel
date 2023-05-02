@@ -167,7 +167,7 @@ public class KernelTests
         var kernel = Kernel.Builder.WithSensitiveHandler(sensitiveHandler).Build();
         var factory = new Mock<Func<IKernel, ITextCompletion>>();
 
-        kernel.Config.AddTextCompletionService("x", factory.Object);
+        kernel.Config.AddTextCompletionService(factory.Object);
 
         // Act
         var nativeSkill = kernel.ImportSkill(new MySkill(), "mySk");

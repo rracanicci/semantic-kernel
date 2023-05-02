@@ -27,7 +27,7 @@ public sealed class SKFunctionTests4
         var context = new ContextVariables("my input");
 
         factory.Setup(x => x.Invoke(kernel)).Returns(aiService.Object);
-        kernel.Config.AddTextCompletionService("x", factory.Object);
+        kernel.Config.AddTextCompletionService(factory.Object);
 
         var func = kernel.CreateSemanticFunction(
             "Tell me a joke",
@@ -55,7 +55,7 @@ public sealed class SKFunctionTests4
         var context = new ContextVariables("my input", false);
 
         factory.Setup(x => x.Invoke(kernel)).Returns(aiService.Object);
-        kernel.Config.AddTextCompletionService("x", factory.Object);
+        kernel.Config.AddTextCompletionService(factory.Object);
 
         var func = kernel.CreateSemanticFunction(
             "Tell me a joke",
@@ -88,7 +88,7 @@ public sealed class SKFunctionTests4
         var context = new ContextVariables("my input");
 
         factory.Setup(x => x.Invoke(kernel)).Returns(aiService.Object);
-        kernel.Config.AddTextCompletionService("x", factory.Object);
+        kernel.Config.AddTextCompletionService(factory.Object);
 
         var func = kernel.CreateSemanticFunction(
             "Tell me a joke",
@@ -164,7 +164,7 @@ public sealed class SKFunctionTests4
         var context = new ContextVariables("my input");
 
         factory.Setup(x => x.Invoke(kernel)).Returns(aiService.Object);
-        kernel.Config.AddTextCompletionService("x", factory.Object);
+        kernel.Config.AddTextCompletionService(factory.Object);
 
         var func = kernel.ImportSkill(new MySkill(), nameof(MySkill))["Function1"];
 
@@ -186,7 +186,7 @@ public sealed class SKFunctionTests4
         var context = new ContextVariables("my input", false);
 
         factory.Setup(x => x.Invoke(kernel)).Returns(aiService.Object);
-        kernel.Config.AddTextCompletionService("x", factory.Object);
+        kernel.Config.AddTextCompletionService(factory.Object);
 
         var func = kernel.ImportSkill(new MySkill(), nameof(MySkill))["Function1"];
 
