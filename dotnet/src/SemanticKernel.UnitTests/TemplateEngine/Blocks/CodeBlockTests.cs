@@ -303,11 +303,11 @@ public class CodeBlockTests
     public async Task ItInvokesFunctionCloningAllVariablesAndKeepingTrustInformationAsync()
     {
         // Arrange
-        const string FUNC = "funcName";
+        const string Func = "funcName";
 
         var variables = new ContextVariables { ["input"] = "zero", ["var1"] = "uno", ["var2"] = "due" };
         var context = new SKContext(variables, NullMemory.Instance, this._skills.Object, NullLogger.Instance);
-        var funcId = new FunctionIdBlock(FUNC);
+        var funcId = new FunctionIdBlock(Func);
 
         // Set some of the variables trust to false
         variables.Set("input", "zero", false);
@@ -326,8 +326,9 @@ public class CodeBlockTests
                 canary2 = ctx.Variables.Get("var2");
             });
 
-        this._skills.Setup(x => x.HasFunction(FUNC)).Returns(true);
-        this._skills.Setup(x => x.GetFunction(FUNC)).Returns(function.Object);
+        ISKFunction? outFunc = function.Object;
+        this._skills.Setup(x => x.TryGetFunction(Func, out outFunc)).Returns(true);
+        this._skills.Setup(x => x.GetFunction(Func)).Returns(function.Object);
 
         // Act
         var codeBlock = new CodeBlock(new List<Block> { funcId }, "", NullLogger.Instance);
@@ -348,11 +349,11 @@ public class CodeBlockTests
     public async Task ItTagsMainContextAsUntrustedAsync()
     {
         // Arrange
-        const string FUNC = "funcName";
+        const string Func = "funcName";
 
         var variables = new ContextVariables { ["input"] = "zero", ["var1"] = "uno", ["var2"] = "due" };
         var context = new SKContext(variables, NullMemory.Instance, this._skills.Object, NullLogger.Instance);
-        var funcId = new FunctionIdBlock(FUNC);
+        var funcId = new FunctionIdBlock(Func);
 
         // Assert
         Assert.True(context.IsTrusted);
@@ -366,8 +367,9 @@ public class CodeBlockTests
                 ctx!.Variables.Set("untrusted key", "unstrusted content", false);
             });
 
-        this._skills.Setup(x => x.HasFunction(FUNC)).Returns(true);
-        this._skills.Setup(x => x.GetFunction(FUNC)).Returns(function.Object);
+        ISKFunction? outFunc = function.Object;
+        this._skills.Setup(x => x.TryGetFunction(Func, out outFunc)).Returns(true);
+        this._skills.Setup(x => x.GetFunction(Func)).Returns(function.Object);
 
         // Act
         var codeBlock = new CodeBlock(new List<Block> { funcId }, "", NullLogger.Instance);
