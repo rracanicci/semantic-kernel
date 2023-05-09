@@ -61,7 +61,7 @@ public class UntrustedContentException : SKException
     }
 
     /// <summary>
-    /// Error codes for <see cref="ValidationException"/>.
+    /// Error codes for <see cref="UntrustedContentException"/>.
     /// </summary>
     public enum ErrorCodes
     {
