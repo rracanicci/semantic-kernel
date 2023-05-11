@@ -160,11 +160,11 @@ public class KernelTests
     }
 
     [Fact]
-    public void ItConfiguresSensitiveHandlerInFunctions()
+    public void ItConfiguresTrustHandlerInFunctions()
     {
         // Arrange
-        ISensitiveHandler sensitiveHandler = new DefaultSensitiveHandler();
-        var kernel = Kernel.Builder.WithSensitiveHandler(sensitiveHandler).Build();
+        ITrustHandler trustHandler = new DefaultTrustHandler();
+        var kernel = Kernel.Builder.WithTrustHandler(trustHandler).Build();
         var factory = new Mock<Func<IKernel, ITextCompletion>>();
 
         kernel.Config.AddTextCompletionService(factory.Object);
@@ -176,12 +176,12 @@ public class KernelTests
         var jokerFunc = (SKFunction)kernel.Skills.GetFunction("jk", "joker");
 
         // Assert
-        Assert.NotNull(kernel.SensitiveHandler);
-        Assert.NotNull(sayHelloFunc._sensitiveHandler);
-        Assert.NotNull(jokerFunc._sensitiveHandler);
-        Assert.Equal(sensitiveHandler, kernel.SensitiveHandler);
-        Assert.Equal(sensitiveHandler, sayHelloFunc._sensitiveHandler);
-        Assert.Equal(sensitiveHandler, jokerFunc._sensitiveHandler);
+        Assert.NotNull(kernel.TrustHandler);
+        Assert.NotNull(sayHelloFunc._trustHandler);
+        Assert.NotNull(jokerFunc._trustHandler);
+        Assert.Equal(trustHandler, kernel.TrustHandler);
+        Assert.Equal(trustHandler, sayHelloFunc._trustHandler);
+        Assert.Equal(trustHandler, jokerFunc._trustHandler);
     }
 
     public class MySkill
