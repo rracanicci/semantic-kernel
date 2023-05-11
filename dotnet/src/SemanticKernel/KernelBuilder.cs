@@ -27,7 +27,7 @@ public sealed class KernelBuilder
     private IDelegatingHandlerFactory? _httpHandlerFactory = null;
     private IPromptTemplateEngine? _promptTemplateEngine;
     private readonly AIServiceCollection _aiServices = new();
-    private ISensitiveHandler? _sensitiveHandler = null;
+    private ITrustHandler? _trustHandler = null;
 
     /// <summary>
     /// Create a new kernel instance
@@ -57,7 +57,7 @@ public sealed class KernelBuilder
             this._memory,
             this._config,
             this._logger,
-            this._sensitiveHandler
+            this._trustHandler
         );
 
         // TODO: decouple this from 'UseMemory' kernel extension
@@ -157,13 +157,13 @@ public sealed class KernelBuilder
     }
 
     /// <summary>
-    /// Use the given sensitive handler with the kernel to be build.
+    /// Use the given trust handler with the kernel to be build.
     /// </summary>
-    /// <param name="sensitiveHandler">Sensitive handler to use.</param>
+    /// <param name="trustHandler">Trust handler to use.</param>
     /// <returns>Updated kernel builder including the given handler.</returns>
-    public KernelBuilder WithSensitiveHandler(ISensitiveHandler? sensitiveHandler)
+    public KernelBuilder WithTrustHandler(ITrustHandler? trustHandler)
     {
-        this._sensitiveHandler = sensitiveHandler;
+        this._trustHandler = trustHandler;
         return this;
     }
 

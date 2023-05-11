@@ -52,7 +52,7 @@ public sealed class Kernel : IKernel, IDisposable
     public IPromptTemplateEngine PromptTemplateEngine { get; }
 
     /// <inheritdoc/>
-    public ISensitiveHandler? SensitiveHandler => this._sensitiveHandler;
+    public ITrustHandler? TrustHandler => this._trustHandler;
 
     /// <summary>
     /// Return a new instance of the kernel builder, used to build and configure kernel instances.
@@ -68,7 +68,7 @@ public sealed class Kernel : IKernel, IDisposable
     /// <param name="memory"></param>
     /// <param name="config"></param>
     /// <param name="log"></param>
-    /// <param name="sensitiveHandler"></param>
+    /// <param name="trustHandler"></param>
     public Kernel(
         ISkillCollection skillCollection,
         IAIServiceProvider aiServiceProvider,
@@ -76,7 +76,7 @@ public sealed class Kernel : IKernel, IDisposable
         ISemanticTextMemory memory,
         KernelConfig config,
         ILogger log,
-        ISensitiveHandler? sensitiveHandler = null)
+        ITrustHandler? trustHandler = null)
     {
         this.Log = log;
         this.Config = config;
@@ -85,7 +85,7 @@ public sealed class Kernel : IKernel, IDisposable
         this._aiServiceProvider = aiServiceProvider;
         this._promptTemplateEngine = promptTemplateEngine;
         this._skillCollection = skillCollection;
-        this._sensitiveHandler = sensitiveHandler;
+        this._trustHandler = trustHandler;
     }
 
     /// <inheritdoc/>
@@ -124,7 +124,7 @@ public sealed class Kernel : IKernel, IDisposable
         foreach (KeyValuePair<string, ISKFunction> f in skill)
         {
             f.Value.SetDefaultSkillCollection(this.Skills);
-            f.Value.SetSensitiveHandler(this.SensitiveHandler);
+            f.Value.SetTrustHandler(this.TrustHandler);
             this._skillCollection.AddFunction(f.Value);
         }
 
@@ -139,7 +139,7 @@ public sealed class Kernel : IKernel, IDisposable
         Verify.NotNull(customFunction);
 
         customFunction.SetDefaultSkillCollection(this.Skills);
-        customFunction.SetSensitiveHandler(this.SensitiveHandler);
+        customFunction.SetTrustHandler(this.TrustHandler);
         this._skillCollection.AddFunction(customFunction);
 
         return customFunction;
@@ -318,7 +318,7 @@ public sealed class Kernel : IKernel, IDisposable
     private ISemanticTextMemory _memory;
     private readonly IPromptTemplateEngine _promptTemplateEngine;
     private readonly IAIServiceProvider _aiServiceProvider;
-    private ISensitiveHandler? _sensitiveHandler;
+    private ITrustHandler? _trustHandler;
 
     private ISKFunction CreateSemanticFunction(
         string skillName,
@@ -343,7 +343,7 @@ public sealed class Kernel : IKernel, IDisposable
         // Note: the service is instantiated using the kernel configuration state when the function is invoked
         func.SetAIService(() => this.GetService<ITextCompletion>());
 
-        func.SetSensitiveHandler(this.SensitiveHandler);
+        func.SetTrustHandler(this.TrustHandler);
 
         return func;
     }

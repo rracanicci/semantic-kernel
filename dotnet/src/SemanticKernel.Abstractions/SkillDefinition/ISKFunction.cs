@@ -39,14 +39,7 @@ public interface ISKFunction
     bool IsSemantic { get; }
 
     /// <summary>
-    /// If true, the output of the function will always considered to be untrusted
-    /// regardless of the input (default false).
-    /// </summary>
-    public bool ForceOutputToBeUntrusted { get; set; }
-
-    /// <summary>
     /// Whether the function is set to be sensitive (default false).
-    /// Sensitive functions should not be allowed to run with untrusted input.
     /// </summary>
     public bool IsSensitive { get; set; }
 
@@ -111,9 +104,9 @@ public interface ISKFunction
     ISKFunction SetAIConfiguration(CompleteRequestSettings settings);
 
     /// <summary>
-    /// Sets the sensitive handler used for trust checks.
+    /// Sets the trust handler used for trust checks.
     /// </summary>
-    /// <param name="sensitiveHandler">Handler to be set</param>
+    /// <param name="trustHandler">Handler to be set</param>
     /// <returns>Self instance</returns>
-    ISKFunction SetSensitiveHandler(ISensitiveHandler? sensitiveHandler);
+    ISKFunction SetTrustHandler(ITrustHandler? trustHandler);
 }

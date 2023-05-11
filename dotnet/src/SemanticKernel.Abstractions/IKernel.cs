@@ -46,10 +46,10 @@ public interface IKernel
 
     /// <summary>
     /// Handler for trust check events. For example, it gets called
-    /// when a sensitive function tries to run with untrusted content.
+    /// to validate context inputs before completion.
     /// If null, no trust checks will take place.
     /// </summary>
-    ISensitiveHandler? SensitiveHandler { get; }
+    ITrustHandler? TrustHandler { get; }
 
     /// <summary>
     /// Build and register a function in the internal skill collection, in a global generic skill.
