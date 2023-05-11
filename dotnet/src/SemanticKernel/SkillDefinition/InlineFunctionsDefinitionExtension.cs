@@ -33,9 +33,6 @@ public static class InlineFunctionsDefinitionExtension
     /// <param name="presencePenalty">Presence Penalty parameter passed to LLM</param>
     /// <param name="frequencyPenalty">Frequency Penalty parameter passed to LLM</param>
     /// <param name="stopSequences">Strings the LLM will detect to stop generating (before reaching max tokens)</param>
-    /// <param name="isPromptTrusted">If true, the prompt template will be considered trusted (default true)</param>
-    /// <param name="forceOutputToBeUntrusted">If true, the output of the function will always considered to be untrusted
-    /// regardless of the input (default false)</param>
     /// <param name="isSensitive">Whether the function is set to be sensitive or not (default false)</param>
     /// <returns>A function ready to use</returns>
     public static ISKFunction CreateSemanticFunction(
@@ -49,8 +46,6 @@ public static class InlineFunctionsDefinitionExtension
         double topP = 0,
         double presencePenalty = 0,
         double frequencyPenalty = 0,
-        bool isPromptTrusted = true,
-        bool forceOutputToBeUntrusted = false,
         bool isSensitive = false,
         IEnumerable<string>? stopSequences = null)
     {
@@ -60,9 +55,6 @@ public static class InlineFunctionsDefinitionExtension
         {
             Description = description ?? "Generic function, unknown purpose",
             Type = "completion",
-            IsPromptTrusted = isPromptTrusted,
-            ForceOutputToBeUntrusted = forceOutputToBeUntrusted,
-            IsSensitive = isSensitive,
             Completion = new PromptTemplateConfig.CompletionConfig
             {
                 Temperature = temperature,
@@ -78,7 +70,8 @@ public static class InlineFunctionsDefinitionExtension
             promptTemplate: promptTemplate,
             config: config,
             functionName: functionName,
-            skillName: skillName);
+            skillName: skillName,
+            isSensitive: isSensitive);
     }
 
     /// <summary>
@@ -90,13 +83,15 @@ public static class InlineFunctionsDefinitionExtension
     /// <param name="functionName">A name for the given function. The name can be referenced in templates and used by the pipeline planner.</param>
     /// <param name="skillName">An optional skill name, e.g. to namespace functions with the same name. When empty,
     /// the function is added to the global namespace, overwriting functions with the same name</param>
+    /// <param name="isSensitive">Whether the function is set to be sensitive or not (default false)</param>
     /// <returns>A function ready to use</returns>
     public static ISKFunction CreateSemanticFunction(
         this IKernel kernel,
         string promptTemplate,
         PromptTemplateConfig config,
         string? functionName = null,
-        string skillName = "")
+        string skillName = "",
+        bool isSensitive = false)
     {
         functionName ??= RandomFunctionName();
         Verify.ValidFunctionName(functionName);
@@ -105,7 +100,7 @@ public static class InlineFunctionsDefinitionExtension
         var template = new PromptTemplate(promptTemplate, config, kernel.PromptTemplateEngine);
 
         // Prepare lambda wrapping AI logic
-        var functionConfig = new SemanticFunctionConfig(config, template);
+        var functionConfig = new SemanticFunctionConfig(config, template, isSensitive);
 
         // TODO: manage overwrites, potentially error out
         return string.IsNullOrEmpty(skillName)

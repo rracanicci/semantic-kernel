@@ -83,10 +83,6 @@ public sealed class Plan : ISKFunction
 
     /// <inheritdoc/>
     [JsonIgnore]
-    public bool ForceOutputToBeUntrusted { get; set; } = false;
-
-    /// <inheritdoc/>
-    [JsonIgnore]
     public bool IsSensitive { get; set; } = false;
 
     /// <inheritdoc/>
@@ -390,11 +386,11 @@ public sealed class Plan : ISKFunction
             : this.Function.SetAIConfiguration(settings);
     }
 
-    public ISKFunction SetSensitiveHandler(ISensitiveHandler? sensitiveHandler)
+    public ISKFunction SetTrustHandler(ITrustHandler? trustHandler)
     {
         return this.Function is null
             ? throw new NotImplementedException()
-            : this.Function.SetSensitiveHandler(sensitiveHandler);
+            : this.Function.SetTrustHandler(trustHandler);
     }
 
     #endregion ISKFunction implementation
@@ -594,7 +590,6 @@ public sealed class Plan : ISKFunction
         this.SkillName = function.SkillName;
         this.Description = function.Description;
         this.IsSemantic = function.IsSemantic;
-        this.ForceOutputToBeUntrusted = function.ForceOutputToBeUntrusted;
         this.IsSensitive = function.IsSensitive;
         this.RequestSettings = function.RequestSettings;
     }

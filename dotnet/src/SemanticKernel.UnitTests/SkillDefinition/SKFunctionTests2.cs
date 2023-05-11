@@ -5,6 +5,7 @@ using System.Reflection;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
 using Microsoft.SemanticKernel.Orchestration;
+using Microsoft.SemanticKernel.Security;
 using Microsoft.SemanticKernel.SkillDefinition;
 using Moq;
 using Xunit;
@@ -44,7 +45,6 @@ public sealed class SKFunctionTests2
 
         // Assert
         Assert.NotNull(function);
-        Assert.False(function.ForceOutputToBeUntrusted);
         Assert.False(function.IsSensitive);
     }
 
@@ -52,7 +52,7 @@ public sealed class SKFunctionTests2
     public void ItSetsTrustSettings()
     {
         // Arrange
-        [SKFunction("Test", forceOutputToBeUntrusted: true, isSensitive: true)]
+        [SKFunction("Test", isSensitive: true)]
         [SKFunctionName("Test")]
         static void Test()
         {
@@ -64,15 +64,14 @@ public sealed class SKFunctionTests2
 
         // Assert
         Assert.NotNull(function);
-        Assert.True(function.ForceOutputToBeUntrusted);
         Assert.True(function.IsSensitive);
     }
 
     [Theory]
-    [InlineData(true, false, true)]
-    [InlineData(false, false, false)]
-    [InlineData(true, true, false)]
-    public async Task ItSupportsType1Async(bool isTrusted, bool forceOutputToBeUntrusted, bool expectedTrustResult)
+    [InlineData(true, true, true)]
+    [InlineData(false, true, false)]
+    [InlineData(true, false, false)]
+    public async Task ItSupportsType1Async(bool isTrusted, bool defaultTrusted, bool expectedTrustResult)
     {
         // Arrange
         [SKFunction("Test")]
@@ -84,10 +83,12 @@ public sealed class SKFunctionTests2
 
         var context = this.MockContext("", isTrusted);
 
+        var trustHandler = new DefaultTrustHandler(defaultTrusted);
+
         // Act
         var function = SKFunction.FromNativeMethod(Method(Test), log: this._log.Object);
         Assert.NotNull(function);
-        function.ForceOutputToBeUntrusted = forceOutputToBeUntrusted;
+        function.SetTrustHandler(trustHandler);
         SKContext result = await function.InvokeAsync(context);
 
         // Assert
@@ -98,10 +99,10 @@ public sealed class SKFunctionTests2
     }
 
     [Theory]
-    [InlineData(true, false, true)]
-    [InlineData(false, false, false)]
-    [InlineData(true, true, false)]
-    public async Task ItSupportsType2Async(bool isTrusted, bool forceOutputToBeUntrusted, bool expectedTrustResult)
+    [InlineData(true, true, true)]
+    [InlineData(false, true, false)]
+    [InlineData(true, false, false)]
+    public async Task ItSupportsType2Async(bool isTrusted, bool defaultTrusted, bool expectedTrustResult)
     {
         // Arrange
         [SKFunction("Test")]
@@ -114,10 +115,12 @@ public sealed class SKFunctionTests2
 
         var context = this.MockContext("", isTrusted);
 
+        var trustHandler = new DefaultTrustHandler(defaultTrusted);
+
         // Act
         var function = SKFunction.FromNativeMethod(Method(Test), log: this._log.Object);
         Assert.NotNull(function);
-        function.ForceOutputToBeUntrusted = forceOutputToBeUntrusted;
+        function.SetTrustHandler(trustHandler);
         SKContext result = await function.InvokeAsync(context);
 
         // Assert
@@ -130,10 +133,10 @@ public sealed class SKFunctionTests2
     }
 
     [Theory]
-    [InlineData(true, false, true)]
-    [InlineData(false, false, false)]
-    [InlineData(true, true, false)]
-    public async Task ItSupportsType3Async(bool isTrusted, bool forceOutputToBeUntrusted, bool expectedTrustResult)
+    [InlineData(true, true, true)]
+    [InlineData(false, true, false)]
+    [InlineData(true, false, false)]
+    public async Task ItSupportsType3Async(bool isTrusted, bool defaultTrusted, bool expectedTrustResult)
     {
         // Arrange
         [SKFunction("Test")]
@@ -146,10 +149,12 @@ public sealed class SKFunctionTests2
 
         var context = this.MockContext("", isTrusted);
 
+        var trustHandler = new DefaultTrustHandler(defaultTrusted);
+
         // Act
         var function = SKFunction.FromNativeMethod(Method(Test), log: this._log.Object);
         Assert.NotNull(function);
-        function.ForceOutputToBeUntrusted = forceOutputToBeUntrusted;
+        function.SetTrustHandler(trustHandler);
         SKContext result = await function.InvokeAsync(context);
 
         // Assert
@@ -162,10 +167,10 @@ public sealed class SKFunctionTests2
     }
 
     [Theory]
-    [InlineData(true, false, true)]
-    [InlineData(false, false, false)]
-    [InlineData(true, true, false)]
-    public async Task ItSupportsType4Async(bool isTrusted, bool forceOutputToBeUntrusted, bool expectedTrustResult)
+    [InlineData(true, true, true)]
+    [InlineData(false, true, false)]
+    [InlineData(true, false, false)]
+    public async Task ItSupportsType4Async(bool isTrusted, bool defaultTrusted, bool expectedTrustResult)
     {
         // Arrange
         [SKFunction("Test")]
@@ -179,10 +184,12 @@ public sealed class SKFunctionTests2
         var context = this.MockContext("xy", isTrusted);
         context["someVar"] = "qz";
 
+        var trustHandler = new DefaultTrustHandler(defaultTrusted);
+
         // Act
         var function = SKFunction.FromNativeMethod(Method(Test), log: this._log.Object);
         Assert.NotNull(function);
-        function.ForceOutputToBeUntrusted = forceOutputToBeUntrusted;
+        function.SetTrustHandler(trustHandler);
         SKContext result = await function.InvokeAsync(context);
 
         // Assert
@@ -194,10 +201,10 @@ public sealed class SKFunctionTests2
     }
 
     [Theory]
-    [InlineData(true, false, true)]
-    [InlineData(false, false, false)]
-    [InlineData(true, true, false)]
-    public async Task ItSupportsType5Async(bool isTrusted, bool forceOutputToBeUntrusted, bool expectedTrustResult)
+    [InlineData(true, true, true)]
+    [InlineData(false, true, false)]
+    [InlineData(true, false, false)]
+    public async Task ItSupportsType5Async(bool isTrusted, bool defaultTrusted, bool expectedTrustResult)
     {
         // Arrange
         [SKFunction("Test")]
@@ -211,10 +218,12 @@ public sealed class SKFunctionTests2
         var context = this.MockContext("", isTrusted);
         context["someVar"] = s_expected;
 
+        var trustHandler = new DefaultTrustHandler(defaultTrusted);
+
         // Act
         var function = SKFunction.FromNativeMethod(Method(Test), log: this._log.Object);
         Assert.NotNull(function);
-        function.ForceOutputToBeUntrusted = forceOutputToBeUntrusted;
+        function.SetTrustHandler(trustHandler);
         SKContext result = await function.InvokeAsync(context);
 
         // Assert
@@ -253,10 +262,10 @@ public sealed class SKFunctionTests2
     }
 
     [Theory]
-    [InlineData(true, false, true)]
-    [InlineData(false, false, false)]
-    [InlineData(true, true, false)]
-    public async Task ItSupportsType6Async(bool isTrusted, bool forceOutputToBeUntrusted, bool expectedTrustResult)
+    [InlineData(true, true, true)]
+    [InlineData(false, true, false)]
+    [InlineData(true, false, false)]
+    public async Task ItSupportsType6Async(bool isTrusted, bool defaultTrusted, bool expectedTrustResult)
     {
         // Arrange
         [SKFunction("Test")]
@@ -270,10 +279,12 @@ public sealed class SKFunctionTests2
 
         var context = this.MockContext("", isTrusted);
 
+        var trustHandler = new DefaultTrustHandler(defaultTrusted);
+
         // Act
         var function = SKFunction.FromNativeMethod(Method(Test), log: this._log.Object);
         Assert.NotNull(function);
-        function.ForceOutputToBeUntrusted = forceOutputToBeUntrusted;
+        function.SetTrustHandler(trustHandler);
         SKContext result = await function.InvokeAsync(context);
 
         // Assert
@@ -286,10 +297,10 @@ public sealed class SKFunctionTests2
     }
 
     [Theory]
-    [InlineData(true, false, true)]
-    [InlineData(false, false, false)]
-    [InlineData(true, true, false)]
-    public async Task ItSupportsType7Async(bool isTrusted, bool forceOutputToBeUntrusted, bool expectedTrustResult)
+    [InlineData(true, true, true)]
+    [InlineData(false, true, false)]
+    [InlineData(true, false, false)]
+    public async Task ItSupportsType7Async(bool isTrusted, bool defaultTrusted, bool expectedTrustResult)
     {
         // Arrange
         [SKFunction("Test")]
@@ -304,10 +315,12 @@ public sealed class SKFunctionTests2
 
         var context = this.MockContext("", isTrusted);
 
+        var trustHandler = new DefaultTrustHandler(defaultTrusted);
+
         // Act
         var function = SKFunction.FromNativeMethod(Method(Test), log: this._log.Object);
         Assert.NotNull(function);
-        function.ForceOutputToBeUntrusted = forceOutputToBeUntrusted;
+        function.SetTrustHandler(trustHandler);
         SKContext result = await function.InvokeAsync(context);
 
         // Assert
@@ -352,10 +365,10 @@ public sealed class SKFunctionTests2
     }
 
     [Theory]
-    [InlineData(true, false, true)]
-    [InlineData(false, false, false)]
-    [InlineData(true, true, false)]
-    public async Task ItSupportsAsyncType7Async(bool isTrusted, bool forceOutputToBeUntrusted, bool expectedTrustResult)
+    [InlineData(true, true, true)]
+    [InlineData(false, true, false)]
+    [InlineData(true, false, false)]
+    public async Task ItSupportsAsyncType7Async(bool isTrusted, bool defaultTrusted, bool expectedTrustResult)
     {
         // Arrange
         [SKFunction("Test")]
@@ -371,10 +384,12 @@ public sealed class SKFunctionTests2
 
         var context = this.MockContext("", isTrusted);
 
+        var trustHandler = new DefaultTrustHandler(defaultTrusted);
+
         // Act
         var function = SKFunction.FromNativeMethod(Method(TestAsync), log: this._log.Object);
         Assert.NotNull(function);
-        function.ForceOutputToBeUntrusted = forceOutputToBeUntrusted;
+        function.SetTrustHandler(trustHandler);
         SKContext result = await function.InvokeAsync(context);
 
         // Assert
@@ -387,10 +402,10 @@ public sealed class SKFunctionTests2
     }
 
     [Theory]
-    [InlineData(true, false, true)]
-    [InlineData(false, false, false)]
-    [InlineData(true, true, false)]
-    public async Task ItSupportsType8Async(bool isTrusted, bool forceOutputToBeUntrusted, bool expectedTrustResult)
+    [InlineData(true, true, true)]
+    [InlineData(false, true, false)]
+    [InlineData(true, false, false)]
+    public async Task ItSupportsType8Async(bool isTrusted, bool defaultTrusted, bool expectedTrustResult)
     {
         // Arrange
         [SKFunction("Test")]
@@ -402,10 +417,12 @@ public sealed class SKFunctionTests2
 
         var context = this.MockContext(".blah", isTrusted);
 
+        var trustHandler = new DefaultTrustHandler(defaultTrusted);
+
         // Act
         var function = SKFunction.FromNativeMethod(Method(Test), log: this._log.Object);
         Assert.NotNull(function);
-        function.ForceOutputToBeUntrusted = forceOutputToBeUntrusted;
+        function.SetTrustHandler(trustHandler);
         SKContext result = await function.InvokeAsync(context);
 
         // Assert
@@ -416,10 +433,10 @@ public sealed class SKFunctionTests2
     }
 
     [Theory]
-    [InlineData(true, false, true)]
-    [InlineData(false, false, false)]
-    [InlineData(true, true, false)]
-    public async Task ItSupportsType9Async(bool isTrusted, bool forceOutputToBeUntrusted, bool expectedTrustResult)
+    [InlineData(true, true, true)]
+    [InlineData(false, true, false)]
+    [InlineData(true, false, false)]
+    public async Task ItSupportsType9Async(bool isTrusted, bool defaultTrusted, bool expectedTrustResult)
     {
         // Arrange
         [SKFunction("Test")]
@@ -432,10 +449,12 @@ public sealed class SKFunctionTests2
 
         var context = this.MockContext("", isTrusted);
 
+        var trustHandler = new DefaultTrustHandler(defaultTrusted);
+
         // Act
         var function = SKFunction.FromNativeMethod(Method(Test), log: this._log.Object);
         Assert.NotNull(function);
-        function.ForceOutputToBeUntrusted = forceOutputToBeUntrusted;
+        function.SetTrustHandler(trustHandler);
         SKContext result = await function.InvokeAsync(context);
 
         // Assert
@@ -447,10 +466,10 @@ public sealed class SKFunctionTests2
     }
 
     [Theory]
-    [InlineData(true, false, true)]
-    [InlineData(false, false, false)]
-    [InlineData(true, true, false)]
-    public async Task ItSupportsType10Async(bool isTrusted, bool forceOutputToBeUntrusted, bool expectedTrustResult)
+    [InlineData(true, true, true)]
+    [InlineData(false, true, false)]
+    [InlineData(true, false, false)]
+    public async Task ItSupportsType10Async(bool isTrusted, bool defaultTrusted, bool expectedTrustResult)
     {
         // Arrange
         [SKFunction("Test")]
@@ -463,10 +482,12 @@ public sealed class SKFunctionTests2
 
         var context = this.MockContext("", isTrusted);
 
+        var trustHandler = new DefaultTrustHandler(defaultTrusted);
+
         // Act
         var function = SKFunction.FromNativeMethod(Method(Test), log: this._log.Object);
         Assert.NotNull(function);
-        function.ForceOutputToBeUntrusted = forceOutputToBeUntrusted;
+        function.SetTrustHandler(trustHandler);
         SKContext result = await function.InvokeAsync(context);
 
         // Assert
@@ -478,10 +499,10 @@ public sealed class SKFunctionTests2
     }
 
     [Theory]
-    [InlineData(true, false, true)]
-    [InlineData(false, false, false)]
-    [InlineData(true, true, false)]
-    public async Task ItSupportsType11Async(bool isTrusted, bool forceOutputToBeUntrusted, bool expectedTrustResult)
+    [InlineData(true, true, true)]
+    [InlineData(false, true, false)]
+    [InlineData(true, false, false)]
+    public async Task ItSupportsType11Async(bool isTrusted, bool defaultTrusted, bool expectedTrustResult)
     {
         // Arrange
         [SKFunction("Test")]
@@ -495,10 +516,12 @@ public sealed class SKFunctionTests2
 
         var context = this.MockContext("", isTrusted);
 
+        var trustHandler = new DefaultTrustHandler(defaultTrusted);
+
         // Act
         var function = SKFunction.FromNativeMethod(Method(Test), log: this._log.Object);
         Assert.NotNull(function);
-        function.ForceOutputToBeUntrusted = forceOutputToBeUntrusted;
+        function.SetTrustHandler(trustHandler);
         SKContext result = await function.InvokeAsync(context);
 
         // Assert
@@ -511,10 +534,10 @@ public sealed class SKFunctionTests2
     }
 
     [Theory]
-    [InlineData(true, false, true)]
-    [InlineData(false, false, false)]
-    [InlineData(true, true, false)]
-    public async Task ItSupportsType12Async(bool isTrusted, bool forceOutputToBeUntrusted, bool expectedTrustResult)
+    [InlineData(true, true, true)]
+    [InlineData(false, true, false)]
+    [InlineData(true, false, false)]
+    public async Task ItSupportsType12Async(bool isTrusted, bool defaultTrusted, bool expectedTrustResult)
     {
         // Arrange
         [SKFunction("Test")]
@@ -530,10 +553,12 @@ public sealed class SKFunctionTests2
 
         var context = this.MockContext("", isTrusted);
 
+        var trustHandler = new DefaultTrustHandler(defaultTrusted);
+
         // Act
         var function = SKFunction.FromNativeMethod(Method(Test), log: this._log.Object);
         Assert.NotNull(function);
-        function.ForceOutputToBeUntrusted = forceOutputToBeUntrusted;
+        function.SetTrustHandler(trustHandler);
         SKContext result = await function.InvokeAsync(context);
 
         // Assert
@@ -546,10 +571,10 @@ public sealed class SKFunctionTests2
     }
 
     [Theory]
-    [InlineData(true, false, true)]
-    [InlineData(false, false, false)]
-    [InlineData(true, true, false)]
-    public async Task ItSupportsType13Async(bool isTrusted, bool forceOutputToBeUntrusted, bool expectedTrustResult)
+    [InlineData(true, true, true)]
+    [InlineData(false, true, false)]
+    [InlineData(true, false, false)]
+    public async Task ItSupportsType13Async(bool isTrusted, bool defaultTrusted, bool expectedTrustResult)
     {
         // Arrange
         [SKFunction("Test")]
@@ -565,10 +590,12 @@ public sealed class SKFunctionTests2
 
         var context = this.MockContext("", isTrusted);
 
+        var trustHandler = new DefaultTrustHandler(defaultTrusted);
+
         // Act
         var function = SKFunction.FromNativeMethod(Method(Test), log: this._log.Object);
         Assert.NotNull(function);
-        function.ForceOutputToBeUntrusted = forceOutputToBeUntrusted;
+        function.SetTrustHandler(trustHandler);
         SKContext result = await function.InvokeAsync(context);
 
         // Assert
@@ -581,10 +608,10 @@ public sealed class SKFunctionTests2
     }
 
     [Theory]
-    [InlineData(true, false, true)]
-    [InlineData(false, false, false)]
-    [InlineData(true, true, false)]
-    public async Task ItSupportsType14Async(bool isTrusted, bool forceOutputToBeUntrusted, bool expectedTrustResult)
+    [InlineData(true, true, true)]
+    [InlineData(false, true, false)]
+    [InlineData(true, false, false)]
+    public async Task ItSupportsType14Async(bool isTrusted, bool defaultTrusted, bool expectedTrustResult)
     {
         // Arrange
         [SKFunction("Test")]
@@ -609,10 +636,12 @@ public sealed class SKFunctionTests2
         var oldContext = this.MockContext("", isTrusted);
         oldContext["legacy"] = "something";
 
+        var trustHandler = new DefaultTrustHandler(defaultTrusted);
+
         // Act
         var function = SKFunction.FromNativeMethod(Method(Test), log: this._log.Object);
         Assert.NotNull(function);
-        function.ForceOutputToBeUntrusted = forceOutputToBeUntrusted;
+        function.SetTrustHandler(trustHandler);
         SKContext newContext = await function.InvokeAsync(oldContext);
 
         // Assert
@@ -697,10 +726,10 @@ public sealed class SKFunctionTests2
     }
 
     [Theory]
-    [InlineData(true, false, true)]
-    [InlineData(false, false, false)]
-    [InlineData(true, true, false)]
-    public async Task ItSupportsType15Async(bool isTrusted, bool forceOutputToBeUntrusted, bool expectedTrustResult)
+    [InlineData(true, true, true)]
+    [InlineData(false, true, false)]
+    [InlineData(true, false, false)]
+    public async Task ItSupportsType15Async(bool isTrusted, bool defaultTrusted, bool expectedTrustResult)
     {
         // Arrange
         [SKFunction("Test")]
@@ -713,10 +742,12 @@ public sealed class SKFunctionTests2
 
         var context = this.MockContext("", isTrusted);
 
+        var trustHandler = new DefaultTrustHandler(defaultTrusted);
+
         // Act
         var function = SKFunction.FromNativeMethod(Method(Test), log: this._log.Object);
         Assert.NotNull(function);
-        function.ForceOutputToBeUntrusted = forceOutputToBeUntrusted;
+        function.SetTrustHandler(trustHandler);
         SKContext result = await function.InvokeAsync(context);
 
         // Assert
@@ -727,10 +758,10 @@ public sealed class SKFunctionTests2
     }
 
     [Theory]
-    [InlineData(true, false, true)]
-    [InlineData(false, false, false)]
-    [InlineData(true, true, false)]
-    public async Task ItSupportsType16Async(bool isTrusted, bool forceOutputToBeUntrusted, bool expectedTrustResult)
+    [InlineData(true, true, true)]
+    [InlineData(false, true, false)]
+    [InlineData(true, false, false)]
+    public async Task ItSupportsType16Async(bool isTrusted, bool defaultTrusted, bool expectedTrustResult)
     {
         // Arrange
         [SKFunction("Test")]
@@ -745,10 +776,12 @@ public sealed class SKFunctionTests2
 
         var context = this.MockContext("", isTrusted);
 
+        var trustHandler = new DefaultTrustHandler(defaultTrusted);
+
         // Act
         var function = SKFunction.FromNativeMethod(Method(Test), log: this._log.Object);
         Assert.NotNull(function);
-        function.ForceOutputToBeUntrusted = forceOutputToBeUntrusted;
+        function.SetTrustHandler(trustHandler);
         SKContext result = await function.InvokeAsync(context);
 
         // Assert
@@ -761,10 +794,10 @@ public sealed class SKFunctionTests2
     }
 
     [Theory]
-    [InlineData(true, false, true)]
-    [InlineData(false, false, false)]
-    [InlineData(true, true, false)]
-    public async Task ItSupportsType17Async(bool isTrusted, bool forceOutputToBeUntrusted, bool expectedTrustResult)
+    [InlineData(true, true, true)]
+    [InlineData(false, true, false)]
+    [InlineData(true, false, false)]
+    public async Task ItSupportsType17Async(bool isTrusted, bool defaultTrusted, bool expectedTrustResult)
     {
         // Arrange
         [SKFunction("Test")]
@@ -779,10 +812,12 @@ public sealed class SKFunctionTests2
 
         var context = this.MockContext("input:", isTrusted);
 
+        var trustHandler = new DefaultTrustHandler(defaultTrusted);
+
         // Act
         var function = SKFunction.FromNativeMethod(Method(Test), log: this._log.Object);
         Assert.NotNull(function);
-        function.ForceOutputToBeUntrusted = forceOutputToBeUntrusted;
+        function.SetTrustHandler(trustHandler);
         SKContext result = await function.InvokeAsync(context);
 
         // Assert
@@ -795,10 +830,10 @@ public sealed class SKFunctionTests2
     }
 
     [Theory]
-    [InlineData(true, false, true)]
-    [InlineData(false, false, false)]
-    [InlineData(true, true, false)]
-    public async Task ItSupportsType18Async(bool isTrusted, bool forceOutputToBeUntrusted, bool expectedTrustResult)
+    [InlineData(true, true, true)]
+    [InlineData(false, true, false)]
+    [InlineData(true, false, false)]
+    public async Task ItSupportsType18Async(bool isTrusted, bool defaultTrusted, bool expectedTrustResult)
     {
         // Arrange
         [SKFunction("Test")]
@@ -811,10 +846,12 @@ public sealed class SKFunctionTests2
 
         var context = this.MockContext("", isTrusted);
 
+        var trustHandler = new DefaultTrustHandler(defaultTrusted);
+
         // Act
         var function = SKFunction.FromNativeMethod(Method(Test), log: this._log.Object);
         Assert.NotNull(function);
-        function.ForceOutputToBeUntrusted = forceOutputToBeUntrusted;
+        function.SetTrustHandler(trustHandler);
         SKContext result = await function.InvokeAsync(context);
 
         // Assert

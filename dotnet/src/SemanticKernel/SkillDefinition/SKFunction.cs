@@ -42,9 +42,6 @@ public sealed class SKFunction : ISKFunction, IDisposable
     public bool IsSemantic { get; }
 
     /// <inheritdoc/>
-    public bool ForceOutputToBeUntrusted { get; set; }
-
-    /// <inheritdoc/>
     public bool IsSensitive { get; set; }
 
     /// <inheritdoc/>
@@ -90,7 +87,6 @@ public sealed class SKFunction : ISKFunction, IDisposable
             functionName: methodDetails.Name,
             description: methodDetails.Description,
             isSemantic: false,
-            forceOutputToBeUntrusted: methodDetails.ForceOutputToBeUntrusted,
             isSensitive: methodDetails.IsSensitive,
             log: log);
     }
@@ -152,8 +148,7 @@ public sealed class SKFunction : ISKFunction, IDisposable
             skillName: skillName,
             functionName: functionName,
             isSemantic: true,
-            forceOutputToBeUntrusted: functionConfig.PromptTemplateConfig.ForceOutputToBeUntrusted,
-            isSensitive: functionConfig.PromptTemplateConfig.IsSensitive,
+            isSensitive: functionConfig.IsSensitive,
             log: log
         );
 
@@ -164,21 +159,8 @@ public sealed class SKFunction : ISKFunction, IDisposable
         {
             Verify.NotNull(client);
 
-            if (!functionConfig.PromptTemplateConfig.IsPromptTrusted)
-            {
-                // If the prompt itself is untrusted,
-                // consider the context variables also untrusted
-                context.IsTrusted = false;
-            }
-
-            var isOutputTrusted = func.ShouldOutputBeTrusted(
-                isInputTrusted: context.IsTrusted
-            );
-
-            func.PerformSensitiveChecks(
-                context: context,
-                prompt: null
-            );
+            // Validates if the input context is trusted before executing the completion
+            var isTrusted = func.ValidateInputTrust(context, null);
 
             try
             {
@@ -186,14 +168,11 @@ public sealed class SKFunction : ISKFunction, IDisposable
 
                 // The prompt template might contain function calls that could
                 // turn the context into untrusted, so check again
-                func.PerformSensitiveChecks(
-                    context: context,
-                    prompt: prompt
-                );
+                isTrusted = isTrusted && func.ValidateInputTrust(context, prompt);
 
                 string completion = await client.CompleteAsync(prompt, requestSettings, context.CancellationToken).ConfigureAwait(false);
 
-                context.UpdateResult(completion, isOutputTrusted);
+                context.UpdateResult(completion, isTrusted);
             }
             catch (AIException ex)
             {
@@ -286,9 +265,9 @@ public sealed class SKFunction : ISKFunction, IDisposable
     }
 
     /// <inheritdoc/>
-    public ISKFunction SetSensitiveHandler(ISensitiveHandler? sensitiveHandler)
+    public ISKFunction SetTrustHandler(ITrustHandler? trustHandler)
     {
-        this._sensitiveHandler = sensitiveHandler;
+        this._trustHandler = trustHandler;
         return this;
     }
 
@@ -331,7 +310,7 @@ public sealed class SKFunction : ISKFunction, IDisposable
     private IReadOnlySkillCollection? _skillCollection;
     private ITextCompletion? _aiService = null;
     private CompleteRequestSettings _aiRequestSettings = new();
-    internal ISensitiveHandler? _sensitiveHandler = null;
+    internal ITrustHandler? _trustHandler = null;
 
     private struct MethodDetails
     {
@@ -341,7 +320,6 @@ public sealed class SKFunction : ISKFunction, IDisposable
         public List<ParameterView> Parameters { get; set; }
         public string Name { get; set; }
         public string Description { get; set; }
-        public bool ForceOutputToBeUntrusted { get; set; }
         public bool IsSensitive { get; set; }
     }
 
@@ -376,7 +354,6 @@ public sealed class SKFunction : ISKFunction, IDisposable
         string functionName,
         string description,
         bool isSemantic = false,
-        bool forceOutputToBeUntrusted = false,
         bool isSensitive = false,
         ILogger? log = null
     )
@@ -393,7 +370,6 @@ public sealed class SKFunction : ISKFunction, IDisposable
         this.Parameters = parameters;
 
         this.IsSemantic = isSemantic;
-        this.ForceOutputToBeUntrusted = forceOutputToBeUntrusted;
         this.IsSensitive = isSensitive;
         this.Name = functionName;
         this.SkillName = skillName;
@@ -445,14 +421,8 @@ public sealed class SKFunction : ISKFunction, IDisposable
         SKContext resultContext;
         string? stringResult = null;
 
-        var isOutputTrusted = this.ShouldOutputBeTrusted(
-            isInputTrusted: context.IsTrusted
-        );
-
-        this.PerformSensitiveChecks(
-            context: context,
-            prompt: null
-        );
+        // Validates if the input context is trusted before executing the native call
+        var isTrusted = this.ValidateInputTrust(context, null);
 
         switch (this._delegateType)
         {
@@ -607,7 +577,7 @@ public sealed class SKFunction : ISKFunction, IDisposable
                     "Invalid function type detected, unable to execute.");
         }
 
-        resultContext.UpdateResult(stringResult, isOutputTrusted);
+        resultContext.UpdateResult(stringResult, isTrusted);
 
         return resultContext;
     }
@@ -618,25 +588,10 @@ public sealed class SKFunction : ISKFunction, IDisposable
         context.Skills ??= this._skillCollection;
     }
 
-    private bool ShouldOutputBeTrusted(bool isInputTrusted)
+    private bool ValidateInputTrust(SKContext context, string? prompt)
     {
-        return isInputTrusted && !this.ForceOutputToBeUntrusted;
-    }
-
-    private void PerformSensitiveChecks(
-        SKContext context,
-        string? prompt)
-    {
-        if (this._sensitiveHandler != null && this.IsSensitive && !context.IsTrusted)
-        {
-            this._sensitiveHandler.OnSensitiveFunctionWithUntrustedContent(
-                this.SkillName,
-                this.Name,
-                this.IsSemantic,
-                context,
-                prompt
-            );
-        }
+        // If there is no trust handler, rely on context's default trust
+        return this._trustHandler?.ValidateInput(this, context, prompt) ?? context.IsTrusted;
     }
 
     private static MethodDetails GetMethodDetails(
@@ -720,7 +675,6 @@ public sealed class SKFunction : ISKFunction, IDisposable
         Verify.ParametersUniqueness(result.Parameters);
 
         result.Description = skFunctionAttribute?.Description ?? "";
-        result.ForceOutputToBeUntrusted = skFunctionAttribute?.ForceOutputToBeUntrusted ?? false;
         result.IsSensitive = skFunctionAttribute?.IsSensitive ?? false;
 
         log?.LogTrace("Method '{0}' found, type `{1}`", result.Name, result.Type.ToString("G"));

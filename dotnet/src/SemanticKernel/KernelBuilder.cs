@@ -24,7 +24,7 @@ public sealed class KernelBuilder
     private ILogger _log = NullLogger.Instance;
     private IMemoryStore? _memoryStorage = null;
     private IDelegatingHandlerFactory? _httpHandlerFactory = null;
-    private ISensitiveHandler? _sensitiveHandler = null;
+    private ITrustHandler? _trustHandler = null;
 
     /// <summary>
     /// Create a new kernel instance
@@ -53,7 +53,7 @@ public sealed class KernelBuilder
             this._memory,
             this._config,
             this._log,
-            this._sensitiveHandler
+            this._trustHandler
         );
 
         // TODO: decouple this from 'UseMemory' kernel extension
@@ -141,13 +141,13 @@ public sealed class KernelBuilder
     }
 
     /// <summary>
-    /// Use the given sensitive handler with the kernel to be build.
+    /// Use the given trust handler with the kernel to be build.
     /// </summary>
-    /// <param name="sensitiveHandler">Sensitive handler to use.</param>
+    /// <param name="trustHandler">Trust handler to use.</param>
     /// <returns>Updated kernel builder including the given handler.</returns>
-    public KernelBuilder WithSensitiveHandler(ISensitiveHandler? sensitiveHandler)
+    public KernelBuilder WithTrustHandler(ITrustHandler? trustHandler)
     {
-        this._sensitiveHandler = sensitiveHandler;
+        this._trustHandler = trustHandler;
         return this;
     }
 

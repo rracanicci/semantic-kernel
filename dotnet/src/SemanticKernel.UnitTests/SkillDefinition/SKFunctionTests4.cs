@@ -20,8 +20,8 @@ public sealed class SKFunctionTests4
     public async Task SemanticSensitiveFunctionShouldNotFailWithTrustedInputAsync()
     {
         // Arrange
-        ISensitiveHandler sensitiveHandler = new DefaultSensitiveHandler();
-        var kernel = Kernel.Builder.WithSensitiveHandler(sensitiveHandler).Build();
+        ITrustHandler trustHandler = new DefaultTrustHandler();
+        var kernel = Kernel.Builder.WithTrustHandler(trustHandler).Build();
         var factory = new Mock<Func<IKernel, ITextCompletion>>();
         var aiService = new Mock<ITextCompletion>();
         var context = new ContextVariables("my input");
@@ -48,8 +48,8 @@ public sealed class SKFunctionTests4
     public async Task SemanticSensitiveFunctionShouldFailWithUntrustedInputAsync()
     {
         // Arrange
-        ISensitiveHandler sensitiveHandler = new DefaultSensitiveHandler();
-        var kernel = Kernel.Builder.WithSensitiveHandler(sensitiveHandler).Build();
+        ITrustHandler trustHandler = new DefaultTrustHandler();
+        var kernel = Kernel.Builder.WithTrustHandler(trustHandler).Build();
         var factory = new Mock<Func<IKernel, ITextCompletion>>();
         var aiService = new Mock<ITextCompletion>();
         var context = new ContextVariables("my input", false);
@@ -78,11 +78,11 @@ public sealed class SKFunctionTests4
     }
 
     [Fact]
-    public async Task SemanticSensitiveFunctionShouldFailWithUntrustedPromptAsync()
+    public async Task SemanticSensitiveFunctionWithDefaultUntrustedAsync()
     {
         // Arrange
-        ISensitiveHandler sensitiveHandler = new DefaultSensitiveHandler();
-        var kernel = Kernel.Builder.WithSensitiveHandler(sensitiveHandler).Build();
+        ITrustHandler trustHandler = new DefaultTrustHandler(defaultTrusted: false);
+        var kernel = Kernel.Builder.WithTrustHandler(trustHandler).Build();
         var factory = new Mock<Func<IKernel, ITextCompletion>>();
         var aiService = new Mock<ITextCompletion>();
         var context = new ContextVariables("my input");
@@ -95,31 +95,24 @@ public sealed class SKFunctionTests4
             functionName: "joker",
             skillName: "jk",
             description: "Nice fun",
-            isSensitive: true,
-            isPromptTrusted: false
+            isSensitive: true
         );
 
         // Act
         var result = await kernel.RunAsync(context, func);
 
         // Assert
-        Assert.True(result.ErrorOccurred);
-        Assert.IsType<UntrustedContentException>(result.LastException);
-        Assert.Equal(
-            UntrustedContentException.ErrorCodes.SensitiveFunctionWithUntrustedContent,
-            ((UntrustedContentException)result.LastException).ErrorCode
-        );
+        Assert.False(result.ErrorOccurred);
+        Assert.False(result.IsTrusted);
     }
 
     [Fact]
     public async Task SemanticSensitiveFunctionShouldFailWithUntrustedTemplateRenderAsync()
     {
         // Arrange
-        var sensitiveHandler = new DefaultSensitiveHandler();
+        var trustHandler = new DefaultTrustHandler();
         var promptTemplateConfig = new PromptTemplateConfig();
         var promptTemplate = new Mock<IPromptTemplate>();
-
-        promptTemplateConfig.IsSensitive = true;
 
         // Mock this to make the context untrusted when the template is rendered
         promptTemplate.Setup(x => x.RenderAsync(It.IsAny<SKContext>()))
@@ -130,7 +123,7 @@ public sealed class SKFunctionTests4
             .Setup(x => x.GetParameters())
             .Returns(new List<ParameterView>());
 
-        var functionConfig = new SemanticFunctionConfig(promptTemplateConfig, promptTemplate.Object);
+        var functionConfig = new SemanticFunctionConfig(promptTemplateConfig, promptTemplate.Object, isSensitive: true);
         var func = SKFunction.FromSemanticConfig(
             "exampleSkill",
             "exampleFunction",
@@ -138,7 +131,7 @@ public sealed class SKFunctionTests4
         );
         var aiService = new Mock<ITextCompletion>();
 
-        func.SetSensitiveHandler(sensitiveHandler);
+        func.SetTrustHandler(trustHandler);
         func.SetAIService(() => aiService.Object);
 
         // Act
@@ -157,8 +150,8 @@ public sealed class SKFunctionTests4
     public async Task NativeSensitiveFunctionShouldNotFailWithTrustedInputAsync()
     {
         // Arrange
-        ISensitiveHandler sensitiveHandler = new DefaultSensitiveHandler();
-        var kernel = Kernel.Builder.WithSensitiveHandler(sensitiveHandler).Build();
+        ITrustHandler trustHandler = new DefaultTrustHandler();
+        var kernel = Kernel.Builder.WithTrustHandler(trustHandler).Build();
         var factory = new Mock<Func<IKernel, ITextCompletion>>();
         var aiService = new Mock<ITextCompletion>();
         var context = new ContextVariables("my input");
@@ -179,8 +172,8 @@ public sealed class SKFunctionTests4
     public async Task NativeSensitiveFunctionShouldFailWithUntrustedInputAsync()
     {
         // Arrange
-        ISensitiveHandler sensitiveHandler = new DefaultSensitiveHandler();
-        var kernel = Kernel.Builder.WithSensitiveHandler(sensitiveHandler).Build();
+        ITrustHandler trustHandler = new DefaultTrustHandler();
+        var kernel = Kernel.Builder.WithTrustHandler(trustHandler).Build();
         var factory = new Mock<Func<IKernel, ITextCompletion>>();
         var aiService = new Mock<ITextCompletion>();
         var context = new ContextVariables("my input", false);

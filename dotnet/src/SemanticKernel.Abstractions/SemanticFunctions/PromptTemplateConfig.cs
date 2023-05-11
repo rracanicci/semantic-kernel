@@ -153,32 +153,6 @@ public class PromptTemplateConfig
     public InputConfig Input { get; set; } = new();
 
     /// <summary>
-    /// If true, the prompt template will be considered trusted (default true).
-    /// This is just for the prompt itself, context variables such as the input
-    /// are handled separetely.
-    /// Untrusted prompts should only be allowed to run with not sensitive functions.
-    /// </summary>
-    [JsonPropertyName("is_prompt_trusted")]
-    [JsonPropertyOrder(7)]
-    public bool IsPromptTrusted { get; set; } = true;
-
-    /// <summary>
-    /// If true, the output of the function will always be considered to be untrusted
-    /// regardless of the input (default false).
-    /// </summary>
-    [JsonPropertyName("force_output_to_be_untrusted")]
-    [JsonPropertyOrder(8)]
-    public bool ForceOutputToBeUntrusted { get; set; } = false;
-
-    /// <summary>
-    /// Whether the function is set to be sensitive (default false).
-    /// Sensitive functions should not be allowed to run with untrusted input.
-    /// </summary>
-    [JsonPropertyName("is_sensitive")]
-    [JsonPropertyOrder(9)]
-    public bool IsSensitive { get; set; } = false;
-
-    /// <summary>
     /// Remove some default properties to reduce the JSON complexity.
     /// </summary>
     /// <returns>Compacted prompt template configuration.</returns>
