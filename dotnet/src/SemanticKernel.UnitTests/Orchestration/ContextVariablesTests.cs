@@ -222,7 +222,7 @@ public class ContextVariablesTests
         Assert.True(target.IsInputTrusted);
 
         // Act
-        target.SensitiveInput = target.SensitiveInput.ToUntrusted();
+        target.SensitiveInput = target.SensitiveInput.UpdateIsTrusted(false);
 
         // Assert
         Assert.Equal(anyContent, target.Input);
