@@ -21,7 +21,7 @@ public sealed class SKFunctionTests4
     {
         // Arrange
         ITrustService trustService = new DefaultTrustService();
-        var kernel = Kernel.Builder.WithTrustService(trustService).Build();
+        var kernel = Kernel.Builder.WithDefaultTrustService(trustService).Build();
         var factory = new Mock<Func<IKernel, ITextCompletion>>();
         var aiService = new Mock<ITextCompletion>();
         var context = new ContextVariables("my input");
@@ -49,7 +49,7 @@ public sealed class SKFunctionTests4
     {
         // Arrange
         ITrustService trustService = new DefaultTrustService();
-        var kernel = Kernel.Builder.WithTrustService(trustService).Build();
+        var kernel = Kernel.Builder.WithDefaultTrustService(trustService).Build();
         var factory = new Mock<Func<IKernel, ITextCompletion>>();
         var aiService = new Mock<ITextCompletion>();
         var context = new ContextVariables("my input", false);
@@ -82,7 +82,7 @@ public sealed class SKFunctionTests4
     {
         // Arrange
         ITrustService trustService = new DefaultTrustService(defaultTrusted: false);
-        var kernel = Kernel.Builder.WithTrustService(trustService).Build();
+        var kernel = Kernel.Builder.WithDefaultTrustService(trustService).Build();
         var factory = new Mock<Func<IKernel, ITextCompletion>>();
         var aiService = new Mock<ITextCompletion>();
         var context = new ContextVariables("my input");
@@ -127,11 +127,11 @@ public sealed class SKFunctionTests4
         var func = SKFunction.FromSemanticConfig(
             "exampleSkill",
             "exampleFunction",
-            functionConfig
+            functionConfig,
+            trustService
         );
         var aiService = new Mock<ITextCompletion>();
 
-        func.SetTrustService(trustService);
         func.SetAIService(() => aiService.Object);
 
         // Act
@@ -151,7 +151,7 @@ public sealed class SKFunctionTests4
     {
         // Arrange
         ITrustService trustService = new DefaultTrustService();
-        var kernel = Kernel.Builder.WithTrustService(trustService).Build();
+        var kernel = Kernel.Builder.WithDefaultTrustService(trustService).Build();
         var factory = new Mock<Func<IKernel, ITextCompletion>>();
         var aiService = new Mock<ITextCompletion>();
         var context = new ContextVariables("my input");
@@ -173,7 +173,7 @@ public sealed class SKFunctionTests4
     {
         // Arrange
         ITrustService trustService = new DefaultTrustService();
-        var kernel = Kernel.Builder.WithTrustService(trustService).Build();
+        var kernel = Kernel.Builder.WithDefaultTrustService(trustService).Build();
         var factory = new Mock<Func<IKernel, ITextCompletion>>();
         var aiService = new Mock<ITextCompletion>();
         var context = new ContextVariables("my input", false);

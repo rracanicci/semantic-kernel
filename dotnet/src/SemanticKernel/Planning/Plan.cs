@@ -87,6 +87,10 @@ public sealed class Plan : ISKFunction
 
     /// <inheritdoc/>
     [JsonIgnore]
+    public ITrustService? TrustService { get; private set; } = null;
+
+    /// <inheritdoc/>
+    [JsonIgnore]
     public CompleteRequestSettings RequestSettings { get; private set; } = new();
 
     #endregion ISKFunction implementation
@@ -386,13 +390,6 @@ public sealed class Plan : ISKFunction
             : this.Function.SetAIConfiguration(settings);
     }
 
-    public ISKFunction SetTrustService(ITrustService? trustService)
-    {
-        return this.Function is null
-            ? throw new NotImplementedException()
-            : this.Function.SetTrustService(trustService);
-    }
-
     #endregion ISKFunction implementation
 
     /// <summary>
@@ -591,6 +588,7 @@ public sealed class Plan : ISKFunction
         this.Description = function.Description;
         this.IsSemantic = function.IsSemantic;
         this.IsSensitive = function.IsSensitive;
+        this.TrustService = function.TrustService;
         this.RequestSettings = function.RequestSettings;
     }
 

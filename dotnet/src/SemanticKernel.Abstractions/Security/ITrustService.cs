@@ -28,7 +28,7 @@ public interface ITrustService
     /// </summary>
     /// <param name="func">Instance of the function being called</param>
     /// <param name="context">The current execution context</param>
-    /// <param name="prompt">The current rendered prompt to be used with the completion client./param>
+    /// <param name="prompt">The current rendered prompt to be used with the completion client.</param>
     /// <returns>Should return a SensitiveString representing the final prompt to be used for the completion client.
     /// The SensitiveString includes trust information.</returns>
     Task<SensitiveString> ValidatePromptAsync(ISKFunction func, SKContext context, string prompt);

@@ -45,6 +45,9 @@ public sealed class SKFunction : ISKFunction, IDisposable
     public bool IsSensitive { get; }
 
     /// <inheritdoc/>
+    public ITrustService? TrustService => this._trustService;
+
+    /// <inheritdoc/>
     public CompleteRequestSettings RequestSettings
     {
         get { return this._aiRequestSettings; }
@@ -61,12 +64,14 @@ public sealed class SKFunction : ISKFunction, IDisposable
     /// <param name="methodSignature">Signature of the method to invoke</param>
     /// <param name="methodContainerInstance">Object containing the method to invoke</param>
     /// <param name="skillName">SK skill name</param>
+    /// <param name="trustService">Service used for trust checks</param>
     /// <param name="log">Application logger</param>
     /// <returns>SK function instance</returns>
     public static ISKFunction? FromNativeMethod(
         MethodInfo methodSignature,
         object? methodContainerInstance = null,
         string skillName = "",
+        ITrustService? trustService = null,
         ILogger? log = null)
     {
         if (string.IsNullOrWhiteSpace(skillName)) { skillName = SkillCollection.GlobalSkill; }
@@ -88,6 +93,7 @@ public sealed class SKFunction : ISKFunction, IDisposable
             description: methodDetails.Description,
             isSemantic: false,
             isSensitive: methodDetails.IsSensitive,
+            trustService: trustService,
             log: log);
     }
 
@@ -99,6 +105,7 @@ public sealed class SKFunction : ISKFunction, IDisposable
     /// <param name="functionName">SK function name</param>
     /// <param name="description">SK function description</param>
     /// <param name="parameters">SK function parameters</param>
+    /// <param name="trustService">Service used for trust checks</param>
     /// <param name="log">Application logger</param>
     /// <returns>SK function instance</returns>
     public static ISKFunction FromNativeFunction(
@@ -107,6 +114,7 @@ public sealed class SKFunction : ISKFunction, IDisposable
         string functionName,
         string description,
         IEnumerable<ParameterView>? parameters = null,
+        ITrustService? trustService = null,
         ILogger? log = null)
     {
         MethodDetails methodDetails = GetMethodDetails(nativeFunction.Method, nativeFunction.Target, false, log);
@@ -119,6 +127,7 @@ public sealed class SKFunction : ISKFunction, IDisposable
             skillName: skillName,
             functionName: functionName,
             isSemantic: false,
+            trustService: trustService,
             log: log);
     }
 
@@ -129,11 +138,13 @@ public sealed class SKFunction : ISKFunction, IDisposable
     /// <param name="functionName">Name of the function to create.</param>
     /// <param name="functionConfig">Semantic function configuration.</param>
     /// <param name="log">Optional logger for the function.</param>
+    /// <param name="trustService">Trust service for trust checks.</param>
     /// <returns>SK function instance.</returns>
     public static ISKFunction FromSemanticConfig(
         string skillName,
         string functionName,
         SemanticFunctionConfig functionConfig,
+        ITrustService? trustService = null,
         ILogger? log = null)
     {
         Verify.NotNull(functionConfig);
@@ -149,6 +160,7 @@ public sealed class SKFunction : ISKFunction, IDisposable
             functionName: functionName,
             isSemantic: true,
             isSensitive: functionConfig.IsSensitive,
+            trustService: trustService,
             log: log
         );
 
@@ -263,13 +275,6 @@ public sealed class SKFunction : ISKFunction, IDisposable
         return this;
     }
 
-    /// <inheritdoc/>
-    public ISKFunction SetTrustService(ITrustService? trustService)
-    {
-        this._trustService = trustService;
-        return this;
-    }
-
     /// <summary>
     /// Dispose of resources.
     /// </summary>
@@ -309,7 +314,7 @@ public sealed class SKFunction : ISKFunction, IDisposable
     private IReadOnlySkillCollection? _skillCollection;
     private ITextCompletion? _aiService = null;
     private CompleteRequestSettings _aiRequestSettings = new();
-    internal ITrustService? _trustService = null;
+    private readonly ITrustService? _trustService;
 
     private struct MethodDetails
     {
@@ -354,6 +359,7 @@ public sealed class SKFunction : ISKFunction, IDisposable
         string description,
         bool isSemantic = false,
         bool isSensitive = false,
+        ITrustService? trustService = null,
         ILogger? log = null
     )
     {
@@ -366,6 +372,7 @@ public sealed class SKFunction : ISKFunction, IDisposable
 
         this._delegateType = delegateType;
         this._function = delegateFunction;
+        this._trustService = trustService;
         this.Parameters = parameters;
 
         this.IsSemantic = isSemantic;
@@ -589,22 +596,22 @@ public sealed class SKFunction : ISKFunction, IDisposable
 
     private async Task<bool> ValidateInputAsync(SKContext context)
     {
-        if (this._trustService == null)
+        if (this.TrustService == null)
         {
             // If there is no trust service, rely on context's default trust
             return context.IsTrusted;
         }
-        return await this._trustService.ValidateInputAsync(this, context).ConfigureAwait(false);
+        return await this.TrustService.ValidateInputAsync(this, context).ConfigureAwait(false);
     }
 
     private async Task<SensitiveString> ValidatePromptAsync(SKContext context, string prompt)
     {
-        if (this._trustService == null)
+        if (this.TrustService == null)
         {
             // If there is no trust service, rely on context's default trust
             return new SensitiveString(prompt, context.IsTrusted);
         }
-        return await this._trustService.ValidatePromptAsync(this, context, prompt).ConfigureAwait(false);
+        return await this.TrustService.ValidatePromptAsync(this, context, prompt).ConfigureAwait(false);
     }
 
     private static MethodDetails GetMethodDetails(
