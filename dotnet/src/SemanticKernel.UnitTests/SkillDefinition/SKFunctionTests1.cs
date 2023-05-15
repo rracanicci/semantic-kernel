@@ -86,7 +86,7 @@ public sealed class SKFunctionTests1
     }
 
     [Fact]
-    public void ItAllowsToUpdateTrustSettings()
+    public void ItAllowsFunctionToBeSensitive()
     {
         // Arrange
         var templateConfig = new PromptTemplateConfig();
@@ -96,11 +96,5 @@ public sealed class SKFunctionTests1
         // Assert
         Assert.True(functionConfig.IsSensitive);
         Assert.True(skFunction.IsSensitive);
-
-        // Act
-        skFunction.IsSensitive = false;
-
-        // Assert
-        Assert.False(skFunction.IsSensitive);
     }
 }
