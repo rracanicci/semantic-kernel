@@ -44,6 +44,13 @@ public interface ISKFunction
     bool IsSensitive { get; }
 
     /// <summary>
+    /// Trust service for trust check events.
+    /// For example, it gets called to validate context inputs before completion.
+    /// If null, no trust checks will take place.
+    /// </summary>
+    ITrustService? TrustService { get; }
+
+    /// <summary>
     /// AI service settings
     /// </summary>
     CompleteRequestSettings RequestSettings { get; }
@@ -102,11 +109,4 @@ public interface ISKFunction
     /// <param name="settings">LLM completion settings</param>
     /// <returns>Self instance</returns>
     ISKFunction SetAIConfiguration(CompleteRequestSettings settings);
-
-    /// <summary>
-    /// Sets the trust service used for trust checks.
-    /// </summary>
-    /// <param name="trustService">Service to be set</param>
-    /// <returns>Self instance</returns>
-    ISKFunction SetTrustService(ITrustService? trustService);
 }

@@ -86,9 +86,8 @@ public sealed class SKFunctionTests2
         var trustService = new DefaultTrustService(defaultTrusted);
 
         // Act
-        var function = SKFunction.FromNativeMethod(Method(Test), log: this._log.Object);
+        var function = SKFunction.FromNativeMethod(Method(Test), trustService: trustService, log: this._log.Object);
         Assert.NotNull(function);
-        function.SetTrustService(trustService);
         SKContext result = await function.InvokeAsync(context);
 
         // Assert
@@ -118,9 +117,8 @@ public sealed class SKFunctionTests2
         var trustService = new DefaultTrustService(defaultTrusted);
 
         // Act
-        var function = SKFunction.FromNativeMethod(Method(Test), log: this._log.Object);
+        var function = SKFunction.FromNativeMethod(Method(Test), trustService: trustService, log: this._log.Object);
         Assert.NotNull(function);
-        function.SetTrustService(trustService);
         SKContext result = await function.InvokeAsync(context);
 
         // Assert
@@ -152,9 +150,8 @@ public sealed class SKFunctionTests2
         var trustService = new DefaultTrustService(defaultTrusted);
 
         // Act
-        var function = SKFunction.FromNativeMethod(Method(Test), log: this._log.Object);
+        var function = SKFunction.FromNativeMethod(Method(Test), trustService: trustService, log: this._log.Object);
         Assert.NotNull(function);
-        function.SetTrustService(trustService);
         SKContext result = await function.InvokeAsync(context);
 
         // Assert
@@ -187,9 +184,8 @@ public sealed class SKFunctionTests2
         var trustService = new DefaultTrustService(defaultTrusted);
 
         // Act
-        var function = SKFunction.FromNativeMethod(Method(Test), log: this._log.Object);
+        var function = SKFunction.FromNativeMethod(Method(Test), trustService: trustService, log: this._log.Object);
         Assert.NotNull(function);
-        function.SetTrustService(trustService);
         SKContext result = await function.InvokeAsync(context);
 
         // Assert
@@ -221,9 +217,8 @@ public sealed class SKFunctionTests2
         var trustService = new DefaultTrustService(defaultTrusted);
 
         // Act
-        var function = SKFunction.FromNativeMethod(Method(Test), log: this._log.Object);
+        var function = SKFunction.FromNativeMethod(Method(Test), trustService: trustService, log: this._log.Object);
         Assert.NotNull(function);
-        function.SetTrustService(trustService);
         SKContext result = await function.InvokeAsync(context);
 
         // Assert
@@ -282,9 +277,8 @@ public sealed class SKFunctionTests2
         var trustService = new DefaultTrustService(defaultTrusted);
 
         // Act
-        var function = SKFunction.FromNativeMethod(Method(Test), log: this._log.Object);
+        var function = SKFunction.FromNativeMethod(Method(Test), trustService: trustService, log: this._log.Object);
         Assert.NotNull(function);
-        function.SetTrustService(trustService);
         SKContext result = await function.InvokeAsync(context);
 
         // Assert
@@ -318,9 +312,8 @@ public sealed class SKFunctionTests2
         var trustService = new DefaultTrustService(defaultTrusted);
 
         // Act
-        var function = SKFunction.FromNativeMethod(Method(Test), log: this._log.Object);
+        var function = SKFunction.FromNativeMethod(Method(Test), trustService: trustService, log: this._log.Object);
         Assert.NotNull(function);
-        function.SetTrustService(trustService);
         SKContext result = await function.InvokeAsync(context);
 
         // Assert
@@ -387,9 +380,8 @@ public sealed class SKFunctionTests2
         var trustService = new DefaultTrustService(defaultTrusted);
 
         // Act
-        var function = SKFunction.FromNativeMethod(Method(TestAsync), log: this._log.Object);
+        var function = SKFunction.FromNativeMethod(Method(TestAsync), trustService: trustService, log: this._log.Object);
         Assert.NotNull(function);
-        function.SetTrustService(trustService);
         SKContext result = await function.InvokeAsync(context);
 
         // Assert
@@ -420,9 +412,8 @@ public sealed class SKFunctionTests2
         var trustService = new DefaultTrustService(defaultTrusted);
 
         // Act
-        var function = SKFunction.FromNativeMethod(Method(Test), log: this._log.Object);
+        var function = SKFunction.FromNativeMethod(Method(Test), trustService: trustService, log: this._log.Object);
         Assert.NotNull(function);
-        function.SetTrustService(trustService);
         SKContext result = await function.InvokeAsync(context);
 
         // Assert
@@ -452,9 +443,8 @@ public sealed class SKFunctionTests2
         var trustService = new DefaultTrustService(defaultTrusted);
 
         // Act
-        var function = SKFunction.FromNativeMethod(Method(Test), log: this._log.Object);
+        var function = SKFunction.FromNativeMethod(Method(Test), trustService: trustService, log: this._log.Object);
         Assert.NotNull(function);
-        function.SetTrustService(trustService);
         SKContext result = await function.InvokeAsync(context);
 
         // Assert
@@ -485,9 +475,8 @@ public sealed class SKFunctionTests2
         var trustService = new DefaultTrustService(defaultTrusted);
 
         // Act
-        var function = SKFunction.FromNativeMethod(Method(Test), log: this._log.Object);
+        var function = SKFunction.FromNativeMethod(Method(Test), trustService: trustService, log: this._log.Object);
         Assert.NotNull(function);
-        function.SetTrustService(trustService);
         SKContext result = await function.InvokeAsync(context);
 
         // Assert
@@ -519,9 +508,8 @@ public sealed class SKFunctionTests2
         var trustService = new DefaultTrustService(defaultTrusted);
 
         // Act
-        var function = SKFunction.FromNativeMethod(Method(Test), log: this._log.Object);
+        var function = SKFunction.FromNativeMethod(Method(Test), trustService: trustService, log: this._log.Object);
         Assert.NotNull(function);
-        function.SetTrustService(trustService);
         SKContext result = await function.InvokeAsync(context);
 
         // Assert
@@ -556,9 +544,8 @@ public sealed class SKFunctionTests2
         var trustService = new DefaultTrustService(defaultTrusted);
 
         // Act
-        var function = SKFunction.FromNativeMethod(Method(Test), log: this._log.Object);
+        var function = SKFunction.FromNativeMethod(Method(Test), trustService: trustService, log: this._log.Object);
         Assert.NotNull(function);
-        function.SetTrustService(trustService);
         SKContext result = await function.InvokeAsync(context);
 
         // Assert
@@ -593,9 +580,8 @@ public sealed class SKFunctionTests2
         var trustService = new DefaultTrustService(defaultTrusted);
 
         // Act
-        var function = SKFunction.FromNativeMethod(Method(Test), log: this._log.Object);
+        var function = SKFunction.FromNativeMethod(Method(Test), trustService: trustService, log: this._log.Object);
         Assert.NotNull(function);
-        function.SetTrustService(trustService);
         SKContext result = await function.InvokeAsync(context);
 
         // Assert
@@ -639,9 +625,8 @@ public sealed class SKFunctionTests2
         var trustService = new DefaultTrustService(defaultTrusted);
 
         // Act
-        var function = SKFunction.FromNativeMethod(Method(Test), log: this._log.Object);
+        var function = SKFunction.FromNativeMethod(Method(Test), trustService: trustService, log: this._log.Object);
         Assert.NotNull(function);
-        function.SetTrustService(trustService);
         SKContext newContext = await function.InvokeAsync(oldContext);
 
         // Assert
@@ -745,9 +730,8 @@ public sealed class SKFunctionTests2
         var trustService = new DefaultTrustService(defaultTrusted);
 
         // Act
-        var function = SKFunction.FromNativeMethod(Method(TestAsync), log: this._log.Object);
+        var function = SKFunction.FromNativeMethod(Method(TestAsync), trustService: trustService, log: this._log.Object);
         Assert.NotNull(function);
-        function.SetTrustService(trustService);
         SKContext result = await function.InvokeAsync(context);
 
         // Assert
@@ -779,9 +763,8 @@ public sealed class SKFunctionTests2
         var trustService = new DefaultTrustService(defaultTrusted);
 
         // Act
-        var function = SKFunction.FromNativeMethod(Method(TestAsync), log: this._log.Object);
+        var function = SKFunction.FromNativeMethod(Method(TestAsync), trustService: trustService, log: this._log.Object);
         Assert.NotNull(function);
-        function.SetTrustService(trustService);
         SKContext result = await function.InvokeAsync(context);
 
         // Assert
@@ -815,9 +798,8 @@ public sealed class SKFunctionTests2
         var trustService = new DefaultTrustService(defaultTrusted);
 
         // Act
-        var function = SKFunction.FromNativeMethod(Method(TestAsync), log: this._log.Object);
+        var function = SKFunction.FromNativeMethod(Method(TestAsync), trustService: trustService, log: this._log.Object);
         Assert.NotNull(function);
-        function.SetTrustService(trustService);
         SKContext result = await function.InvokeAsync(context);
 
         // Assert
@@ -849,9 +831,8 @@ public sealed class SKFunctionTests2
         var trustService = new DefaultTrustService(defaultTrusted);
 
         // Act
-        var function = SKFunction.FromNativeMethod(Method(TestAsync), log: this._log.Object);
+        var function = SKFunction.FromNativeMethod(Method(TestAsync), trustService: trustService, log: this._log.Object);
         Assert.NotNull(function);
-        function.SetTrustService(trustService);
         SKContext result = await function.InvokeAsync(context);
 
         // Assert
