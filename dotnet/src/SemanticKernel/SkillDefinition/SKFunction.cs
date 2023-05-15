@@ -42,7 +42,7 @@ public sealed class SKFunction : ISKFunction, IDisposable
     public bool IsSemantic { get; }
 
     /// <inheritdoc/>
-    public bool IsSensitive { get; set; }
+    public bool IsSensitive { get; }
 
     /// <inheritdoc/>
     public CompleteRequestSettings RequestSettings
