@@ -386,11 +386,11 @@ public sealed class Plan : ISKFunction
             : this.Function.SetAIConfiguration(settings);
     }
 
-    public ISKFunction SetTrustHandler(ITrustHandler? trustHandler)
+    public ISKFunction SetTrustService(ITrustService? trustService)
     {
         return this.Function is null
             ? throw new NotImplementedException()
-            : this.Function.SetTrustHandler(trustHandler);
+            : this.Function.SetTrustService(trustService);
     }
 
     #endregion ISKFunction implementation

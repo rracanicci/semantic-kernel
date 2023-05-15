@@ -9,7 +9,7 @@ namespace Microsoft.SemanticKernel.Security;
 /// <summary>
 /// Base interface used to handle trust events and validation.
 /// </summary>
-public interface ITrustHandler
+public interface ITrustService
 {
     /// <summary>
     /// Called to validate the input context before: executing a completion for a semantic function;

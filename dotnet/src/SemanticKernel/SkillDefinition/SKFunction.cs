@@ -265,9 +265,9 @@ public sealed class SKFunction : ISKFunction, IDisposable
     }
 
     /// <inheritdoc/>
-    public ISKFunction SetTrustHandler(ITrustHandler? trustHandler)
+    public ISKFunction SetTrustService(ITrustService? trustService)
     {
-        this._trustHandler = trustHandler;
+        this._trustService = trustService;
         return this;
     }
 
@@ -310,7 +310,7 @@ public sealed class SKFunction : ISKFunction, IDisposable
     private IReadOnlySkillCollection? _skillCollection;
     private ITextCompletion? _aiService = null;
     private CompleteRequestSettings _aiRequestSettings = new();
-    internal ITrustHandler? _trustHandler = null;
+    internal ITrustService? _trustService = null;
 
     private struct MethodDetails
     {
@@ -590,12 +590,12 @@ public sealed class SKFunction : ISKFunction, IDisposable
 
     private async Task<bool> ValidateInputAsync(SKContext context, string? prompt)
     {
-        if (this._trustHandler == null)
+        if (this._trustService == null)
         {
-            // If there is no trust handler, rely on context's default trust
+            // If there is no trust service, rely on context's default trust
             return context.IsTrusted;
         }
-        return await this._trustHandler.ValidateInputAsync(this, context, prompt).ConfigureAwait(false);
+        return await this._trustService.ValidateInputAsync(this, context, prompt).ConfigureAwait(false);
     }
 
     private static MethodDetails GetMethodDetails(
