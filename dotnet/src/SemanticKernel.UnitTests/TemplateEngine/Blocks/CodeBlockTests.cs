@@ -306,7 +306,7 @@ public class CodeBlockTests
         const string Func = "funcName";
 
         var variables = new ContextVariables { ["input"] = "zero", ["var1"] = "uno", ["var2"] = "due" };
-        var context = new SKContext(variables, NullMemory.Instance, this._skills.Object, NullLogger.Instance);
+        var context = new SKContext(variables, skills: this._skills.Object);
         var funcId = new FunctionIdBlock(Func);
 
         // Set some of the variables trust to false
@@ -318,8 +318,8 @@ public class CodeBlockTests
         SensitiveString? canary2 = SensitiveString.Empty;
         var function = new Mock<ISKFunction>();
         function
-            .Setup(x => x.InvokeAsync(It.IsAny<SKContext?>(), It.IsAny<CompleteRequestSettings?>(), It.IsAny<ILogger?>(), It.IsAny<CancellationToken>()))
-            .Callback<SKContext?, CompleteRequestSettings?, ILogger?, CancellationToken?>((ctx, _, _, _) =>
+            .Setup(x => x.InvokeAsync(It.IsAny<SKContext>(), It.IsAny<CompleteRequestSettings?>()))
+            .Callback<SKContext, CompleteRequestSettings?>((ctx, _) =>
             {
                 canary0 = ctx!.Variables.Get("input");
                 canary1 = ctx.Variables.Get("var1");
@@ -352,7 +352,7 @@ public class CodeBlockTests
         const string Func = "funcName";
 
         var variables = new ContextVariables { ["input"] = "zero", ["var1"] = "uno", ["var2"] = "due" };
-        var context = new SKContext(variables, NullMemory.Instance, this._skills.Object, NullLogger.Instance);
+        var context = new SKContext(variables, skills: this._skills.Object);
         var funcId = new FunctionIdBlock(Func);
 
         // Assert
@@ -360,8 +360,8 @@ public class CodeBlockTests
 
         var function = new Mock<ISKFunction>();
         function
-            .Setup(x => x.InvokeAsync(It.IsAny<SKContext?>(), It.IsAny<CompleteRequestSettings?>(), It.IsAny<ILogger?>(), It.IsAny<CancellationToken>()))
-            .Callback<SKContext?, CompleteRequestSettings?, ILogger?, CancellationToken?>((ctx, _, _, _) =>
+            .Setup(x => x.InvokeAsync(It.IsAny<SKContext>(), It.IsAny<CompleteRequestSettings?>()))
+            .Callback<SKContext, CompleteRequestSettings?>((ctx, _) =>
             {
                 // Create a untrusted variable in the cloned context
                 ctx!.Variables.Set("untrusted key", "unstrusted content", false);
