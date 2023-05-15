@@ -191,7 +191,7 @@ public sealed class SKFunction : ISKFunction, IDisposable
             return context;
         }
 
-        // Update delegate function to what it shoud be
+        // Update delegate function to what it should be
         func._function = LocalFunc;
 
         return func;
