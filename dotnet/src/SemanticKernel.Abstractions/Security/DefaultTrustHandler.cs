@@ -1,5 +1,6 @@
 ﻿// Copyright (c) Microsoft. All rights reserved.
 
+using System.Threading.Tasks;
 using Microsoft.SemanticKernel.Orchestration;
 using Microsoft.SemanticKernel.SkillDefinition;
 
@@ -35,7 +36,7 @@ public class DefaultTrustHandler : ITrustHandler
     /// <param name="prompt">The current rendered prompt to be executed (for semantic functions)</param>
     /// <returns>Should return true if the context/prompts are to be considered trusted, or false otherwise.</returns>
     /// <exception cref="UntrustedContentException">Raised when the context is unstrusted and the function is sensitive.</exception>
-    public bool ValidateInput(ISKFunction func, SKContext context, string? prompt)
+    public Task<bool> ValidateInputAsync(ISKFunction func, SKContext context, string? prompt)
     {
         if (func.IsSensitive && !context.IsTrusted)
         {
@@ -44,7 +45,6 @@ public class DefaultTrustHandler : ITrustHandler
                  $"Could not run {func.SkillName}.{func.Name}, the function is sensitive and the input untrusted"
             );
         }
-
-        return context.IsTrusted && this.DefaultTrusted;
+        return Task.FromResult(context.IsTrusted && this.DefaultTrusted);
     }
 }

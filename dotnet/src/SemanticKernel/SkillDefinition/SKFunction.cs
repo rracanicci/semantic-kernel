@@ -160,7 +160,7 @@ public sealed class SKFunction : ISKFunction, IDisposable
             Verify.NotNull(client);
 
             // Validates if the input context is trusted before executing the completion
-            var isTrusted = func.ValidateInputTrust(context, null);
+            var isTrusted = await func.ValidateInputAsync(context, null).ConfigureAwait(false);
 
             try
             {
@@ -168,7 +168,7 @@ public sealed class SKFunction : ISKFunction, IDisposable
 
                 // The prompt template might contain function calls that could
                 // turn the context into untrusted, so check again
-                isTrusted = isTrusted && func.ValidateInputTrust(context, prompt);
+                isTrusted = isTrusted && await func.ValidateInputAsync(context, prompt).ConfigureAwait(false);
 
                 string completion = await client.CompleteAsync(prompt, requestSettings, context.CancellationToken).ConfigureAwait(false);
 
@@ -428,7 +428,7 @@ public sealed class SKFunction : ISKFunction, IDisposable
         string? stringResult = null;
 
         // Validates if the input context is trusted before executing the native call
-        var isTrusted = this.ValidateInputTrust(context, null);
+        var isTrusted = await this.ValidateInputAsync(context, null).ConfigureAwait(false);
 
         switch (this._delegateType)
         {
@@ -594,10 +594,14 @@ public sealed class SKFunction : ISKFunction, IDisposable
         context.Skills ??= this._skillCollection;
     }
 
-    private bool ValidateInputTrust(SKContext context, string? prompt)
+    private async Task<bool> ValidateInputAsync(SKContext context, string? prompt)
     {
-        // If there is no trust handler, rely on context's default trust
-        return this._trustHandler?.ValidateInput(this, context, prompt) ?? context.IsTrusted;
+        if (this._trustHandler == null)
+        {
+            // If there is no trust handler, rely on context's default trust
+            return context.IsTrusted;
+        }
+        return await this._trustHandler.ValidateInputAsync(this, context, prompt).ConfigureAwait(false);
     }
 
     private static MethodDetails GetMethodDetails(
