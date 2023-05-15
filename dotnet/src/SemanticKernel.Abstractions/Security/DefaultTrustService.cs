@@ -7,7 +7,7 @@ using Microsoft.SemanticKernel.SkillDefinition;
 namespace Microsoft.SemanticKernel.Security;
 
 /// <summary>
-/// Default implementation of the trust handler.
+/// Default implementation of the trust service.
 /// When set, throws an exception to stop execution when sensitive functions try
 /// to run with untrusted content.
 /// </summary>
@@ -33,10 +33,9 @@ public class DefaultTrustService : ITrustService
     /// </summary>
     /// <param name="func">Instance of the function being called</param>
     /// <param name="context">The current execution context</param>
-    /// <param name="prompt">The current rendered prompt to be executed (for semantic functions)</param>
-    /// <returns>Should return true if the context/prompts are to be considered trusted, or false otherwise.</returns>
+    /// <returns>Should return true if the context is to be considered trusted, or false otherwise.</returns>
     /// <exception cref="UntrustedContentException">Raised when the context is unstrusted and the function is sensitive.</exception>
-    public Task<bool> ValidateInputAsync(ISKFunction func, SKContext context, string? prompt)
+    public Task<bool> ValidateInputAsync(ISKFunction func, SKContext context)
     {
         if (func.IsSensitive && !context.IsTrusted)
         {
@@ -46,5 +45,23 @@ public class DefaultTrustService : ITrustService
             );
         }
         return Task.FromResult(context.IsTrusted && this.DefaultTrusted);
+    }
+
+    /// <summary>
+    /// Returns the prompt wrapped in a SensitiveString. The SensitiveString will
+    /// be trusted if the context is already trusted and DefaultTrusted is true.
+    /// </summary>
+    /// <param name="func">Instance of the function being called</param>
+    /// <param name="context">The current execution context</param>
+    /// <param name="prompt">The current rendered prompt to be used with the completion client./param>
+    /// <returns>Should return a SensitiveString representing the final prompt to be used with the completion client.
+    /// The SensitiveString includes trust information.</returns>
+    /// <exception cref="UntrustedContentException">Raised when the context is unstrusted and the function is sensitive.</exception>
+    public async Task<SensitiveString> ValidatePromptAsync(ISKFunction func, SKContext context, string prompt)
+    {
+        return new SensitiveString(
+            prompt,
+            isTrusted: await this.ValidateInputAsync(func, context).ConfigureAwait(false)
+        );
     }
 }
