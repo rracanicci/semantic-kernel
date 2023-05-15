@@ -159,20 +159,19 @@ public sealed class SKFunction : ISKFunction, IDisposable
         {
             Verify.NotNull(client);
 
-            // Validates if the input context is trusted before executing the completion
-            var isTrusted = await func.ValidateInputAsync(context, null).ConfigureAwait(false);
+            // Validates if the input context is trusted before rendering the prompt
+            var isInputTrusted = await func.ValidateInputAsync(context).ConfigureAwait(false);
 
             try
             {
-                string prompt = await functionConfig.PromptTemplate.RenderAsync(context).ConfigureAwait(false);
+                string renderedPrompt = await functionConfig.PromptTemplate.RenderAsync(context).ConfigureAwait(false);
 
-                // The prompt template might contain function calls that could
-                // turn the context into untrusted, so check again
-                isTrusted = isTrusted && await func.ValidateInputAsync(context, prompt).ConfigureAwait(false);
+                // Validates the rendered prompt before executing the completion
+                SensitiveString prompt = await func.ValidatePromptAsync(context, renderedPrompt).ConfigureAwait(false);
 
-                string completion = await client.CompleteAsync(prompt, requestSettings, context.CancellationToken).ConfigureAwait(false);
+                string completion = await client.CompleteAsync(prompt.Value, requestSettings, context.CancellationToken).ConfigureAwait(false);
 
-                context.UpdateResult(completion, isTrusted);
+                context.UpdateResult(completion, isInputTrusted && prompt.IsTrusted);
             }
             catch (AIException ex)
             {
@@ -428,7 +427,7 @@ public sealed class SKFunction : ISKFunction, IDisposable
         string? stringResult = null;
 
         // Validates if the input context is trusted before executing the native call
-        var isTrusted = await this.ValidateInputAsync(context, null).ConfigureAwait(false);
+        var isTrusted = await this.ValidateInputAsync(context).ConfigureAwait(false);
 
         switch (this._delegateType)
         {
@@ -594,14 +593,24 @@ public sealed class SKFunction : ISKFunction, IDisposable
         context.Skills ??= this._skillCollection;
     }
 
-    private async Task<bool> ValidateInputAsync(SKContext context, string? prompt)
+    private async Task<bool> ValidateInputAsync(SKContext context)
     {
         if (this._trustService == null)
         {
             // If there is no trust service, rely on context's default trust
             return context.IsTrusted;
         }
-        return await this._trustService.ValidateInputAsync(this, context, prompt).ConfigureAwait(false);
+        return await this._trustService.ValidateInputAsync(this, context).ConfigureAwait(false);
+    }
+
+    private async Task<SensitiveString> ValidatePromptAsync(SKContext context, string prompt)
+    {
+        if (this._trustService == null)
+        {
+            // If there is no trust service, rely on context's default trust
+            return new SensitiveString(prompt, context.IsTrusted);
+        }
+        return await this._trustService.ValidatePromptAsync(this, context, prompt).ConfigureAwait(false);
     }
 
     private static MethodDetails GetMethodDetails(

@@ -12,17 +12,24 @@ namespace Microsoft.SemanticKernel.Security;
 public interface ITrustService
 {
     /// <summary>
-    /// Called to validate the input context before: executing a completion for a semantic function;
-    /// or calling a native function.
-    /// 
-    /// - For semantic functions there will be two calls to this, one with the raw context, before the
-    /// template is rendered into a prompt (prompt will be null). And other after the template is
-    /// rendered into a prompt (prompt will be rendered template).
-    /// - For native functions the prompt parameter will always be null.
+    /// Called to validate the input context before:
+    ///
+    /// - Semantic Functions: rendering the prompt used for the text completion client.
+    /// - Native Functions: calling the native function.
     /// </summary>
     /// <param name="func">Instance of the function being called</param>
     /// <param name="context">The current execution context</param>
-    /// <param name="prompt">The current rendered prompt to be executed (for semantic functions)</param>
-    /// <returns>Should return true if the context/prompts are to be considered trusted, or false otherwise.</returns>
-    Task<bool> ValidateInputAsync(ISKFunction func, SKContext context, string? prompt);
+    /// <returns>Should return true if the context is to be considered trusted, or false otherwise.</returns>
+    Task<bool> ValidateInputAsync(ISKFunction func, SKContext context);
+
+    /// <summary>
+    /// Called to validate the rendered prompt before executing the text completion client
+    /// (only for Semantic Functions).
+    /// </summary>
+    /// <param name="func">Instance of the function being called</param>
+    /// <param name="context">The current execution context</param>
+    /// <param name="prompt">The current rendered prompt to be used with the completion client./param>
+    /// <returns>Should return a SensitiveString representing the final prompt to be used for the completion client.
+    /// The SensitiveString includes trust information.</returns>
+    Task<SensitiveString> ValidatePromptAsync(ISKFunction func, SKContext context, string prompt);
 }
