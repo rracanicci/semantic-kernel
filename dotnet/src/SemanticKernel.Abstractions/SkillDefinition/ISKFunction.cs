@@ -41,7 +41,7 @@ public interface ISKFunction
     /// <summary>
     /// Whether the function is set to be sensitive (default false).
     /// </summary>
-    public bool IsSensitive { get; set; }
+    bool IsSensitive { get; }
 
     /// <summary>
     /// AI service settings

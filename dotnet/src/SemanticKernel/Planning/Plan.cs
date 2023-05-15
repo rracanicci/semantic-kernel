@@ -83,7 +83,7 @@ public sealed class Plan : ISKFunction
 
     /// <inheritdoc/>
     [JsonIgnore]
-    public bool IsSensitive { get; set; } = false;
+    public bool IsSensitive { get; private set; } = false;
 
     /// <inheritdoc/>
     [JsonIgnore]
