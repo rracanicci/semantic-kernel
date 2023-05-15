@@ -11,7 +11,7 @@ namespace Microsoft.SemanticKernel.Security;
 /// When set, throws an exception to stop execution when sensitive functions try
 /// to run with untrusted content.
 /// </summary>
-public class DefaultTrustHandler : ITrustHandler
+public class DefaultTrustService : ITrustService
 {
     /// <summary>
     /// If set to false, will cause ValidateInput to always return false.
@@ -22,7 +22,7 @@ public class DefaultTrustHandler : ITrustHandler
     /// Creates a new default trust handler.
     /// </summary>
     /// <param name="defaultTrusted">If set to false, will cause ValidateInput to always return false (default true).</param>
-    public DefaultTrustHandler(bool defaultTrusted = true)
+    public DefaultTrustService(bool defaultTrusted = true)
     {
         this.DefaultTrusted = defaultTrusted;
     }

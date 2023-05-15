@@ -207,14 +207,14 @@ public class KernelTests
     }
 
     [Fact]
-    public void ItConfiguresTrustHandlerInFunctions()
+    public void ItConfiguresTrustServiceInFunctions()
     {
         // Arrange
-        ITrustHandler trustHandler = new DefaultTrustHandler();
+        ITrustService trustService = new DefaultTrustService();
         var factory = new Mock<Func<(ILogger, KernelConfig), ITextCompletion>>();
         var kernel = Kernel.Builder
             .WithAIService<ITextCompletion>("x", factory.Object)
-            .WithTrustHandler(trustHandler).Build();
+            .WithTrustService(trustService).Build();
 
         // Act
         var nativeSkill = kernel.ImportSkill(new MySkill(), "mySk");
@@ -223,12 +223,12 @@ public class KernelTests
         var jokerFunc = (SKFunction)kernel.Skills.GetFunction("jk", "joker");
 
         // Assert
-        Assert.NotNull(kernel.TrustHandler);
-        Assert.NotNull(sayHelloFunc._trustHandler);
-        Assert.NotNull(jokerFunc._trustHandler);
-        Assert.Equal(trustHandler, kernel.TrustHandler);
-        Assert.Equal(trustHandler, sayHelloFunc._trustHandler);
-        Assert.Equal(trustHandler, jokerFunc._trustHandler);
+        Assert.NotNull(kernel.TrustService);
+        Assert.NotNull(sayHelloFunc._trustService);
+        Assert.NotNull(jokerFunc._trustService);
+        Assert.Equal(trustService, kernel.TrustService);
+        Assert.Equal(trustService, sayHelloFunc._trustService);
+        Assert.Equal(trustService, jokerFunc._trustService);
     }
 
     public class MySkill

@@ -83,12 +83,12 @@ public sealed class SKFunctionTests2
 
         var context = this.MockContext("", isTrusted);
 
-        var trustHandler = new DefaultTrustHandler(defaultTrusted);
+        var trustService = new DefaultTrustService(defaultTrusted);
 
         // Act
         var function = SKFunction.FromNativeMethod(Method(Test), log: this._log.Object);
         Assert.NotNull(function);
-        function.SetTrustHandler(trustHandler);
+        function.SetTrustService(trustService);
         SKContext result = await function.InvokeAsync(context);
 
         // Assert
@@ -115,12 +115,12 @@ public sealed class SKFunctionTests2
 
         var context = this.MockContext("", isTrusted);
 
-        var trustHandler = new DefaultTrustHandler(defaultTrusted);
+        var trustService = new DefaultTrustService(defaultTrusted);
 
         // Act
         var function = SKFunction.FromNativeMethod(Method(Test), log: this._log.Object);
         Assert.NotNull(function);
-        function.SetTrustHandler(trustHandler);
+        function.SetTrustService(trustService);
         SKContext result = await function.InvokeAsync(context);
 
         // Assert
@@ -149,12 +149,12 @@ public sealed class SKFunctionTests2
 
         var context = this.MockContext("", isTrusted);
 
-        var trustHandler = new DefaultTrustHandler(defaultTrusted);
+        var trustService = new DefaultTrustService(defaultTrusted);
 
         // Act
         var function = SKFunction.FromNativeMethod(Method(Test), log: this._log.Object);
         Assert.NotNull(function);
-        function.SetTrustHandler(trustHandler);
+        function.SetTrustService(trustService);
         SKContext result = await function.InvokeAsync(context);
 
         // Assert
@@ -184,12 +184,12 @@ public sealed class SKFunctionTests2
         var context = this.MockContext("xy", isTrusted);
         context["someVar"] = "qz";
 
-        var trustHandler = new DefaultTrustHandler(defaultTrusted);
+        var trustService = new DefaultTrustService(defaultTrusted);
 
         // Act
         var function = SKFunction.FromNativeMethod(Method(Test), log: this._log.Object);
         Assert.NotNull(function);
-        function.SetTrustHandler(trustHandler);
+        function.SetTrustService(trustService);
         SKContext result = await function.InvokeAsync(context);
 
         // Assert
@@ -218,12 +218,12 @@ public sealed class SKFunctionTests2
         var context = this.MockContext("", isTrusted);
         context["someVar"] = s_expected;
 
-        var trustHandler = new DefaultTrustHandler(defaultTrusted);
+        var trustService = new DefaultTrustService(defaultTrusted);
 
         // Act
         var function = SKFunction.FromNativeMethod(Method(Test), log: this._log.Object);
         Assert.NotNull(function);
-        function.SetTrustHandler(trustHandler);
+        function.SetTrustService(trustService);
         SKContext result = await function.InvokeAsync(context);
 
         // Assert
@@ -279,12 +279,12 @@ public sealed class SKFunctionTests2
 
         var context = this.MockContext("", isTrusted);
 
-        var trustHandler = new DefaultTrustHandler(defaultTrusted);
+        var trustService = new DefaultTrustService(defaultTrusted);
 
         // Act
         var function = SKFunction.FromNativeMethod(Method(Test), log: this._log.Object);
         Assert.NotNull(function);
-        function.SetTrustHandler(trustHandler);
+        function.SetTrustService(trustService);
         SKContext result = await function.InvokeAsync(context);
 
         // Assert
@@ -315,12 +315,12 @@ public sealed class SKFunctionTests2
 
         var context = this.MockContext("", isTrusted);
 
-        var trustHandler = new DefaultTrustHandler(defaultTrusted);
+        var trustService = new DefaultTrustService(defaultTrusted);
 
         // Act
         var function = SKFunction.FromNativeMethod(Method(Test), log: this._log.Object);
         Assert.NotNull(function);
-        function.SetTrustHandler(trustHandler);
+        function.SetTrustService(trustService);
         SKContext result = await function.InvokeAsync(context);
 
         // Assert
@@ -384,12 +384,12 @@ public sealed class SKFunctionTests2
 
         var context = this.MockContext("", isTrusted);
 
-        var trustHandler = new DefaultTrustHandler(defaultTrusted);
+        var trustService = new DefaultTrustService(defaultTrusted);
 
         // Act
         var function = SKFunction.FromNativeMethod(Method(TestAsync), log: this._log.Object);
         Assert.NotNull(function);
-        function.SetTrustHandler(trustHandler);
+        function.SetTrustService(trustService);
         SKContext result = await function.InvokeAsync(context);
 
         // Assert
@@ -417,12 +417,12 @@ public sealed class SKFunctionTests2
 
         var context = this.MockContext(".blah", isTrusted);
 
-        var trustHandler = new DefaultTrustHandler(defaultTrusted);
+        var trustService = new DefaultTrustService(defaultTrusted);
 
         // Act
         var function = SKFunction.FromNativeMethod(Method(Test), log: this._log.Object);
         Assert.NotNull(function);
-        function.SetTrustHandler(trustHandler);
+        function.SetTrustService(trustService);
         SKContext result = await function.InvokeAsync(context);
 
         // Assert
@@ -449,12 +449,12 @@ public sealed class SKFunctionTests2
 
         var context = this.MockContext("", isTrusted);
 
-        var trustHandler = new DefaultTrustHandler(defaultTrusted);
+        var trustService = new DefaultTrustService(defaultTrusted);
 
         // Act
         var function = SKFunction.FromNativeMethod(Method(Test), log: this._log.Object);
         Assert.NotNull(function);
-        function.SetTrustHandler(trustHandler);
+        function.SetTrustService(trustService);
         SKContext result = await function.InvokeAsync(context);
 
         // Assert
@@ -482,12 +482,12 @@ public sealed class SKFunctionTests2
 
         var context = this.MockContext("", isTrusted);
 
-        var trustHandler = new DefaultTrustHandler(defaultTrusted);
+        var trustService = new DefaultTrustService(defaultTrusted);
 
         // Act
         var function = SKFunction.FromNativeMethod(Method(Test), log: this._log.Object);
         Assert.NotNull(function);
-        function.SetTrustHandler(trustHandler);
+        function.SetTrustService(trustService);
         SKContext result = await function.InvokeAsync(context);
 
         // Assert
@@ -516,12 +516,12 @@ public sealed class SKFunctionTests2
 
         var context = this.MockContext("", isTrusted);
 
-        var trustHandler = new DefaultTrustHandler(defaultTrusted);
+        var trustService = new DefaultTrustService(defaultTrusted);
 
         // Act
         var function = SKFunction.FromNativeMethod(Method(Test), log: this._log.Object);
         Assert.NotNull(function);
-        function.SetTrustHandler(trustHandler);
+        function.SetTrustService(trustService);
         SKContext result = await function.InvokeAsync(context);
 
         // Assert
@@ -553,12 +553,12 @@ public sealed class SKFunctionTests2
 
         var context = this.MockContext("", isTrusted);
 
-        var trustHandler = new DefaultTrustHandler(defaultTrusted);
+        var trustService = new DefaultTrustService(defaultTrusted);
 
         // Act
         var function = SKFunction.FromNativeMethod(Method(Test), log: this._log.Object);
         Assert.NotNull(function);
-        function.SetTrustHandler(trustHandler);
+        function.SetTrustService(trustService);
         SKContext result = await function.InvokeAsync(context);
 
         // Assert
@@ -590,12 +590,12 @@ public sealed class SKFunctionTests2
 
         var context = this.MockContext("", isTrusted);
 
-        var trustHandler = new DefaultTrustHandler(defaultTrusted);
+        var trustService = new DefaultTrustService(defaultTrusted);
 
         // Act
         var function = SKFunction.FromNativeMethod(Method(Test), log: this._log.Object);
         Assert.NotNull(function);
-        function.SetTrustHandler(trustHandler);
+        function.SetTrustService(trustService);
         SKContext result = await function.InvokeAsync(context);
 
         // Assert
@@ -636,12 +636,12 @@ public sealed class SKFunctionTests2
         var oldContext = this.MockContext("", isTrusted);
         oldContext["legacy"] = "something";
 
-        var trustHandler = new DefaultTrustHandler(defaultTrusted);
+        var trustService = new DefaultTrustService(defaultTrusted);
 
         // Act
         var function = SKFunction.FromNativeMethod(Method(Test), log: this._log.Object);
         Assert.NotNull(function);
-        function.SetTrustHandler(trustHandler);
+        function.SetTrustService(trustService);
         SKContext newContext = await function.InvokeAsync(oldContext);
 
         // Assert
@@ -742,12 +742,12 @@ public sealed class SKFunctionTests2
 
         var context = this.MockContext("", isTrusted);
 
-        var trustHandler = new DefaultTrustHandler(defaultTrusted);
+        var trustService = new DefaultTrustService(defaultTrusted);
 
         // Act
         var function = SKFunction.FromNativeMethod(Method(TestAsync), log: this._log.Object);
         Assert.NotNull(function);
-        function.SetTrustHandler(trustHandler);
+        function.SetTrustService(trustService);
         SKContext result = await function.InvokeAsync(context);
 
         // Assert
@@ -776,12 +776,12 @@ public sealed class SKFunctionTests2
 
         var context = this.MockContext("", isTrusted);
 
-        var trustHandler = new DefaultTrustHandler(defaultTrusted);
+        var trustService = new DefaultTrustService(defaultTrusted);
 
         // Act
         var function = SKFunction.FromNativeMethod(Method(TestAsync), log: this._log.Object);
         Assert.NotNull(function);
-        function.SetTrustHandler(trustHandler);
+        function.SetTrustService(trustService);
         SKContext result = await function.InvokeAsync(context);
 
         // Assert
@@ -812,12 +812,12 @@ public sealed class SKFunctionTests2
 
         var context = this.MockContext("input:", isTrusted);
 
-        var trustHandler = new DefaultTrustHandler(defaultTrusted);
+        var trustService = new DefaultTrustService(defaultTrusted);
 
         // Act
         var function = SKFunction.FromNativeMethod(Method(TestAsync), log: this._log.Object);
         Assert.NotNull(function);
-        function.SetTrustHandler(trustHandler);
+        function.SetTrustService(trustService);
         SKContext result = await function.InvokeAsync(context);
 
         // Assert
@@ -846,12 +846,12 @@ public sealed class SKFunctionTests2
 
         var context = this.MockContext("", isTrusted);
 
-        var trustHandler = new DefaultTrustHandler(defaultTrusted);
+        var trustService = new DefaultTrustService(defaultTrusted);
 
         // Act
         var function = SKFunction.FromNativeMethod(Method(TestAsync), log: this._log.Object);
         Assert.NotNull(function);
-        function.SetTrustHandler(trustHandler);
+        function.SetTrustService(trustService);
         SKContext result = await function.InvokeAsync(context);
 
         // Assert

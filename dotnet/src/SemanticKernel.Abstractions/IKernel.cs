@@ -45,11 +45,11 @@ public interface IKernel
     IReadOnlySkillCollection Skills { get; }
 
     /// <summary>
-    /// Handler for trust check events. For example, it gets called
+    /// Service for trust check events. For example, it gets called
     /// to validate context inputs before completion.
     /// If null, no trust checks will take place.
     /// </summary>
-    ITrustHandler? TrustHandler { get; }
+    ITrustService? TrustService { get; }
 
     /// <summary>
     /// Build and register a function in the internal skill collection, in a global generic skill.

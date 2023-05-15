@@ -52,7 +52,7 @@ public sealed class Kernel : IKernel, IDisposable
     public IPromptTemplateEngine PromptTemplateEngine { get; }
 
     /// <inheritdoc/>
-    public ITrustHandler? TrustHandler => this._trustHandler;
+    public ITrustService? TrustService => this._trustService;
 
     /// <summary>
     /// Return a new instance of the kernel builder, used to build and configure kernel instances.
@@ -68,7 +68,7 @@ public sealed class Kernel : IKernel, IDisposable
     /// <param name="memory"></param>
     /// <param name="config"></param>
     /// <param name="log"></param>
-    /// <param name="trustHandler"></param>
+    /// <param name="trustService"></param>
     public Kernel(
         ISkillCollection skillCollection,
         IAIServiceProvider aiServiceProvider,
@@ -76,7 +76,7 @@ public sealed class Kernel : IKernel, IDisposable
         ISemanticTextMemory memory,
         KernelConfig config,
         ILogger log,
-        ITrustHandler? trustHandler = null)
+        ITrustService? trustService = null)
     {
         this.Log = log;
         this.Config = config;
@@ -85,7 +85,7 @@ public sealed class Kernel : IKernel, IDisposable
         this._aiServiceProvider = aiServiceProvider;
         this._promptTemplateEngine = promptTemplateEngine;
         this._skillCollection = skillCollection;
-        this._trustHandler = trustHandler;
+        this._trustService = trustService;
     }
 
     /// <inheritdoc/>
@@ -124,7 +124,7 @@ public sealed class Kernel : IKernel, IDisposable
         foreach (KeyValuePair<string, ISKFunction> f in skill)
         {
             f.Value.SetDefaultSkillCollection(this.Skills);
-            f.Value.SetTrustHandler(this.TrustHandler);
+            f.Value.SetTrustService(this.TrustService);
             this._skillCollection.AddFunction(f.Value);
         }
 
@@ -139,7 +139,7 @@ public sealed class Kernel : IKernel, IDisposable
         Verify.NotNull(customFunction);
 
         customFunction.SetDefaultSkillCollection(this.Skills);
-        customFunction.SetTrustHandler(this.TrustHandler);
+        customFunction.SetTrustService(this.TrustService);
         this._skillCollection.AddFunction(customFunction);
 
         return customFunction;
@@ -318,7 +318,7 @@ public sealed class Kernel : IKernel, IDisposable
     private ISemanticTextMemory _memory;
     private readonly IPromptTemplateEngine _promptTemplateEngine;
     private readonly IAIServiceProvider _aiServiceProvider;
-    private ITrustHandler? _trustHandler;
+    private ITrustService? _trustService;
 
     private ISKFunction CreateSemanticFunction(
         string skillName,
@@ -343,7 +343,7 @@ public sealed class Kernel : IKernel, IDisposable
         // Note: the service is instantiated using the kernel configuration state when the function is invoked
         func.SetAIService(() => this.GetService<ITextCompletion>());
 
-        func.SetTrustHandler(this.TrustHandler);
+        func.SetTrustService(this.TrustService);
 
         return func;
     }
