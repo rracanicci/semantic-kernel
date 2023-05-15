@@ -16,7 +16,7 @@ public class DefaultTrustService : ITrustService
     /// <summary>
     /// If set to false, will cause ValidateInput to always return false.
     /// </summary>
-    public bool DefaultTrusted { set; get; }
+    private readonly bool _defaultTrusted;
 
     /// <summary>
     /// Creates a new default trust handler.
@@ -24,7 +24,7 @@ public class DefaultTrustService : ITrustService
     /// <param name="defaultTrusted">If set to false, will cause ValidateInput to always return false (default true).</param>
     public DefaultTrustService(bool defaultTrusted = true)
     {
-        this.DefaultTrusted = defaultTrusted;
+        this._defaultTrusted = defaultTrusted;
     }
 
     /// <summary>
@@ -44,7 +44,7 @@ public class DefaultTrustService : ITrustService
                  $"Could not run {func.SkillName}.{func.Name}, the function is sensitive and the input untrusted"
             );
         }
-        return Task.FromResult(context.IsTrusted && this.DefaultTrusted);
+        return Task.FromResult(context.IsTrusted && this._defaultTrusted);
     }
 
     /// <summary>
