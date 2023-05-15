@@ -20,8 +20,8 @@ public sealed class SKFunctionTests4
     public async Task SemanticSensitiveFunctionShouldNotFailWithTrustedInputAsync()
     {
         // Arrange
-        ITrustHandler trustHandler = new DefaultTrustHandler();
-        var kernel = Kernel.Builder.WithTrustHandler(trustHandler).Build();
+        ITrustService trustService = new DefaultTrustService();
+        var kernel = Kernel.Builder.WithTrustService(trustService).Build();
         var factory = new Mock<Func<IKernel, ITextCompletion>>();
         var aiService = new Mock<ITextCompletion>();
         var context = new ContextVariables("my input");
@@ -48,8 +48,8 @@ public sealed class SKFunctionTests4
     public async Task SemanticSensitiveFunctionShouldFailWithUntrustedInputAsync()
     {
         // Arrange
-        ITrustHandler trustHandler = new DefaultTrustHandler();
-        var kernel = Kernel.Builder.WithTrustHandler(trustHandler).Build();
+        ITrustService trustService = new DefaultTrustService();
+        var kernel = Kernel.Builder.WithTrustService(trustService).Build();
         var factory = new Mock<Func<IKernel, ITextCompletion>>();
         var aiService = new Mock<ITextCompletion>();
         var context = new ContextVariables("my input", false);
@@ -81,8 +81,8 @@ public sealed class SKFunctionTests4
     public async Task SemanticSensitiveFunctionWithDefaultUntrustedAsync()
     {
         // Arrange
-        ITrustHandler trustHandler = new DefaultTrustHandler(defaultTrusted: false);
-        var kernel = Kernel.Builder.WithTrustHandler(trustHandler).Build();
+        ITrustService trustService = new DefaultTrustService(defaultTrusted: false);
+        var kernel = Kernel.Builder.WithTrustService(trustService).Build();
         var factory = new Mock<Func<IKernel, ITextCompletion>>();
         var aiService = new Mock<ITextCompletion>();
         var context = new ContextVariables("my input");
@@ -110,7 +110,7 @@ public sealed class SKFunctionTests4
     public async Task SemanticSensitiveFunctionShouldFailWithUntrustedTemplateRenderAsync()
     {
         // Arrange
-        var trustHandler = new DefaultTrustHandler();
+        var trustService = new DefaultTrustService();
         var promptTemplateConfig = new PromptTemplateConfig();
         var promptTemplate = new Mock<IPromptTemplate>();
 
@@ -131,7 +131,7 @@ public sealed class SKFunctionTests4
         );
         var aiService = new Mock<ITextCompletion>();
 
-        func.SetTrustHandler(trustHandler);
+        func.SetTrustService(trustService);
         func.SetAIService(() => aiService.Object);
 
         // Act
@@ -150,8 +150,8 @@ public sealed class SKFunctionTests4
     public async Task NativeSensitiveFunctionShouldNotFailWithTrustedInputAsync()
     {
         // Arrange
-        ITrustHandler trustHandler = new DefaultTrustHandler();
-        var kernel = Kernel.Builder.WithTrustHandler(trustHandler).Build();
+        ITrustService trustService = new DefaultTrustService();
+        var kernel = Kernel.Builder.WithTrustService(trustService).Build();
         var factory = new Mock<Func<IKernel, ITextCompletion>>();
         var aiService = new Mock<ITextCompletion>();
         var context = new ContextVariables("my input");
@@ -172,8 +172,8 @@ public sealed class SKFunctionTests4
     public async Task NativeSensitiveFunctionShouldFailWithUntrustedInputAsync()
     {
         // Arrange
-        ITrustHandler trustHandler = new DefaultTrustHandler();
-        var kernel = Kernel.Builder.WithTrustHandler(trustHandler).Build();
+        ITrustService trustService = new DefaultTrustService();
+        var kernel = Kernel.Builder.WithTrustService(trustService).Build();
         var factory = new Mock<Func<IKernel, ITextCompletion>>();
         var aiService = new Mock<ITextCompletion>();
         var context = new ContextVariables("my input", false);

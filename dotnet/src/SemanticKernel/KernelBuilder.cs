@@ -24,7 +24,7 @@ public sealed class KernelBuilder
     private ILogger _log = NullLogger.Instance;
     private IMemoryStore? _memoryStorage = null;
     private IDelegatingHandlerFactory? _httpHandlerFactory = null;
-    private ITrustHandler? _trustHandler = null;
+    private ITrustService? _trustService = null;
 
     /// <summary>
     /// Create a new kernel instance
@@ -53,7 +53,7 @@ public sealed class KernelBuilder
             this._memory,
             this._config,
             this._log,
-            this._trustHandler
+            this._trustService
         );
 
         // TODO: decouple this from 'UseMemory' kernel extension
@@ -141,13 +141,13 @@ public sealed class KernelBuilder
     }
 
     /// <summary>
-    /// Use the given trust handler with the kernel to be build.
+    /// Use the given trust service with the kernel to be build.
     /// </summary>
-    /// <param name="trustHandler">Trust handler to use.</param>
-    /// <returns>Updated kernel builder including the given handler.</returns>
-    public KernelBuilder WithTrustHandler(ITrustHandler? trustHandler)
+    /// <param name="trustService">Trust service to use.</param>
+    /// <returns>Updated kernel builder including the given service.</returns>
+    public KernelBuilder WithTrustService(ITrustService? trustService)
     {
-        this._trustHandler = trustHandler;
+        this._trustService = trustService;
         return this;
     }
 

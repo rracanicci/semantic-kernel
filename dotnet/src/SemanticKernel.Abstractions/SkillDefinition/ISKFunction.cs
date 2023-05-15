@@ -104,9 +104,9 @@ public interface ISKFunction
     ISKFunction SetAIConfiguration(CompleteRequestSettings settings);
 
     /// <summary>
-    /// Sets the trust handler used for trust checks.
+    /// Sets the trust service used for trust checks.
     /// </summary>
-    /// <param name="trustHandler">Handler to be set</param>
+    /// <param name="trustService">Service to be set</param>
     /// <returns>Self instance</returns>
-    ISKFunction SetTrustHandler(ITrustHandler? trustHandler);
+    ISKFunction SetTrustService(ITrustService? trustService);
 }
