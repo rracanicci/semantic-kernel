@@ -1,5 +1,6 @@
 ﻿// Copyright (c) Microsoft. All rights reserved.
 
+using System.Threading.Tasks;
 using Microsoft.SemanticKernel.Orchestration;
 using Microsoft.SemanticKernel.SkillDefinition;
 
@@ -23,5 +24,5 @@ public interface ITrustHandler
     /// <param name="context">The current execution context</param>
     /// <param name="prompt">The current rendered prompt to be executed (for semantic functions)</param>
     /// <returns>Should return true if the context/prompts are to be considered trusted, or false otherwise.</returns>
-    bool ValidateInput(ISKFunction func, SKContext context, string? prompt);
+    Task<bool> ValidateInputAsync(ISKFunction func, SKContext context, string? prompt);
 }
