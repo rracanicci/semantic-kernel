@@ -31,10 +31,6 @@ public sealed class SKContext
         {
             return this.Variables.IsAllTrusted();
         }
-        internal set
-        {
-            this.Variables.SensitiveInput = this.Variables.SensitiveInput.UpdateIsTrusted(value);
-        }
     }
 
     /// <summary>
@@ -144,6 +140,14 @@ public sealed class SKContext
     }
 
     /// <summary>
+    /// Make all the variables stored in the context untrusted.
+    /// </summary>
+    public void MakeAllUntrusted()
+    {
+        this.Variables.MakeAllUntrusted();
+    }
+
+    /// <summary>
     /// Print the processed input, aka the current data after any processing occurred.
     /// If an error occurred, prints the last exception message instead.
     /// </summary>
@@ -210,16 +214,12 @@ public sealed class SKContext
     /// <param name="isResultTrusted">Whether the new result is trusted or not</param>
     internal void UpdateResult(string? stringResult, bool isResultTrusted)
     {
-        if (stringResult != null)
-        {
-            this.Variables.Update(
-                stringResult,
-                // Use previous trust information to update
-                isTrusted: this.Variables.IsInputTrusted && isResultTrusted
-            );
-        }
-        // Use previous trust information to update
-        this.IsTrusted = this.IsTrusted && isResultTrusted;
+        this.Variables.Update(
+            // Keep previous result if one is not provided
+            stringResult ?? this.Result,
+            // Use previous trust information to update
+            isTrusted: this.Variables.IsInputTrusted && isResultTrusted
+        );
     }
 
     #endregion

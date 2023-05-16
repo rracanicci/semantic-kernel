@@ -321,9 +321,9 @@ public class CodeBlockTests
             .Setup(x => x.InvokeAsync(It.IsAny<SKContext>(), It.IsAny<CompleteRequestSettings?>()))
             .Callback<SKContext, CompleteRequestSettings?>((ctx, _) =>
             {
-                canary0 = ctx!.Variables.Get("input");
-                canary1 = ctx.Variables.Get("var1");
-                canary2 = ctx.Variables.Get("var2");
+                canary0 = GetAsSensitiveString(ctx, "input");
+                canary1 = GetAsSensitiveString(ctx, "var1");
+                canary2 = GetAsSensitiveString(ctx, "var2");
             });
 
         ISKFunction? outFunc = function.Object;
@@ -378,5 +378,14 @@ public class CodeBlockTests
         // Assert
         // The main context should have its trust set to false
         Assert.False(context.IsTrusted);
+    }
+
+    private static SensitiveString? GetAsSensitiveString(SKContext context, string name)
+    {
+        if (context.Variables.Get(name, out string value, out bool isTrusted))
+        {
+            return new SensitiveString(value, isTrusted);
+        }
+        return null;
     }
 }
