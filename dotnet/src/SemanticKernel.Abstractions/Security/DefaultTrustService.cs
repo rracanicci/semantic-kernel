@@ -41,9 +41,10 @@ public class DefaultTrustService : ITrustService
         {
             throw new UntrustedContentException(
                 UntrustedContentException.ErrorCodes.SensitiveFunctionWithUntrustedContent,
-                 $"Could not run {func.SkillName}.{func.Name}, the function is sensitive and the input untrusted"
+                $"Could not run {func.SkillName}.{func.Name}, the function is sensitive and the input untrusted"
             );
         }
+
         return Task.FromResult(context.IsTrusted && this._defaultTrusted);
     }
 
