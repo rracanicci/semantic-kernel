@@ -34,7 +34,7 @@ public class DefaultTrustService : ITrustService
     /// <param name="func">Instance of the function being called</param>
     /// <param name="context">The current execution context</param>
     /// <returns>Should return true if the context is to be considered trusted, or false otherwise.</returns>
-    /// <exception cref="UntrustedContentException">Raised when the context is unstrusted and the function is sensitive.</exception>
+    /// <exception cref="UntrustedContentException">Raised when the context is untrusted and the function is sensitive.</exception>
     public Task<bool> ValidateInputAsync(ISKFunction func, SKContext context)
     {
         if (func.IsSensitive && !context.IsTrusted)
