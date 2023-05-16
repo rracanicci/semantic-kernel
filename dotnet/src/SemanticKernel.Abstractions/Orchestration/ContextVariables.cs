@@ -184,7 +184,7 @@ public sealed class ContextVariables : IEnumerable<KeyValuePair<string, string>>
     /// </summary>
     public void MakeAllUntrusted()
     {
-        foreach(var item in this._variables.ToList())
+        foreach (var item in this._variables.ToList())
         {
             this._variables[item.Key] = item.Value.UpdateIsTrusted(false);
         }
