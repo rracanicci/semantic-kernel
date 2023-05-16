@@ -222,7 +222,7 @@ public class ContextVariablesTests
         Assert.True(target.IsInputTrusted);
 
         // Act
-        target.SensitiveInput = target.SensitiveInput.UpdateIsTrusted(false);
+        target.Update(target.Input, false);
 
         // Assert
         Assert.Equal(anyContent, target.Input);
@@ -261,24 +261,41 @@ public class ContextVariablesTests
         target.Set(anyName, anyContent, false);
 
         // Assert
-        SensitiveString? entry = target.Get(anyName);
-
-        Assert.NotNull(entry);
-        Assert.Equal(anyContent, entry.Value);
-        Assert.False(entry.IsTrusted);
+        AssertContextVariable(target, anyName, anyContent, false);
     }
 
     [Fact]
-    public void GetNullSucceeds()
+    public void GetDoesNotExistSucceeds()
     {
         // Arrange
         string anyName = Guid.NewGuid().ToString();
         ContextVariables target = new ContextVariables();
 
         // Assert
-        SensitiveString? entry = target.Get(anyName);
+        var exists = target.Get(anyName, out string value, out bool isTrusted);
 
-        Assert.Null(entry);
+        Assert.False(exists);
+        Assert.Empty(value);
+        Assert.True(isTrusted);
+    }
+
+    [Fact]
+    public void GetExistSucceeds()
+    {
+        // Arrange
+        string anyName = Guid.NewGuid().ToString();
+        string anyValue = Guid.NewGuid().ToString();
+        bool anyTrust = false;
+        ContextVariables target = new ContextVariables();
+
+        target.Set(anyName, anyValue, anyTrust);
+
+        // Assert
+        var exists = target.Get(anyName, out string value, out bool isTrusted);
+
+        Assert.True(exists);
+        Assert.Equal(anyValue, value);
+        Assert.Equal(anyTrust, isTrusted);
     }
 
     [Fact]
@@ -297,17 +314,10 @@ public class ContextVariablesTests
         toBeCloned.Update(mainContent, true);
 
         // Assert
-        SensitiveString? targetEntry = target.Get(anyName);
-
-        Assert.Equal(target.Input, mainContent);
-        Assert.False(target.IsInputTrusted);
-
-        Assert.NotNull(targetEntry);
-        Assert.Equal(anyContent, targetEntry.Value);
-        Assert.False(targetEntry.IsTrusted);
-
-        Assert.Equal(mainContent, toBeCloned.Input);
-        Assert.True(toBeCloned.IsInputTrusted);
+        AssertContextVariable(target, ContextVariables.MainKey, mainContent, false);
+        AssertContextVariable(target, anyName, anyContent, false);
+        AssertContextVariable(toBeCloned, ContextVariables.MainKey, mainContent, true);
+        AssertContextVariable(toBeCloned, anyName, anyContent, false);
     }
 
     [Fact]
@@ -333,24 +343,42 @@ public class ContextVariablesTests
     }
 
     [Fact]
-    public void CallIsAnyUntrustedSucceeds()
+    public void CallMakeAllUntrustedSucceeds()
     {
         // Arrange
         string mainContent = Guid.NewGuid().ToString();
-        string anyName = Guid.NewGuid().ToString();
-        string anyContent = Guid.NewGuid().ToString();
+        string anyName0 = Guid.NewGuid().ToString();
+        string anyContent0 = Guid.NewGuid().ToString();
+        string anyName1 = Guid.NewGuid().ToString();
+        string anyContent1 = Guid.NewGuid().ToString();
         ContextVariables target = new ContextVariables(mainContent, true);
 
         // Act
-        target.Set(anyName, anyContent, true);
+        target.Set(anyName0, anyContent0, true);
+        target.Set(anyName1, anyContent1, true);
 
         // Assert
-        Assert.False(target.IsAnyUntrusted());
+        Assert.True(target.IsAllTrusted());
+        AssertContextVariable(target, ContextVariables.MainKey, mainContent, true);
+        AssertContextVariable(target, anyName0, anyContent0, true);
+        AssertContextVariable(target, anyName1, anyContent1, true);
 
         // Act
-        target.Update(anyContent, false);
+        target.MakeAllUntrusted();
 
         // Assert
-        Assert.True(target.IsAnyUntrusted());
+        Assert.False(target.IsAllTrusted());
+        AssertContextVariable(target, ContextVariables.MainKey, mainContent, false);
+        AssertContextVariable(target, anyName0, anyContent0, false);
+        AssertContextVariable(target, anyName1, anyContent1, false);
+    }
+
+    private static void AssertContextVariable(ContextVariables variables, string name, string expectedValue, bool expectedIsTrusted)
+    {
+        var exists = variables.Get(name, out var value, out bool isTrusted);
+
+        Assert.True(exists);
+        Assert.Equal(expectedValue, value);
+        Assert.Equal(expectedIsTrusted, isTrusted);
     }
 }

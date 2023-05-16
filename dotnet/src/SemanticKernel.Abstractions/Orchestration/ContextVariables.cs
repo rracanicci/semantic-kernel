@@ -33,16 +33,6 @@ public sealed class ContextVariables : IEnumerable<KeyValuePair<string, string>>
     }
 
     /// <summary>
-    /// In the simplest scenario, the data is an input string, stored here.
-    /// This also already includes whether the input trusted or not.
-    /// </summary>
-    public SensitiveString SensitiveInput
-    {
-        get => this._variables[MainKey];
-        set => this._variables[MainKey] = value;
-    }
-
-    /// <summary>
     /// Constructor for context variables.
     /// </summary>
     /// <param name="content">Optional value for the main variable of the context.</param>
@@ -111,19 +101,27 @@ public sealed class ContextVariables : IEnumerable<KeyValuePair<string, string>>
     }
 
     /// <summary>
-    /// Fetch a sensitive variable from the context variables.
+    /// Fetch a variable value and if its content is trusted from the context variables.
     /// </summary>
-    /// <param name="name">Variable name.</param>
-    /// <returns>The sensitive variable or null.</returns>
-    public SensitiveString? Get(string name)
+    /// <param name="name">Variable name</param>
+    /// <param name="value">Value</param>
+    /// <param name="isTrusted">Whether the variable value is trusted or not</param>
+    /// <returns>Whether the value exists in the context variables</returns>
+    public bool Get(string name, out string value, out bool isTrusted)
     {
         SensitiveString result;
 
         if (this._variables.TryGetValue(name, out result!))
         {
-            return result;
+            value = result.Value;
+            isTrusted = result.IsTrusted;
+            return true;
         }
-        return null;
+
+        value = string.Empty;
+        isTrusted = true;
+
+        return false;
     }
 
     /// <summary>
@@ -182,12 +180,14 @@ public sealed class ContextVariables : IEnumerable<KeyValuePair<string, string>>
     }
 
     /// <summary>
-    /// True if any of the stored variables have untrusted content.
+    /// Make all the variables stored in the context untrusted.
     /// </summary>
-    /// <returns></returns>
-    public bool IsAnyUntrusted()
+    public void MakeAllUntrusted()
     {
-        return this._variables.Values.Any(v => !v.IsTrusted);
+        foreach(var item in this._variables.ToList())
+        {
+            this._variables[item.Key] = item.Value.UpdateIsTrusted(false);
+        }
     }
 
     /// <summary>
