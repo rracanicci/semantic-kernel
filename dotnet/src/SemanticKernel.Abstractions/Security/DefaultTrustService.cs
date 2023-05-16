@@ -56,7 +56,7 @@ public class DefaultTrustService : ITrustService
     /// <param name="prompt">The current rendered prompt to be used with the completion client.</param>
     /// <returns>Should return a SensitiveString representing the final prompt to be used with the completion client.
     /// The SensitiveString includes trust information.</returns>
-    /// <exception cref="UntrustedContentException">Raised when the context is unstrusted and the function is sensitive.</exception>
+    /// <exception cref="UntrustedContentException">Raised when the context is untrusted and the function is sensitive.</exception>
     public async Task<SensitiveString> ValidatePromptAsync(ISKFunction func, SKContext context, string prompt)
     {
         return new SensitiveString(
