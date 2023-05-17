@@ -25,7 +25,7 @@ public sealed class ContextVariables : IEnumerable<KeyValuePair<string, string>>
     public string Input => this._variables[MainKey].Value;
 
     /// <summary>
-    /// Checks if the main input is trusted or not.
+    /// Checks whether the input string (Input) is trusted or not.
     /// </summary>
     public bool IsInputTrusted
     {
@@ -145,7 +145,10 @@ public sealed class ContextVariables : IEnumerable<KeyValuePair<string, string>>
         get => this._variables[name].Value;
         set
         {
-            // This will be trusted by default for now
+            // This will be trusted by default for now.
+            // TODO: we could plan to replace string usages in the kernel
+            // with SensitiveString, so here "value" could directly be a sensitive string
+            // including trust information
             this._variables[name] = new SensitiveString(value);
         }
     }
@@ -197,6 +200,7 @@ public sealed class ContextVariables : IEnumerable<KeyValuePair<string, string>>
     /// <returns>An enumerator that iterates through the context variables</returns>
     public IEnumerator<KeyValuePair<string, string>> GetEnumerator()
     {
+        // For now, return an iterator that does not directly expose the sensitive string
         foreach (KeyValuePair<string, SensitiveString> kv in this._variables)
         {
             yield return new KeyValuePair<string, string>(kv.Key, kv.Value.Value);

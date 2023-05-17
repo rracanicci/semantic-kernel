@@ -44,7 +44,9 @@ public interface IKernel
     IReadOnlySkillCollection Skills { get; }
 
     /// <summary>
-    /// Default service for trust check events in case a specific one is not provided.
+    /// Default service for trust check events in case a specific one is not provided at function creation.
+    /// Functions directly created through the kernel will use this trust service if no other is provided.
+    /// If null, the created functions will rely on the DefaultTrustService implementation.
     /// </summary>
     ITrustService? DefaultTrustService { get; }
 

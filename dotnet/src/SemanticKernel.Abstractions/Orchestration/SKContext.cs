@@ -25,13 +25,7 @@ public sealed class SKContext
     /// <summary>
     /// Whether all the context variables are trusted or not.
     /// </summary>
-    public bool IsTrusted
-    {
-        get
-        {
-            return this.Variables.IsAllTrusted();
-        }
-    }
+    public bool IsTrusted => this.Variables.IsAllTrusted();
 
     /// <summary>
     /// Whether an error occurred while executing functions in the pipeline.
@@ -208,7 +202,9 @@ public sealed class SKContext
 
     /// <summary>
     /// Update the current result with a new string result and trust information.
-    /// If the current result is already untrusted, it will be kept untrusted.
+    /// - If the current result is already untrusted, it will be kept untrusted.
+    /// - If the provided stringResult is null, the previous result will be kept and
+    /// only trust information will be updated.
     /// </summary>
     /// <param name="stringResult">New result value</param>
     /// <param name="isResultTrusted">Whether the new result is trusted or not</param>

@@ -7,14 +7,36 @@ using Microsoft.SemanticKernel.SkillDefinition;
 namespace Microsoft.SemanticKernel.Security;
 
 /// <summary>
-/// Base interface used to handle trust events and validation.
+/// Base interface used to handle trust events and validation. The flow in the SKFunction is:
+///
+/// - Semantic function
+///     - Call ValidateContextAsync
+///     - Render prompt using template and variables
+///     - Call ValidatePromptAsync with rendered template and context
+///     - Call completion client with the returned prompt from ValidatePromptAsync
+///     - Update result
+///
+/// - Native function
+///     - Call ValidateContextAsync
+///     - Call native function implementation
+///     - Update result
 /// </summary>
 public interface ITrustService
 {
     /// <summary>
-    /// Called to validate the context before:
-    /// - Semantic Functions: rendering the prompt used for the text completion client.
-    /// - Native Functions: calling the native function.
+    /// Called by the SKFunction flow to validate if the current context is considered to be trusted or not:
+    ///
+    /// - This is called for semantic functions before rendering the prompt template.
+    /// - This is called for native functions before calling the native function implementation.
+    ///
+    /// If the return is false, this means the context will be tagged as untrusted.
+    ///
+    /// The implementation might depend on the application needs. A simple sample implementation
+    /// could be accomplished by analyzing the variables in the context, if they are all trusted, then
+    /// consider the context to be trusted.
+    ///
+    /// This also gives an opportunity for the context to be updated or actions to be taken if
+    /// potention untrusted content is found. For example, sanitizing an untrusted variable and turning it into trusted.
     /// </summary>
     /// <param name="func">Instance of the function being called</param>
     /// <param name="context">The current execution context</param>
@@ -22,8 +44,21 @@ public interface ITrustService
     Task<bool> ValidateContextAsync(ISKFunction func, SKContext context);
 
     /// <summary>
-    /// Called to validate the rendered prompt before executing the text completion client
-    /// (only for Semantic Functions).
+    /// This will only be called by semantic functions. It will be called in the SKFunction flow after the prompt is
+    /// rendered using the given template, and before calling the text completion with the rendered prompt.
+    ///
+    /// It should return the content to be used in the completion client as a SensitiveString, which will include
+    /// trust information. If the SensitiveString returned is not trusted, this means the context will be tagged as untrusted.
+    ///
+    /// After the template is rendered, the context might be tagged as untrusted because the template might contain function calls
+    /// that turned the context into untrusted when rendered.
+    ///
+    /// The implementation might depend on the application needs. A simple sample implementation
+    /// could be accomplished by analyzing the variables in the context and the rendered prompt, if everything is trusted, then
+    /// return the prompt wrapped in a SensitiveString and tagged as trusted.
+    ///
+    /// This also gives an opportunity for both the context and the prompt to be updated before calling the completion client
+    /// when something untrusted is identified. For example, sanitizing an untrusted prompt and turning it into trusted.
     /// </summary>
     /// <param name="func">Instance of the function being called</param>
     /// <param name="context">The current execution context</param>
