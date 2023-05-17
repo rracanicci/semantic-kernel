@@ -46,9 +46,8 @@ public interface ISKFunction
     /// <summary>
     /// Trust service for trust check events.
     /// For example, it gets called to validate context inputs before completion.
-    /// If null, no trust checks will take place.
     /// </summary>
-    ITrustService? TrustService { get; }
+    ITrustService TrustService { get; }
 
     /// <summary>
     /// AI service settings

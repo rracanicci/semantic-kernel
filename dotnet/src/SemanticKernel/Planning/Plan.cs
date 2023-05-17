@@ -87,7 +87,7 @@ public sealed class Plan : ISKFunction
 
     /// <inheritdoc/>
     [JsonIgnore]
-    public ITrustService? TrustService { get; private set; } = null;
+    public ITrustService TrustService { get; private set; } = DefaultTrustService.Default;
 
     /// <inheritdoc/>
     [JsonIgnore]
