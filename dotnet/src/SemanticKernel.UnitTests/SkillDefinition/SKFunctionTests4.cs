@@ -2,6 +2,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.SemanticKernel;
 using Microsoft.SemanticKernel.AI.TextCompletion;
@@ -27,6 +28,9 @@ public sealed class SKFunctionTests4
         var context = new ContextVariables("my input");
 
         factory.Setup(x => x.Invoke(kernel)).Returns(aiService.Object);
+        aiService
+            .Setup(x => x.CompleteAsync(It.IsAny<string>(), It.IsAny<CompleteRequestSettings>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync("some string");
         kernel.Config.AddTextCompletionService(factory.Object);
 
         var func = kernel.CreateSemanticFunction(
@@ -57,6 +61,9 @@ public sealed class SKFunctionTests4
         var context = new ContextVariables("my input", false);
 
         factory.Setup(x => x.Invoke(kernel)).Returns(aiService.Object);
+        aiService
+            .Setup(x => x.CompleteAsync(It.IsAny<string>(), It.IsAny<CompleteRequestSettings>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync("some string");
         kernel.Config.AddTextCompletionService(factory.Object);
 
         var func = kernel.CreateSemanticFunction(
@@ -90,6 +97,9 @@ public sealed class SKFunctionTests4
         var context = new ContextVariables("my input");
 
         factory.Setup(x => x.Invoke(kernel)).Returns(aiService.Object);
+        aiService
+            .Setup(x => x.CompleteAsync(It.IsAny<string>(), It.IsAny<CompleteRequestSettings>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync("some string");
         kernel.Config.AddTextCompletionService(factory.Object);
 
         var func = kernel.CreateSemanticFunction(
@@ -104,9 +114,9 @@ public sealed class SKFunctionTests4
         var result = await kernel.RunAsync(context, func);
 
         // Assert
+        Assert.Null(result.LastException);
         Assert.Empty(result.LastErrorDescription);
         Assert.False(result.ErrorOccurred);
-        Assert.Null(result.LastException);
         Assert.False(result.IsTrusted);
     }
 
@@ -161,6 +171,9 @@ public sealed class SKFunctionTests4
         var context = new ContextVariables("my input");
 
         factory.Setup(x => x.Invoke(kernel)).Returns(aiService.Object);
+        aiService
+            .Setup(x => x.CompleteAsync(It.IsAny<string>(), It.IsAny<CompleteRequestSettings>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync("some string");
         kernel.Config.AddTextCompletionService(factory.Object);
 
         var func = kernel.ImportSkill(new MySkill(), nameof(MySkill))["Function1"];
@@ -183,6 +196,9 @@ public sealed class SKFunctionTests4
         var context = new ContextVariables("my input", false);
 
         factory.Setup(x => x.Invoke(kernel)).Returns(aiService.Object);
+        aiService
+            .Setup(x => x.CompleteAsync(It.IsAny<string>(), It.IsAny<CompleteRequestSettings>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync("some string");
         kernel.Config.AddTextCompletionService(factory.Object);
 
         var func = kernel.ImportSkill(new MySkill(), nameof(MySkill))["Function1"];
