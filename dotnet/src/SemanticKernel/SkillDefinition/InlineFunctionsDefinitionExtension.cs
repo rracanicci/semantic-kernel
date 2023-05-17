@@ -34,7 +34,7 @@ public static class InlineFunctionsDefinitionExtension
     /// <param name="presencePenalty">Presence Penalty parameter passed to LLM</param>
     /// <param name="frequencyPenalty">Frequency Penalty parameter passed to LLM</param>
     /// <param name="isSensitive">Whether the function is set to be sensitive or not (default false)</param>
-    /// <param name="trustService">Service used for trust checks (if null will use the default registered in the kernel).</param>
+    /// <param name="trustService">Service used for trust checks (if null will use the default registered in the kernel)</param>
     /// <param name="stopSequences">Strings the LLM will detect to stop generating (before reaching max tokens)</param>
     /// <returns>A function ready to use</returns>
     public static ISKFunction CreateSemanticFunction(
@@ -88,7 +88,7 @@ public static class InlineFunctionsDefinitionExtension
     /// <param name="skillName">An optional skill name, e.g. to namespace functions with the same name. When empty,
     /// the function is added to the global namespace, overwriting functions with the same name</param>
     /// <param name="isSensitive">Whether the function is set to be sensitive or not (default false)</param>
-    /// <param name="trustService">Service used for trust checks (if null will use the default registered in the kernel).</param>
+    /// <param name="trustService">Service used for trust checks (if null will use the default registered in the kernel)</param>
     /// <returns>A function ready to use</returns>
     public static ISKFunction CreateSemanticFunction(
         this IKernel kernel,
