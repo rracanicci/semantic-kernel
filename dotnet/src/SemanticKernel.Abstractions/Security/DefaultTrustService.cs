@@ -14,14 +14,16 @@ namespace Microsoft.SemanticKernel.Security;
 public class DefaultTrustService : ITrustService
 {
     /// <summary>
-    /// If set to false, will cause ValidateInput to always return false.
+    /// If set to false, will cause ValidateContext to always return false and ValidatePromptAsync
+    /// to always flag the prompt as untrusted.
     /// </summary>
     private readonly bool _defaultTrusted;
 
     /// <summary>
     /// Creates a new default trust handler.
     /// </summary>
-    /// <param name="defaultTrusted">If set to false, will cause ValidateInput to always return false (default true).</param>
+    /// <param name="defaultTrusted">If set to false, will cause ValidateContext to always return false and ValidatePromptAsync
+    /// to always flag the prompt as untrusted (default true).</param>
     public DefaultTrustService(bool defaultTrusted = true)
     {
         this._defaultTrusted = defaultTrusted;
@@ -35,7 +37,7 @@ public class DefaultTrustService : ITrustService
     /// <param name="context">The current execution context</param>
     /// <returns>Should return true if the context is to be considered trusted, or false otherwise.</returns>
     /// <exception cref="UntrustedContentException">Raised when the context is untrusted and the function is sensitive.</exception>
-    public Task<bool> ValidateInputAsync(ISKFunction func, SKContext context)
+    public Task<bool> ValidateContextAsync(ISKFunction func, SKContext context)
     {
         if (func.IsSensitive && !context.IsTrusted)
         {
@@ -62,7 +64,7 @@ public class DefaultTrustService : ITrustService
     {
         return new SensitiveString(
             prompt,
-            isTrusted: await this.ValidateInputAsync(func, context).ConfigureAwait(false)
+            isTrusted: await this.ValidateContextAsync(func, context).ConfigureAwait(false)
         );
     }
 }
