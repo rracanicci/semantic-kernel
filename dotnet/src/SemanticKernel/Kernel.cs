@@ -120,7 +120,13 @@ public sealed class Kernel : IKernel, IDisposable
             this.Log.LogTrace("Importing skill {0}", skillName);
         }
 
-        Dictionary<string, ISKFunction> skill = ImportSkill(skillInstance, skillName, trustService ?? this.DefaultTrustService, this.Log);
+        Dictionary<string, ISKFunction> skill = ImportSkill(
+            skillInstance,
+            skillName,
+            // Use the default trust service registered if none is provided
+            trustService ?? this.DefaultTrustService,
+            this.Log
+        );
         foreach (KeyValuePair<string, ISKFunction> f in skill)
         {
             f.Value.SetDefaultSkillCollection(this.Skills);
@@ -133,6 +139,9 @@ public sealed class Kernel : IKernel, IDisposable
     /// <inheritdoc/>
     public ISKFunction RegisterCustomFunction(string skillName, ISKFunction customFunction)
     {
+        // Note this does not accept the trustService, it is already defined
+        // when the custom function is created, so the kernel will not override
+
         // Future-proofing the name not to contain special chars
         Verify.ValidSkillName(skillName);
         Verify.NotNull(customFunction);
@@ -331,7 +340,14 @@ public sealed class Kernel : IKernel, IDisposable
                 $"Function type not supported: {functionConfig.PromptTemplateConfig}");
         }
 
-        ISKFunction func = SKFunction.FromSemanticConfig(skillName, functionName, functionConfig, trustService ?? this.DefaultTrustService, this.Log);
+        ISKFunction func = SKFunction.FromSemanticConfig(
+            skillName,
+            functionName,
+            functionConfig,
+            // Use the default trust service registered if none is provided
+            trustService ?? this.DefaultTrustService,
+            this.Log
+        );
 
         // Connect the function to the current kernel skill collection, in case the function
         // is invoked manually without a context and without a way to find other functions.

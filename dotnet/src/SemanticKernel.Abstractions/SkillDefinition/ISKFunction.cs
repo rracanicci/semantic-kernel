@@ -44,8 +44,8 @@ public interface ISKFunction
     bool IsSensitive { get; }
 
     /// <summary>
-    /// Trust service for trust check events.
-    /// For example, it gets called to validate context inputs before completion.
+    /// Service used for trust check events.
+    /// This can be provided at function creation, if not, the DefaultTrustService implementation will be used.
     /// </summary>
     ITrustService TrustService { get; }
 
