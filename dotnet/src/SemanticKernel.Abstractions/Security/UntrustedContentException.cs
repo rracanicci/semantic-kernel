@@ -5,7 +5,7 @@ using Microsoft.SemanticKernel.Diagnostics;
 
 namespace Microsoft.SemanticKernel.Security;
 
-#pragma warning disable CA1032 // Implement standard exception constructors
+#pragma warning disable RCS1194 // Implement standard exception constructors
 
 /// <summary>
 /// Untrusted content exception.
