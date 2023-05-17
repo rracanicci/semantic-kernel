@@ -14,6 +14,11 @@ namespace Microsoft.SemanticKernel.Security;
 public class DefaultTrustService : ITrustService
 {
     /// <summary>
+    /// Creates a new DefaultTrustService with default parameters.
+    /// </summary>
+    public static DefaultTrustService Default => new DefaultTrustService();
+
+    /// <summary>
     /// If set to false, will cause ValidateContext to always return false and ValidatePromptAsync
     /// to always flag the prompt as untrusted.
     /// </summary>
