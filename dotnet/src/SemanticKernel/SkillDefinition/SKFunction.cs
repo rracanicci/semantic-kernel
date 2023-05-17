@@ -137,8 +137,8 @@ public sealed class SKFunction : ISKFunction, IDisposable
     /// <param name="skillName">Name of the skill to which the function to create belongs.</param>
     /// <param name="functionName">Name of the function to create.</param>
     /// <param name="functionConfig">Semantic function configuration.</param>
-    /// <param name="log">Optional logger for the function.</param>
     /// <param name="trustService">Service used for trust checks, if null the DefaultTrustService implementation will be used</param>
+    /// <param name="log">Optional logger for the function.</param>
     /// <returns>SK function instance.</returns>
     public static ISKFunction FromSemanticConfig(
         string skillName,
