@@ -132,17 +132,7 @@ public sealed class ContextVariables : IEnumerable<KeyValuePair<string, string>>
     /// <returns>Whether the value exists in the context variables</returns>
     public bool Get(string name, out string value)
     {
-        SensitiveString result;
-
-        if (this._variables.TryGetValue(name, out result!))
-        {
-            value = result.Value;
-            return true;
-        }
-
-        value = string.Empty;
-
-        return false;
+        return this.Get(name, out value, out _);
     }
 
     /// <summary>
@@ -184,9 +174,11 @@ public sealed class ContextVariables : IEnumerable<KeyValuePair<string, string>>
     /// </summary>
     public void MakeAllUntrusted()
     {
+        // Create a copy of the variables map iterator with ToList to avoid
+        // iterating in the map while updating it
         foreach (var item in this._variables.ToList())
         {
-            this._variables[item.Key] = item.Value.UpdateIsTrusted(false);
+            this._variables[item.Key] = new SensitiveString(item.Value.Value, false);
         }
     }
 
