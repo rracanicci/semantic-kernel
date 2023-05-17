@@ -41,7 +41,9 @@ public sealed class SKFunctionTests4
         var result = await kernel.RunAsync(context, func);
 
         // Assert
+        Assert.Empty(result.LastErrorDescription);
         Assert.False(result.ErrorOccurred);
+        Assert.Null(result.LastException);
     }
 
     [Fact]
@@ -102,7 +104,9 @@ public sealed class SKFunctionTests4
         var result = await kernel.RunAsync(context, func);
 
         // Assert
+        Assert.Empty(result.LastErrorDescription);
         Assert.False(result.ErrorOccurred);
+        Assert.Null(result.LastException);
         Assert.False(result.IsTrusted);
     }
 
