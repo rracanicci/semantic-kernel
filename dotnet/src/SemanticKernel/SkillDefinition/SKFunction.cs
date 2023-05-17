@@ -171,8 +171,8 @@ public sealed class SKFunction : ISKFunction, IDisposable
         {
             Verify.NotNull(client);
 
-            // Validates if the input context is trusted before rendering the prompt
-            var isInputTrusted = await func.ValidateInputAsync(context).ConfigureAwait(false);
+            // Validates if the context is trusted before rendering the prompt
+            var isContextTrusted = await func.ValidateContextAsync(context).ConfigureAwait(false);
 
             try
             {
@@ -183,7 +183,7 @@ public sealed class SKFunction : ISKFunction, IDisposable
 
                 string completion = await client.CompleteAsync(prompt.Value, requestSettings, context.CancellationToken).ConfigureAwait(false);
 
-                context.UpdateResult(completion, isInputTrusted && prompt.IsTrusted);
+                context.UpdateResult(completion, isContextTrusted && prompt.IsTrusted);
             }
             catch (AIException ex)
             {
@@ -427,8 +427,8 @@ public sealed class SKFunction : ISKFunction, IDisposable
         SKContext resultContext;
         string? stringResult = null;
 
-        // Validates if the input context is trusted before executing the native call
-        var isTrusted = await this.ValidateInputAsync(context).ConfigureAwait(false);
+        // Validates if the context is trusted before executing the native call
+        var isContextTrusted = await this.ValidateContextAsync(context).ConfigureAwait(false);
 
         switch (this._delegateType)
         {
@@ -583,7 +583,7 @@ public sealed class SKFunction : ISKFunction, IDisposable
                     "Invalid function type detected, unable to execute.");
         }
 
-        resultContext.UpdateResult(stringResult, isTrusted);
+        resultContext.UpdateResult(stringResult, isContextTrusted);
 
         return resultContext;
     }
@@ -594,14 +594,14 @@ public sealed class SKFunction : ISKFunction, IDisposable
         context.Skills ??= this._skillCollection;
     }
 
-    private async Task<bool> ValidateInputAsync(SKContext context)
+    private async Task<bool> ValidateContextAsync(SKContext context)
     {
         if (this.TrustService == null)
         {
             // If there is no trust service, rely on context's default trust
             return context.IsTrusted;
         }
-        return await this.TrustService.ValidateInputAsync(this, context).ConfigureAwait(false);
+        return await this.TrustService.ValidateContextAsync(this, context).ConfigureAwait(false);
     }
 
     private async Task<SensitiveString> ValidatePromptAsync(SKContext context, string prompt)

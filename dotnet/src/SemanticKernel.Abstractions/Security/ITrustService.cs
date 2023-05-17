@@ -12,15 +12,14 @@ namespace Microsoft.SemanticKernel.Security;
 public interface ITrustService
 {
     /// <summary>
-    /// Called to validate the input context before:
-    ///
+    /// Called to validate the context before:
     /// - Semantic Functions: rendering the prompt used for the text completion client.
     /// - Native Functions: calling the native function.
     /// </summary>
     /// <param name="func">Instance of the function being called</param>
     /// <param name="context">The current execution context</param>
     /// <returns>Should return true if the context is to be considered trusted, or false otherwise.</returns>
-    Task<bool> ValidateInputAsync(ISKFunction func, SKContext context);
+    Task<bool> ValidateContextAsync(ISKFunction func, SKContext context);
 
     /// <summary>
     /// Called to validate the rendered prompt before executing the text completion client
