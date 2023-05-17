@@ -10,7 +10,7 @@ namespace Microsoft.SemanticKernel.Security;
 /// Default implementation of the trust service.
 ///
 /// This is just a simple example implementation that will be used by default if no other is provided.
-/// 
+///
 /// When set, throws an exception to stop execution when sensitive functions try to run with untrusted content.
 /// </summary>
 public class DefaultTrustService : ITrustService
@@ -75,7 +75,7 @@ public class DefaultTrustService : ITrustService
     /// Since this is called after the template is rendered, the context could had been considered trusted when ValidateContextAsync was called,
     /// but might have became untrusted by a function call included as part of the prompt template. So this sample implementation will
     /// check the context again using the sample ValidateContextAsync implementation.
-    /// 
+    ///
     /// Returns the prompt wrapped in a SensitiveString.
     ///
     /// NOTE: This is only a simple example implementation that propagates the trust checks using the trust flags from
