@@ -34,16 +34,6 @@ public class SensitiveString
         this.IsTrusted = isTrusted;
     }
 
-    /// <summary>
-    /// Creates a copy of the string, keeping the string content but updating the trust flag value.
-    /// </summary>
-    /// <param name="isTrusted">New trust value</param>
-    /// <returns>The new updated sensitive string</returns>
-    public SensitiveString UpdateIsTrusted(bool isTrusted)
-    {
-        return new SensitiveString(this.Value, isTrusted);
-    }
-
     public override string ToString()
     {
         return this.Value;
