@@ -160,10 +160,10 @@ public class KernelTests
     }
 
     [Fact]
-    public void ItConfiguresTrustServiceInFunctions()
+    public void ItConfiguresCustomTrustServiceInFunctions()
     {
         // Arrange
-        ITrustService trustService = new DefaultTrustService();
+        ITrustService trustService = new CustomTrustService();
         var kernel = Kernel.Builder.WithDefaultTrustService(trustService).Build();
         var factory = new Mock<Func<IKernel, ITextCompletion>>();
 
@@ -182,6 +182,29 @@ public class KernelTests
         Assert.Equal(trustService, kernel.DefaultTrustService);
         Assert.Equal(trustService, sayHelloFunc.TrustService);
         Assert.Equal(trustService, jokerFunc.TrustService);
+    }
+
+    [Fact]
+    public void ItUsesDefaultTrustServiceInFunctionsIfNoneIsProvided()
+    {
+        // Arrange
+        var kernel = Kernel.Builder.Build();
+        var factory = new Mock<Func<IKernel, ITextCompletion>>();
+
+        kernel.Config.AddTextCompletionService(factory.Object);
+
+        // Act
+        var nativeSkill = kernel.ImportSkill(new MySkill(), "mySk");
+        var semanticSkill = kernel.CreateSemanticFunction("Tell me a joke", functionName: "joker", skillName: "jk", description: "Nice fun");
+        var sayHelloFunc = (SKFunction)kernel.Skills.GetFunction("mySk", "SayHello");
+        var jokerFunc = (SKFunction)kernel.Skills.GetFunction("jk", "joker");
+
+        // Assert
+        Assert.Null(kernel.DefaultTrustService);
+        Assert.NotNull(sayHelloFunc.TrustService);
+        Assert.NotNull(jokerFunc.TrustService);
+        Assert.IsType<DefaultTrustService>(sayHelloFunc.TrustService);
+        Assert.IsType<DefaultTrustService>(jokerFunc.TrustService);
     }
 
     public class MySkill
@@ -227,6 +250,19 @@ public class KernelTests
             }
 
             return context;
+        }
+    }
+
+    private sealed class CustomTrustService : ITrustService
+    {
+        public Task<bool> ValidateContextAsync(ISKFunction func, SKContext context)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task<SensitiveString> ValidatePromptAsync(ISKFunction func, SKContext context, string prompt)
+        {
+            throw new NotImplementedException();
         }
     }
 }
