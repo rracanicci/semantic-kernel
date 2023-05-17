@@ -24,13 +24,10 @@ public sealed class SKFunctionTests4
         ITrustService trustService = new DefaultTrustService();
         var kernel = Kernel.Builder.WithDefaultTrustService(trustService).Build();
         var factory = new Mock<Func<IKernel, ITextCompletion>>();
-        var aiService = new Mock<ITextCompletion>();
+        var aiService = MockAIService();
         var context = new ContextVariables("my input");
 
         factory.Setup(x => x.Invoke(kernel)).Returns(aiService.Object);
-        aiService
-            .Setup(x => x.CompleteAsync(It.IsAny<string>(), It.IsAny<CompleteRequestSettings>(), It.IsAny<CancellationToken>()))
-            .ReturnsAsync("some string");
         kernel.Config.AddTextCompletionService(factory.Object);
 
         var func = kernel.CreateSemanticFunction(
@@ -57,13 +54,10 @@ public sealed class SKFunctionTests4
         ITrustService trustService = new DefaultTrustService();
         var kernel = Kernel.Builder.WithDefaultTrustService(trustService).Build();
         var factory = new Mock<Func<IKernel, ITextCompletion>>();
-        var aiService = new Mock<ITextCompletion>();
+        var aiService = MockAIService();
         var context = new ContextVariables("my input", false);
 
         factory.Setup(x => x.Invoke(kernel)).Returns(aiService.Object);
-        aiService
-            .Setup(x => x.CompleteAsync(It.IsAny<string>(), It.IsAny<CompleteRequestSettings>(), It.IsAny<CancellationToken>()))
-            .ReturnsAsync("some string");
         kernel.Config.AddTextCompletionService(factory.Object);
 
         var func = kernel.CreateSemanticFunction(
@@ -93,13 +87,10 @@ public sealed class SKFunctionTests4
         ITrustService trustService = new DefaultTrustService(defaultTrusted: false);
         var kernel = Kernel.Builder.WithDefaultTrustService(trustService).Build();
         var factory = new Mock<Func<IKernel, ITextCompletion>>();
-        var aiService = new Mock<ITextCompletion>();
+        var aiService = MockAIService();
         var context = new ContextVariables("my input");
 
         factory.Setup(x => x.Invoke(kernel)).Returns(aiService.Object);
-        aiService
-            .Setup(x => x.CompleteAsync(It.IsAny<string>(), It.IsAny<CompleteRequestSettings>(), It.IsAny<CancellationToken>()))
-            .ReturnsAsync("some string");
         kernel.Config.AddTextCompletionService(factory.Object);
 
         var func = kernel.CreateSemanticFunction(
@@ -167,13 +158,10 @@ public sealed class SKFunctionTests4
         ITrustService trustService = new DefaultTrustService();
         var kernel = Kernel.Builder.WithDefaultTrustService(trustService).Build();
         var factory = new Mock<Func<IKernel, ITextCompletion>>();
-        var aiService = new Mock<ITextCompletion>();
+        var aiService = MockAIService();
         var context = new ContextVariables("my input");
 
         factory.Setup(x => x.Invoke(kernel)).Returns(aiService.Object);
-        aiService
-            .Setup(x => x.CompleteAsync(It.IsAny<string>(), It.IsAny<CompleteRequestSettings>(), It.IsAny<CancellationToken>()))
-            .ReturnsAsync("some string");
         kernel.Config.AddTextCompletionService(factory.Object);
 
         var func = kernel.ImportSkill(new MySkill(), nameof(MySkill))["Function1"];
@@ -192,13 +180,10 @@ public sealed class SKFunctionTests4
         ITrustService trustService = new DefaultTrustService();
         var kernel = Kernel.Builder.WithDefaultTrustService(trustService).Build();
         var factory = new Mock<Func<IKernel, ITextCompletion>>();
-        var aiService = new Mock<ITextCompletion>();
+        var aiService = MockAIService();
         var context = new ContextVariables("my input", false);
 
         factory.Setup(x => x.Invoke(kernel)).Returns(aiService.Object);
-        aiService
-            .Setup(x => x.CompleteAsync(It.IsAny<string>(), It.IsAny<CompleteRequestSettings>(), It.IsAny<CancellationToken>()))
-            .ReturnsAsync("some string");
         kernel.Config.AddTextCompletionService(factory.Object);
 
         var func = kernel.ImportSkill(new MySkill(), nameof(MySkill))["Function1"];
@@ -220,5 +205,21 @@ public sealed class SKFunctionTests4
         [SKFunction("Function1", isSensitive: true)]
         public void Function1()
         { }
+    }
+
+    private static Mock<ITextCompletion> MockAIService()
+    {
+        var aiService = new Mock<ITextCompletion>();
+        var textCompletionResult = new Mock<ITextCompletionResult>();
+
+        textCompletionResult
+            .Setup(x => x.GetCompletionAsync(It.IsAny<CancellationToken>()))
+            .ReturnsAsync("some string");
+
+        aiService
+            .Setup(x => x.GetCompletionsAsync(It.IsAny<string>(), It.IsAny<CompleteRequestSettings>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(new List<ITextCompletionResult> { textCompletionResult.Object });
+
+        return aiService;
     }
 }
