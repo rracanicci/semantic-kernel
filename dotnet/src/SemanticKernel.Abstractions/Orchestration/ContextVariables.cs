@@ -25,14 +25,6 @@ public sealed class ContextVariables : IEnumerable<KeyValuePair<string, string>>
     public string Input => this._variables[MainKey].Value;
 
     /// <summary>
-    /// Checks whether the input string (Input) is trusted or not.
-    /// </summary>
-    public bool IsInputTrusted
-    {
-        get => this._variables[MainKey].IsTrusted;
-    }
-
-    /// <summary>
     /// Constructor for context variables.
     /// </summary>
     /// <param name="content">Optional value for the main variable of the context.</param>
@@ -234,6 +226,30 @@ public sealed class ContextVariables : IEnumerable<KeyValuePair<string, string>>
         this._variables.TryGetValue(MainKey, out var input) && !string.IsNullOrEmpty(input.Value)
             ? $"Variables = {this._variables.Count}, Input = {input}"
             : $"Variables = {this._variables.Count}";
+
+    /// <summary>
+    /// Checks whether the input string (Input) is trusted or not.
+    /// Currently, this is used only when updating the result
+    /// </summary>
+    // internal bool IsInputTrusted
+    // {
+    //     get => this._sensitiveVariables[MainKey].IsTrusted;
+    // }
+
+    /// <summary>
+    /// Updates the main input text with the new value after a function is complete.
+    /// Retain the trust boolean, e.g. don't allow to switch from Not Trusted to Trusted.
+    /// </summary>
+    /// <param name="content">The new input value, for the next function in the pipeline, or as a result for the user
+    /// if the pipeline reached the end.</param>
+    /// <param name="isTrusted">Whether the content is trusted or not (default true).</param>
+    /// <returns>The current instance</returns>
+    internal ContextVariables UpdateWithTrustCheck(string? content, bool isTrusted)
+    {
+        var currentTrust = this._variables[MainKey].IsTrusted;
+        this._variables[MainKey] = new SensitiveString(content ?? string.Empty, currentTrust && isTrusted);
+        return this;
+    }
 
     #region private ================================================================================
 
