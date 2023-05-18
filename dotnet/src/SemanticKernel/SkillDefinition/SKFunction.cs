@@ -374,7 +374,7 @@ public sealed class SKFunction : ISKFunction, IDisposable
         this._log = log ?? NullLogger.Instance;
 
         // If no trust service is specified, use the default implementation
-        this._trustService = trustService ?? DefaultTrustService.Default;
+        this._trustService = trustService ?? new DefaultTrustService(true);
 
         this._delegateType = delegateType;
         this._function = delegateFunction;

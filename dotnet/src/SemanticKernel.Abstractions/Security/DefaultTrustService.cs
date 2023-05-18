@@ -16,22 +16,21 @@ namespace Microsoft.SemanticKernel.Security;
 public class DefaultTrustService : ITrustService
 {
     /// <summary>
-    /// Creates a new DefaultTrustService with default parameters.
-    /// </summary>
-    public static DefaultTrustService Default => new DefaultTrustService();
-
-    /// <summary>
-    /// If set to false, will cause ValidateContextAsync to always return false and ValidatePromptAsync
-    /// to always flag the prompt as untrusted.
+    /// If set to:
+    /// - false: will cause the context/prompt to always be considered untrusted, meaning the output of the function will always be considered untrusted.
+    /// - true: will use the trust information of the variables in the context to decide whether the context/prompt is trusted or not
+    /// (trusted only if all the variables within the context are trusted).
     /// </summary>
     private readonly bool _defaultTrusted;
 
     /// <summary>
     /// Creates a new default trust handler.
     /// </summary>
-    /// <param name="defaultTrusted">If set to false, will cause ValidateContextAsync to always return false and ValidatePromptAsync
-    /// to always flag the prompt as untrusted (default true).</param>
-    public DefaultTrustService(bool defaultTrusted = true)
+    /// <param name="defaultTrusted">If set to:
+    /// - false: will cause the context/prompt to always be considered untrusted, meaning the output of the function will always be considered untrusted.
+    /// - true: will use the trust information of the variables in the context to decide whether the context/prompt is trusted or not
+    /// (trusted only if all the variables within the context are trusted).</param>
+    public DefaultTrustService(bool defaultTrusted)
     {
         this._defaultTrusted = defaultTrusted;
     }

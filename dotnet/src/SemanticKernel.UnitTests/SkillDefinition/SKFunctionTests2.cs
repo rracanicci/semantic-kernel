@@ -218,7 +218,7 @@ public sealed class SKFunctionTests2
         var context = this.MockContext("xy");
         context["someVar"] = "qz";
 
-        var trustService = new DefaultTrustService();
+        var trustService = new DefaultTrustService(true);
 
         // Act
         var function = SKFunction.FromNativeMethod(Method(Test), trustService: trustService, log: this._log.Object);
@@ -284,7 +284,7 @@ public sealed class SKFunctionTests2
         var context = this.MockContext("");
         context["someVar"] = s_expected;
 
-        var trustService = new DefaultTrustService();
+        var trustService = new DefaultTrustService(true);
 
         // Act
         var function = SKFunction.FromNativeMethod(Method(Test), trustService: trustService, log: this._log.Object);
@@ -384,7 +384,7 @@ public sealed class SKFunctionTests2
 
         var context = this.MockContext("");
 
-        var trustService = new DefaultTrustService();
+        var trustService = new DefaultTrustService(true);
 
         // Act
         var function = SKFunction.FromNativeMethod(Method(Test), trustService: trustService, log: this._log.Object);
@@ -649,7 +649,7 @@ public sealed class SKFunctionTests2
 
         var context = this.MockContext("");
 
-        var trustService = new DefaultTrustService();
+        var trustService = new DefaultTrustService(true);
 
         // Act
         var function = SKFunction.FromNativeMethod(Method(Test), trustService: trustService, log: this._log.Object);
@@ -721,7 +721,7 @@ public sealed class SKFunctionTests2
 
         var context = this.MockContext("");
 
-        var trustService = new DefaultTrustService();
+        var trustService = new DefaultTrustService(true);
 
         // Act
         var function = SKFunction.FromNativeMethod(Method(Test), trustService: trustService, log: this._log.Object);
@@ -792,7 +792,7 @@ public sealed class SKFunctionTests2
 
         var context = this.MockContext("");
 
-        var trustService = new DefaultTrustService();
+        var trustService = new DefaultTrustService(true);
 
         // Act
         var function = SKFunction.FromNativeMethod(Method(Test), trustService: trustService, log: this._log.Object);
@@ -1009,7 +1009,7 @@ public sealed class SKFunctionTests2
 
         var context = this.MockContext("");
 
-        var trustService = new DefaultTrustService();
+        var trustService = new DefaultTrustService(true);
 
         // Act
         var function = SKFunction.FromNativeMethod(Method(Test), trustService: trustService, log: this._log.Object);
@@ -1078,7 +1078,7 @@ public sealed class SKFunctionTests2
 
         var context = this.MockContext("input:");
 
-        var trustService = new DefaultTrustService();
+        var trustService = new DefaultTrustService(true);
 
         // Act
         var function = SKFunction.FromNativeMethod(Method(Test), trustService: trustService, log: this._log.Object);
