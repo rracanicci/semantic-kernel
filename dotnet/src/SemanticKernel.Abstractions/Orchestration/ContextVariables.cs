@@ -228,15 +228,6 @@ public sealed class ContextVariables : IEnumerable<KeyValuePair<string, string>>
             : $"Variables = {this._variables.Count}";
 
     /// <summary>
-    /// Checks whether the input string (Input) is trusted or not.
-    /// Currently, this is used only when updating the result
-    /// </summary>
-    // internal bool IsInputTrusted
-    // {
-    //     get => this._sensitiveVariables[MainKey].IsTrusted;
-    // }
-
-    /// <summary>
     /// Updates the main input text with the new value after a function is complete.
     /// Retain the trust boolean, e.g. don't allow to switch from Not Trusted to Trusted.
     /// </summary>
