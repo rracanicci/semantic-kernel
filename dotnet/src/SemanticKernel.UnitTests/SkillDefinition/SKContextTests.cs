@@ -73,14 +73,14 @@ public class SKContextTests
 
         // Assert
         Assert.True(target.IsTrusted);
-        Assert.True(target.Variables.IsInputTrusted);
+        AssertIsInputTrusted(target.Variables, true);
 
         // Act
         target.MakeAllUntrusted();
 
         // Assert
         Assert.False(target.IsTrusted);
-        Assert.False(target.Variables.IsInputTrusted);
+        AssertIsInputTrusted(target.Variables, false);
     }
 
     [Fact]
@@ -95,7 +95,7 @@ public class SKContextTests
         // Assert
         Assert.Empty(target.Result);
         Assert.True(target.IsTrusted);
-        Assert.True(target.Variables.IsInputTrusted);
+        AssertIsInputTrusted(target.Variables, true);
 
         // Act
         // Update with new result as untrusted
@@ -104,7 +104,7 @@ public class SKContextTests
         // Assert
         Assert.Equal(newResult, target.Result);
         Assert.False(target.IsTrusted);
-        Assert.False(target.Variables.IsInputTrusted);
+        AssertIsInputTrusted(target.Variables, false);
     }
 
     [Fact]
@@ -119,7 +119,7 @@ public class SKContextTests
         // Assert
         Assert.Equal(originalResult, target.Result);
         Assert.False(target.IsTrusted);
-        Assert.False(target.Variables.IsInputTrusted);
+        AssertIsInputTrusted(target.Variables, false);
 
         // Act
         // Update with new result as trusted, although
@@ -130,7 +130,7 @@ public class SKContextTests
         Assert.Equal(newResult, target.Result);
         // Should be kept false because the previous result it already false
         Assert.False(target.IsTrusted);
-        Assert.False(target.Variables.IsInputTrusted);
+        AssertIsInputTrusted(target.Variables, false);
     }
 
     [Fact]
@@ -144,7 +144,7 @@ public class SKContextTests
         // Assert
         Assert.Equal(originalResult, target.Result);
         Assert.True(target.IsTrusted);
-        Assert.True(target.Variables.IsInputTrusted);
+        AssertIsInputTrusted(target.Variables, true);
 
         // Act
         // Update with null result should keep previous value
@@ -153,7 +153,7 @@ public class SKContextTests
         // Assert
         Assert.Equal(originalResult, target.Result);
         Assert.False(target.IsTrusted);
-        Assert.False(target.Variables.IsInputTrusted);
+        AssertIsInputTrusted(target.Variables, false);
     }
 
     private sealed class Parrot
@@ -164,5 +164,15 @@ public class SKContextTests
         {
             return text;
         }
+    }
+
+    private static void AssertIsInputTrusted(ContextVariables variables, bool expectedIsTrusted)
+    {
+        var exists = variables.Get(ContextVariables.MainKey, out _, out bool isTrusted);
+
+        // Assert the variable exists
+        Assert.True(exists);
+        // Assert isTrusted matches
+        Assert.Equal(expectedIsTrusted, isTrusted);
     }
 }
