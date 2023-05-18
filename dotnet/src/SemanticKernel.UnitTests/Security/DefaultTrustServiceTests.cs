@@ -21,7 +21,7 @@ public sealed class DefaultTrustServiceTests
     public async Task SemanticSensitiveFunctionShouldNotFailWithTrustedInputAsync()
     {
         // Arrange
-        ITrustService trustService = new DefaultTrustService();
+        ITrustService trustService = new DefaultTrustService(true);
         var kernel = Kernel.Builder.WithDefaultTrustService(trustService).Build();
         var factory = new Mock<Func<IKernel, ITextCompletion>>();
         var aiService = MockAIService();
@@ -51,7 +51,7 @@ public sealed class DefaultTrustServiceTests
     public async Task SemanticSensitiveFunctionShouldFailWithUntrustedInputAsync()
     {
         // Arrange
-        ITrustService trustService = new DefaultTrustService();
+        ITrustService trustService = new DefaultTrustService(true);
         var kernel = Kernel.Builder.WithDefaultTrustService(trustService).Build();
         var factory = new Mock<Func<IKernel, ITextCompletion>>();
         var aiService = MockAIService();
@@ -122,7 +122,7 @@ public sealed class DefaultTrustServiceTests
     public async Task SemanticSensitiveFunctionShouldFailWithUntrustedTemplateRenderAsync()
     {
         // Arrange
-        var trustService = new DefaultTrustService();
+        var trustService = new DefaultTrustService(true);
         var promptTemplateConfig = new PromptTemplateConfig();
         var promptTemplate = new Mock<IPromptTemplate>();
 
@@ -163,7 +163,7 @@ public sealed class DefaultTrustServiceTests
     public async Task NativeSensitiveFunctionShouldNotFailWithTrustedInputAsync()
     {
         // Arrange
-        ITrustService trustService = new DefaultTrustService();
+        ITrustService trustService = new DefaultTrustService(true);
         var kernel = Kernel.Builder.WithDefaultTrustService(trustService).Build();
         var factory = new Mock<Func<IKernel, ITextCompletion>>();
         var aiService = MockAIService();
@@ -185,7 +185,7 @@ public sealed class DefaultTrustServiceTests
     public async Task NativeSensitiveFunctionShouldFailWithUntrustedInputAsync()
     {
         // Arrange
-        ITrustService trustService = new DefaultTrustService();
+        ITrustService trustService = new DefaultTrustService(true);
         var kernel = Kernel.Builder.WithDefaultTrustService(trustService).Build();
         var factory = new Mock<Func<IKernel, ITextCompletion>>();
         var aiService = MockAIService();
