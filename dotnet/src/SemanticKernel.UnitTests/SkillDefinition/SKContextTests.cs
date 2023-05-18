@@ -69,7 +69,7 @@ public class SKContextTests
     {
         // Arrange
         var variables = new ContextVariables();
-        var target = new SKContext(variables, NullMemory.Instance, this._skills.Object, this._log.Object);
+        var target = new SKContext(variables);
 
         // Assert
         Assert.True(target.IsTrusted);
@@ -84,32 +84,74 @@ public class SKContextTests
     }
 
     [Fact]
-    public void ItCanUpdateResult()
+    public void UpdateResultWithUntrustedContentMakesTheContextUntrusted()
     {
         // Arrange
         string newResult = Guid.NewGuid().ToString();
         string someOtherResult = Guid.NewGuid().ToString();
         var variables = new ContextVariables();
-        var target = new SKContext(variables, NullMemory.Instance, this._skills.Object, this._log.Object);
+        var target = new SKContext(variables);
 
         // Assert
+        Assert.Empty(target.Result);
         Assert.True(target.IsTrusted);
         Assert.True(target.Variables.IsInputTrusted);
 
         // Act
+        // Update with new result as untrusted
         target.UpdateResult(newResult, false);
 
         // Assert
         Assert.Equal(newResult, target.Result);
         Assert.False(target.IsTrusted);
         Assert.False(target.Variables.IsInputTrusted);
+    }
 
-        // Act
-        target.UpdateResult(someOtherResult, true);
+    [Fact]
+    public void UpdateResultInAlreadyUntrustedContextKeepsTheContextUntrusted()
+    {
+        // Arrange
+        string originalResult = Guid.NewGuid().ToString();
+        string newResult = Guid.NewGuid().ToString();
+        var variables = new ContextVariables(originalResult, false);
+        var target = new SKContext(variables);
 
         // Assert
-        Assert.Equal(someOtherResult, target.Result);
+        Assert.Equal(originalResult, target.Result);
+        Assert.False(target.IsTrusted);
+        Assert.False(target.Variables.IsInputTrusted);
+
+        // Act
+        // Update with new result as trusted, although
+        // the context should be kept untrusted because of the previous result
+        target.UpdateResult(newResult, true);
+
+        // Assert
+        Assert.Equal(newResult, target.Result);
         // Should be kept false because the previous result it already false
+        Assert.False(target.IsTrusted);
+        Assert.False(target.Variables.IsInputTrusted);
+    }
+
+    [Fact]
+    public void UpdateResultWithNullContentKeepsPreviousResult()
+    {
+        // Arrange
+        string originalResult = Guid.NewGuid().ToString();
+        var variables = new ContextVariables(originalResult, true);
+        var target = new SKContext(variables);
+
+        // Assert
+        Assert.Equal(originalResult, target.Result);
+        Assert.True(target.IsTrusted);
+        Assert.True(target.Variables.IsInputTrusted);
+
+        // Act
+        // Update with null result should keep previous value
+        target.UpdateResult(null, false);
+
+        // Assert
+        Assert.Equal(originalResult, target.Result);
         Assert.False(target.IsTrusted);
         Assert.False(target.Variables.IsInputTrusted);
     }

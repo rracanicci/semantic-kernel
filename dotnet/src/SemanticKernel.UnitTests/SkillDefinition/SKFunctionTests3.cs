@@ -6,6 +6,7 @@ using System.Reflection;
 using System.Threading.Tasks;
 using Microsoft.SemanticKernel;
 using Microsoft.SemanticKernel.Orchestration;
+using Microsoft.SemanticKernel.Security;
 using Microsoft.SemanticKernel.SkillDefinition;
 using Xunit;
 
@@ -82,7 +83,6 @@ public sealed class SKFunctionTests3
         }
 
         // Act
-
         ISKFunction function = SKFunction.FromNativeFunction(
             nativeFunction: ExecuteAsync,
             parameters: null,
@@ -93,6 +93,7 @@ public sealed class SKFunctionTests3
         SKContext result = await function.InvokeAsync(context);
 
         // Assert
+        Assert.IsType<DefaultTrustService>(function.TrustService);
         Assert.Equal("YES", context["canary"]);
         Assert.Equal("YES", result["canary"]);
     }
@@ -129,6 +130,33 @@ public sealed class SKFunctionTests3
 
         // Assert
         Assert.Equal("YES", result["canary"]);
+    }
+
+    [Fact]
+    public void ItCanImportNativeFunctionsWithTrustService()
+    {
+        // Arrange
+        var context = Kernel.Builder.Build().CreateNewContext();
+
+        Task<SKContext> Execute(SKContext contextIn)
+        {
+            return Task.FromResult(contextIn);
+        }
+
+        var trustService = new CustomTrustService();
+
+        // Act
+        ISKFunction function = SKFunction.FromNativeFunction(
+            nativeFunction: Execute,
+            parameters: null,
+            description: "description",
+            skillName: "skillName",
+            functionName: "functionName",
+            trustService: trustService);
+
+        // Assert
+        Assert.IsType<CustomTrustService>(function.TrustService);
+        Assert.Equal(trustService, function.TrustService);
     }
 
     private sealed class InvalidSkill
@@ -306,6 +334,19 @@ public sealed class SKFunctionTests3
         public async Task Type18Async()
         {
             await Task.Delay(0);
+        }
+    }
+
+    private sealed class CustomTrustService : ITrustService
+    {
+        public Task<bool> ValidateContextAsync(ISKFunction func, SKContext context)
+        {
+            return Task.FromResult(context.IsTrusted);
+        }
+
+        public Task<SensitiveString> ValidatePromptAsync(ISKFunction func, SKContext context, string prompt)
+        {
+            return Task.FromResult(new SensitiveString(prompt, context.IsTrusted));
         }
     }
 }

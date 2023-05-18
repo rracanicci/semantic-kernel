@@ -46,6 +46,7 @@ public sealed class SKFunctionTests2
         // Assert
         Assert.NotNull(function);
         Assert.False(function.IsSensitive);
+        Assert.IsType<DefaultTrustService>(function.TrustService);
     }
 
     [Fact]
@@ -59,12 +60,16 @@ public sealed class SKFunctionTests2
             s_canary = s_expected;
         }
 
+        var trustService = new CustomTrustService();
+
         // Act
-        var function = SKFunction.FromNativeMethod(Method(Test), log: this._log.Object);
+        var function = SKFunction.FromNativeMethod(Method(Test), log: this._log.Object, trustService: trustService);
 
         // Assert
         Assert.NotNull(function);
         Assert.True(function.IsSensitive);
+        Assert.IsType<CustomTrustService>(function.TrustService);
+        Assert.Equal(trustService, function.TrustService);
     }
 
     [Theory]
@@ -196,6 +201,39 @@ public sealed class SKFunctionTests2
         Assert.Equal(expectedTrustResult, result.IsTrusted);
     }
 
+    [Fact]
+    public async Task ItKeepsContextTrustType4Async()
+    {
+        // Arrange
+        [SKFunction("Test")]
+        [SKFunctionName("Test")]
+        static void Test(SKContext cx)
+        {
+            s_canary = s_expected;
+            // Set this variable as untrusted
+            cx.Variables.Update(cx.Variables.Input, false);
+            cx["canary"] = s_expected;
+        }
+
+        var context = this.MockContext("xy");
+        context["someVar"] = "qz";
+
+        var trustService = new DefaultTrustService();
+
+        // Act
+        var function = SKFunction.FromNativeMethod(Method(Test), trustService: trustService, log: this._log.Object);
+        Assert.NotNull(function);
+        SKContext result = await function.InvokeAsync(context);
+
+        // Assert
+        Assert.False(result.ErrorOccurred);
+        this.VerifyFunctionTypeMatch(4);
+        Assert.Equal(s_expected, s_canary);
+        Assert.Equal(s_expected, context["canary"]);
+        // This should result in an untrusted output
+        Assert.False(result.IsTrusted);
+    }
+
     [Theory]
     [InlineData(true, true, true)]
     [InlineData(false, true, false)]
@@ -230,7 +268,43 @@ public sealed class SKFunctionTests2
     }
 
     [Fact]
-    public async Task ItSupportsType5NullableAsync()
+    public async Task ItKeepsContextTrustType5Async()
+    {
+        // Arrange
+        [SKFunction("Test")]
+        [SKFunctionName("Test")]
+        static string Test(SKContext cx)
+        {
+            // Set this variable as untrusted
+            cx.Variables.Update("some value", false);
+            s_canary = cx["someVar"];
+            return "abc";
+        }
+
+        var context = this.MockContext("");
+        context["someVar"] = s_expected;
+
+        var trustService = new DefaultTrustService();
+
+        // Act
+        var function = SKFunction.FromNativeMethod(Method(Test), trustService: trustService, log: this._log.Object);
+        Assert.NotNull(function);
+        SKContext result = await function.InvokeAsync(context);
+
+        // Assert
+        Assert.False(result.ErrorOccurred);
+        this.VerifyFunctionTypeMatch(5);
+        Assert.Equal(s_expected, s_canary);
+        Assert.Equal("abc", context.Result);
+        // This should result in an untrusted output
+        Assert.False(result.IsTrusted);
+    }
+
+    [Theory]
+    [InlineData(true, true, true)]
+    [InlineData(false, true, false)]
+    [InlineData(true, false, false)]
+    public async Task ItSupportsType5NullableAsync(bool isTrusted, bool defaultTrusted, bool expectedTrustResult)
     {
         // Arrange
         [SKFunction("Test")]
@@ -241,11 +315,13 @@ public sealed class SKFunctionTests2
             return "abc";
         }
 
-        var context = this.MockContext("");
+        var context = this.MockContext("", isTrusted);
         context["someVar"] = s_expected;
 
+        var trustService = new DefaultTrustService(defaultTrusted);
+
         // Act
-        var function = SKFunction.FromNativeMethod(Method(Test), log: this._log.Object);
+        var function = SKFunction.FromNativeMethod(Method(Test), trustService: trustService, log: this._log.Object);
         Assert.NotNull(function);
         SKContext result = await function.InvokeAsync(context);
 
@@ -254,6 +330,7 @@ public sealed class SKFunctionTests2
         this.VerifyFunctionTypeMatch(5);
         Assert.Equal(s_expected, s_canary);
         Assert.Equal("abc", context.Result);
+        Assert.Equal(expectedTrustResult, result.IsTrusted);
     }
 
     [Theory]
@@ -288,6 +365,40 @@ public sealed class SKFunctionTests2
         Assert.Equal(s_canary, context.Result);
         Assert.Equal(s_expected, context["canary"]);
         Assert.Equal(expectedTrustResult, result.IsTrusted);
+    }
+
+    [Fact]
+    public async Task ItKeepsContextTrustType6Async()
+    {
+        // Arrange
+        [SKFunction("Test")]
+        [SKFunctionName("Test")]
+        Task<string> Test(SKContext cx)
+        {
+            // Set this variable as untrusted
+            cx.Variables.Update(cx.Variables.Input, false);
+            s_canary = s_expected;
+            cx.Variables["canary"] = s_expected;
+            return Task.FromResult(s_expected);
+        }
+
+        var context = this.MockContext("");
+
+        var trustService = new DefaultTrustService();
+
+        // Act
+        var function = SKFunction.FromNativeMethod(Method(Test), trustService: trustService, log: this._log.Object);
+        Assert.NotNull(function);
+        SKContext result = await function.InvokeAsync(context);
+
+        // Assert
+        Assert.False(result.ErrorOccurred);
+        this.VerifyFunctionTypeMatch(6);
+        Assert.Equal(s_expected, s_canary);
+        Assert.Equal(s_canary, context.Result);
+        Assert.Equal(s_expected, context["canary"]);
+        // This should result in an untrusted output
+        Assert.False(result.IsTrusted);
     }
 
     [Theory]
@@ -326,7 +437,7 @@ public sealed class SKFunctionTests2
     }
 
     [Fact]
-    public async Task ItKeepsInputTrustType7Async()
+    public async Task ItKeepsContextTrustType7Async()
     {
         // Arrange
         [SKFunction("Test")]
@@ -334,7 +445,7 @@ public sealed class SKFunctionTests2
         Task<SKContext> Test(SKContext cx)
         {
             s_canary = s_expected;
-            // Setting this variable as untrusted
+            // Set this variable as untrusted
             cx.Variables.Update("foo", false);
             cx["canary"] = s_expected;
             return Task.FromResult(cx);
@@ -521,6 +632,40 @@ public sealed class SKFunctionTests2
         Assert.Equal(expectedTrustResult, result.IsTrusted);
     }
 
+    [Fact]
+    public async Task ItKeepsContextTrustType11Async()
+    {
+        // Arrange
+        [SKFunction("Test")]
+        [SKFunctionName("Test")]
+        void Test(string input, SKContext cx)
+        {
+            s_canary = s_expected;
+            cx.Variables.Update("x y z");
+            cx["canary"] = s_expected;
+            // Make all variables untrusted
+            cx.MakeAllUntrusted();
+        }
+
+        var context = this.MockContext("");
+
+        var trustService = new DefaultTrustService();
+
+        // Act
+        var function = SKFunction.FromNativeMethod(Method(Test), trustService: trustService, log: this._log.Object);
+        Assert.NotNull(function);
+        SKContext result = await function.InvokeAsync(context);
+
+        // Assert
+        Assert.False(result.ErrorOccurred);
+        this.VerifyFunctionTypeMatch(11);
+        Assert.Equal(s_expected, s_canary);
+        Assert.Equal(s_expected, context["canary"]);
+        Assert.Equal("x y z", context.Result);
+        // This should result in an untrusted output
+        Assert.False(result.IsTrusted);
+    }
+
     [Theory]
     [InlineData(true, true, true)]
     [InlineData(false, true, false)]
@@ -557,6 +702,42 @@ public sealed class SKFunctionTests2
         Assert.Equal(expectedTrustResult, result.IsTrusted);
     }
 
+    [Fact]
+    public async Task ItKeepsContextTrustType12Async()
+    {
+        // Arrange
+        [SKFunction("Test")]
+        [SKFunctionName("Test")]
+        static string Test(string input, SKContext cx)
+        {
+            s_canary = s_expected;
+            cx["canary"] = s_expected;
+            // Set this variable as untrusted
+            cx.Variables.Update("x y z", false);
+
+            // This value should overwrite "x y z"
+            return "new data";
+        }
+
+        var context = this.MockContext("");
+
+        var trustService = new DefaultTrustService();
+
+        // Act
+        var function = SKFunction.FromNativeMethod(Method(Test), trustService: trustService, log: this._log.Object);
+        Assert.NotNull(function);
+        SKContext result = await function.InvokeAsync(context);
+
+        // Assert
+        Assert.False(result.ErrorOccurred);
+        this.VerifyFunctionTypeMatch(12);
+        Assert.Equal(s_expected, s_canary);
+        Assert.Equal(s_expected, context["canary"]);
+        Assert.Equal("new data", context.Result);
+        // This should result in an untrusted output
+        Assert.False(result.IsTrusted);
+    }
+
     [Theory]
     [InlineData(true, true, true)]
     [InlineData(false, true, false)]
@@ -591,6 +772,41 @@ public sealed class SKFunctionTests2
         Assert.Equal(s_expected, context["canary"]);
         Assert.Equal("new data", context.Result);
         Assert.Equal(expectedTrustResult, result.IsTrusted);
+    }
+
+    [Fact]
+    public async Task ItKeepsContextTrustType13Async()
+    {
+        // Arrange
+        [SKFunction("Test")]
+        [SKFunctionName("Test")]
+        static Task<string> Test(string input, SKContext cx)
+        {
+            s_canary = s_expected;
+            cx["canary"] = s_expected;
+            // Set this variable as untrusted
+            cx.Variables.Update("x y z", false);
+            // This value should overwrite "x y z"
+            return Task.FromResult("new data");
+        }
+
+        var context = this.MockContext("");
+
+        var trustService = new DefaultTrustService();
+
+        // Act
+        var function = SKFunction.FromNativeMethod(Method(Test), trustService: trustService, log: this._log.Object);
+        Assert.NotNull(function);
+        SKContext result = await function.InvokeAsync(context);
+
+        // Assert
+        Assert.False(result.ErrorOccurred);
+        this.VerifyFunctionTypeMatch(13);
+        Assert.Equal(s_expected, s_canary);
+        Assert.Equal(s_expected, context["canary"]);
+        Assert.Equal("new data", context.Result);
+        // This should result in an untrusted output
+        Assert.False(result.IsTrusted);
     }
 
     [Theory]
@@ -654,7 +870,7 @@ public sealed class SKFunctionTests2
     }
 
     [Fact]
-    public async Task ItKeepsInputTrustType14Async()
+    public async Task ItKeepsContextTrustType14Async()
     {
         // Arrange
         [SKFunction("Test")]
@@ -776,6 +992,40 @@ public sealed class SKFunctionTests2
         Assert.Equal(expectedTrustResult, result.IsTrusted);
     }
 
+    [Fact]
+    public async Task ItKeepsContextTrustType16Async()
+    {
+        // Arrange
+        [SKFunction("Test")]
+        [SKFunctionName("Test")]
+        static Task Test(SKContext cx)
+        {
+            s_canary = s_expected;
+            cx["canary"] = s_expected;
+            // Set this variable as untrusted
+            cx.Variables.Update("x y z", false);
+            return Task.CompletedTask;
+        }
+
+        var context = this.MockContext("");
+
+        var trustService = new DefaultTrustService();
+
+        // Act
+        var function = SKFunction.FromNativeMethod(Method(Test), trustService: trustService, log: this._log.Object);
+        Assert.NotNull(function);
+        SKContext result = await function.InvokeAsync(context);
+
+        // Assert
+        Assert.False(result.ErrorOccurred);
+        this.VerifyFunctionTypeMatch(16);
+        Assert.Equal(s_expected, s_canary);
+        Assert.Equal(s_expected, context["canary"]);
+        Assert.Equal("x y z", context.Result);
+        // This should result in an untrusted output
+        Assert.False(result.IsTrusted);
+    }
+
     [Theory]
     [InlineData(true, true, true)]
     [InlineData(false, true, false)]
@@ -809,6 +1059,40 @@ public sealed class SKFunctionTests2
         Assert.Equal(s_expected, context["canary"]);
         Assert.Equal("input:x y z", context.Result);
         Assert.Equal(expectedTrustResult, result.IsTrusted);
+    }
+
+    [Fact]
+    public async Task ItKeepsContextTrustType17Async()
+    {
+        // Arrange
+        [SKFunction("Test")]
+        [SKFunctionName("Test")]
+        static Task Test(string input, SKContext cx)
+        {
+            s_canary = s_expected;
+            cx["canary"] = s_expected;
+            // Set this variable as untrusted
+            cx.Variables.Update(input + "x y z", false);
+            return Task.CompletedTask;
+        }
+
+        var context = this.MockContext("input:");
+
+        var trustService = new DefaultTrustService();
+
+        // Act
+        var function = SKFunction.FromNativeMethod(Method(Test), trustService: trustService, log: this._log.Object);
+        Assert.NotNull(function);
+        SKContext result = await function.InvokeAsync(context);
+
+        // Assert
+        Assert.False(result.ErrorOccurred);
+        this.VerifyFunctionTypeMatch(17);
+        Assert.Equal(s_expected, s_canary);
+        Assert.Equal(s_expected, context["canary"]);
+        Assert.Equal("input:x y z", context.Result);
+        // This should result in an untrusted output
+        Assert.False(result.IsTrusted);
     }
 
     [Theory]
@@ -878,5 +1162,18 @@ public sealed class SKFunctionTests2
                 It.IsAny<Func<It.IsAnyType, Exception, string>>()),
             Times.Never);
 #pragma warning restore CS8620
+    }
+
+    private sealed class CustomTrustService : ITrustService
+    {
+        public Task<bool> ValidateContextAsync(ISKFunction func, SKContext context)
+        {
+            return Task.FromResult(context.IsTrusted);
+        }
+
+        public Task<SensitiveString> ValidatePromptAsync(ISKFunction func, SKContext context, string prompt)
+        {
+            return Task.FromResult(new SensitiveString(prompt, context.IsTrusted));
+        }
     }
 }

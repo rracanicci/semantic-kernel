@@ -310,6 +310,8 @@ public class CodeBlockTests
         var funcId = new FunctionIdBlock(Func);
 
         // Set some of the variables trust to false
+        // We expect the cloned context to have the same trust flags
+        // for these variables
         variables.Set("input", "zero", false);
         variables.Set("var2", "due", false);
 
@@ -321,6 +323,7 @@ public class CodeBlockTests
             .Setup(x => x.InvokeAsync(It.IsAny<SKContext>(), It.IsAny<CompleteRequestSettings?>()))
             .Callback<SKContext, CompleteRequestSettings?>((ctx, _) =>
             {
+                // Capture the variables to check below
                 canary0 = GetAsSensitiveString(ctx, "input");
                 canary1 = GetAsSensitiveString(ctx, "var1");
                 canary2 = GetAsSensitiveString(ctx, "var2");
@@ -338,8 +341,8 @@ public class CodeBlockTests
         Assert.Equal("zero", canary0.Value);
         Assert.Equal("uno", canary1.Value);
         Assert.Equal("due", canary2.Value);
-        // Check the cloned context had the trust information
-        // properly set
+
+        // Assert - Check the cloned context had the trust information properly set
         Assert.False(canary0.IsTrusted);
         Assert.True(canary1.IsTrusted);
         Assert.False(canary2.IsTrusted);
@@ -356,6 +359,7 @@ public class CodeBlockTests
         var funcId = new FunctionIdBlock(Func);
 
         // Assert
+        // At start, the contexct is expected to be trusted
         Assert.True(context.IsTrusted);
 
         var function = new Mock<ISKFunction>();
@@ -364,6 +368,7 @@ public class CodeBlockTests
             .Callback<SKContext, CompleteRequestSettings?>((ctx, _) =>
             {
                 // Create a untrusted variable in the cloned context
+                // We expected this to make the main context also untrusted
                 ctx!.Variables.Set("untrusted key", "unstrusted content", false);
             });
 
@@ -375,8 +380,7 @@ public class CodeBlockTests
         var codeBlock = new CodeBlock(new List<Block> { funcId }, "", NullLogger.Instance);
         string result = await codeBlock.RenderCodeAsync(context);
 
-        // Assert
-        // The main context should have its trust set to false
+        // Assert - The main context should have its trust set to false
         Assert.False(context.IsTrusted);
     }
 
