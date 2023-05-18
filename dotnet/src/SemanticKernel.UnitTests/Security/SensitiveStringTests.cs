@@ -12,7 +12,7 @@ namespace SemanticKernel.UnitTests.Security;
 public class SensitiveStringTest
 {
     [Fact]
-    public void CreateNewWithDefaultsSucceeds()
+    public void CreateNewWithDefaultTrustedSucceeds()
     {
         // Arrange
         string anyValue = Guid.NewGuid().ToString();
@@ -24,22 +24,34 @@ public class SensitiveStringTest
         Assert.Equal(anyValue, value.ToString());
         Assert.Equal(anyValue, value.Value);
         Assert.True(value.IsTrusted);
-        Assert.Equal(anyValue.Length, value.Value.Length);
     }
 
     [Fact]
-    public void CreateNewWithNotTrustedContentSucceeds()
+    public void CreateEmptySucceeds()
+    {
+        // Act
+        SensitiveString value = SensitiveString.Empty;
+
+        // Assert
+        Assert.Empty(value.ToString());
+        Assert.Empty(value.Value);
+        Assert.True(value.IsTrusted);
+    }
+
+    [Theory]
+    [InlineData(true)]
+    [InlineData(false)]
+    public void CreateNewWithIsTrustedValueSucceeds(bool isTrusted)
     {
         // Arrange
         string anyValue = Guid.NewGuid().ToString();
 
         // Act
-        SensitiveString value = new SensitiveString(anyValue, false);
+        SensitiveString value = new SensitiveString(anyValue, isTrusted);
 
         // Assert
         Assert.Equal(anyValue, value.ToString());
         Assert.Equal(anyValue, value.Value);
-        Assert.False(value.IsTrusted);
-        Assert.Equal(anyValue.Length, value.Value.Length);
+        Assert.Equal(isTrusted, value.IsTrusted);
     }
 }

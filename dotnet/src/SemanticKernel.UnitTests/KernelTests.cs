@@ -8,6 +8,7 @@ using Microsoft.SemanticKernel;
 using Microsoft.SemanticKernel.AI.TextCompletion;
 using Microsoft.SemanticKernel.Orchestration;
 using Microsoft.SemanticKernel.Security;
+using Microsoft.SemanticKernel.SemanticFunctions;
 using Microsoft.SemanticKernel.SkillDefinition;
 using Moq;
 using Xunit;
@@ -160,28 +161,74 @@ public class KernelTests
     }
 
     [Fact]
-    public void ItConfiguresCustomTrustServiceInFunctions()
+    public void ItConfiguresCustomTrustServiceInFunctionsBySettingKernelDefaultTrustService()
     {
         // Arrange
         ITrustService trustService = new CustomTrustService();
         var kernel = Kernel.Builder.WithDefaultTrustService(trustService).Build();
         var factory = new Mock<Func<IKernel, ITextCompletion>>();
+        var promptTemplateConfig = new PromptTemplateConfig();
+        var promptTemplate = new PromptTemplate("Tell me a joke", promptTemplateConfig, kernel);
+        var semanticFuntionConfig = new SemanticFunctionConfig(promptTemplateConfig, promptTemplate, isSensitive: true);
 
         kernel.Config.AddTextCompletionService(factory.Object);
 
         // Act
         var nativeSkill = kernel.ImportSkill(new MySkill(), "mySk");
-        var semanticSkill = kernel.CreateSemanticFunction("Tell me a joke", functionName: "joker", skillName: "jk", description: "Nice fun");
+        var semanticSkill0 = kernel.RegisterSemanticFunction(functionName: "joker0", semanticFuntionConfig);
+        var semanticSkill1 = kernel.RegisterSemanticFunction(skillName: "jk", functionName: "joker1", semanticFuntionConfig);
+        var semanticSkill2 = kernel.CreateSemanticFunction("Tell me a joke", functionName: "joker2", skillName: "jk", description: "Nice fun");
         var sayHelloFunc = (SKFunction)kernel.Skills.GetFunction("mySk", "SayHello");
-        var jokerFunc = (SKFunction)kernel.Skills.GetFunction("jk", "joker");
+        var jokerFunc0 = (SKFunction)kernel.Skills.GetFunction("joker0");
+        var jokerFunc1 = (SKFunction)kernel.Skills.GetFunction("jk", "joker1");
+        var jokerFunc2 = (SKFunction)kernel.Skills.GetFunction("jk", "joker2");
 
         // Assert
         Assert.NotNull(kernel.DefaultTrustService);
         Assert.NotNull(sayHelloFunc.TrustService);
-        Assert.NotNull(jokerFunc.TrustService);
+        Assert.NotNull(jokerFunc0.TrustService);
+        Assert.NotNull(jokerFunc1.TrustService);
+        Assert.NotNull(jokerFunc1.TrustService);
         Assert.Equal(trustService, kernel.DefaultTrustService);
         Assert.Equal(trustService, sayHelloFunc.TrustService);
-        Assert.Equal(trustService, jokerFunc.TrustService);
+        Assert.Equal(trustService, jokerFunc0.TrustService);
+        Assert.Equal(trustService, jokerFunc1.TrustService);
+        Assert.Equal(trustService, jokerFunc2.TrustService);
+    }
+
+    [Fact]
+    public void ItConfiguresCustomTrustServiceInFunctionsByFunctionCreationParameter()
+    {
+        // Arrange
+        ITrustService trustService = new CustomTrustService();
+        var kernel = Kernel.Builder.Build();
+        var factory = new Mock<Func<IKernel, ITextCompletion>>();
+        var promptTemplateConfig = new PromptTemplateConfig();
+        var promptTemplate = new PromptTemplate("Tell me a joke", promptTemplateConfig, kernel);
+        var semanticFuntionConfig = new SemanticFunctionConfig(promptTemplateConfig, promptTemplate, isSensitive: true);
+
+        kernel.Config.AddTextCompletionService(factory.Object);
+
+        // Act
+        var nativeSkill = kernel.ImportSkill(new MySkill(), "mySk", trustService: trustService);
+        var semanticSkill0 = kernel.RegisterSemanticFunction(functionName: "joker0", semanticFuntionConfig, trustService: trustService);
+        var semanticSkill1 = kernel.RegisterSemanticFunction(skillName: "jk", functionName: "joker1", semanticFuntionConfig, trustService: trustService);
+        var semanticSkill2 = kernel.CreateSemanticFunction("Tell me a joke", functionName: "joker2", skillName: "jk", description: "Nice fun", trustService: trustService);
+        var sayHelloFunc = (SKFunction)kernel.Skills.GetFunction("mySk", "SayHello");
+        var jokerFunc0 = (SKFunction)kernel.Skills.GetFunction("joker0");
+        var jokerFunc1 = (SKFunction)kernel.Skills.GetFunction("jk", "joker1");
+        var jokerFunc2 = (SKFunction)kernel.Skills.GetFunction("jk", "joker2");
+
+        // Assert
+        Assert.Null(kernel.DefaultTrustService);
+        Assert.NotNull(sayHelloFunc.TrustService);
+        Assert.NotNull(jokerFunc0.TrustService);
+        Assert.NotNull(jokerFunc1.TrustService);
+        Assert.NotNull(jokerFunc1.TrustService);
+        Assert.Equal(trustService, sayHelloFunc.TrustService);
+        Assert.Equal(trustService, jokerFunc0.TrustService);
+        Assert.Equal(trustService, jokerFunc1.TrustService);
+        Assert.Equal(trustService, jokerFunc2.TrustService);
     }
 
     [Fact]
@@ -190,21 +237,32 @@ public class KernelTests
         // Arrange
         var kernel = Kernel.Builder.Build();
         var factory = new Mock<Func<IKernel, ITextCompletion>>();
+        var promptTemplateConfig = new PromptTemplateConfig();
+        var promptTemplate = new PromptTemplate("Tell me a joke", promptTemplateConfig, kernel);
+        var semanticFuntionConfig = new SemanticFunctionConfig(promptTemplateConfig, promptTemplate, isSensitive: true);
 
         kernel.Config.AddTextCompletionService(factory.Object);
 
         // Act
         var nativeSkill = kernel.ImportSkill(new MySkill(), "mySk");
-        var semanticSkill = kernel.CreateSemanticFunction("Tell me a joke", functionName: "joker", skillName: "jk", description: "Nice fun");
+        var semanticSkill0 = kernel.RegisterSemanticFunction(functionName: "joker0", semanticFuntionConfig);
+        var semanticSkill1 = kernel.RegisterSemanticFunction(skillName: "jk", functionName: "joker1", semanticFuntionConfig);
+        var semanticSkill2 = kernel.CreateSemanticFunction("Tell me a joke", functionName: "joker2", skillName: "jk", description: "Nice fun");
         var sayHelloFunc = (SKFunction)kernel.Skills.GetFunction("mySk", "SayHello");
-        var jokerFunc = (SKFunction)kernel.Skills.GetFunction("jk", "joker");
+        var jokerFunc0 = (SKFunction)kernel.Skills.GetFunction("joker0");
+        var jokerFunc1 = (SKFunction)kernel.Skills.GetFunction("jk", "joker1");
+        var jokerFunc2 = (SKFunction)kernel.Skills.GetFunction("jk", "joker2");
 
         // Assert
         Assert.Null(kernel.DefaultTrustService);
         Assert.NotNull(sayHelloFunc.TrustService);
-        Assert.NotNull(jokerFunc.TrustService);
+        Assert.NotNull(jokerFunc0.TrustService);
+        Assert.NotNull(jokerFunc1.TrustService);
+        Assert.NotNull(jokerFunc1.TrustService);
         Assert.IsType<DefaultTrustService>(sayHelloFunc.TrustService);
-        Assert.IsType<DefaultTrustService>(jokerFunc.TrustService);
+        Assert.IsType<DefaultTrustService>(jokerFunc0.TrustService);
+        Assert.IsType<DefaultTrustService>(jokerFunc1.TrustService);
+        Assert.IsType<DefaultTrustService>(jokerFunc2.TrustService);
     }
 
     public class MySkill

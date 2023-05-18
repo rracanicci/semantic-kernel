@@ -1,8 +1,10 @@
 ﻿// Copyright (c) Microsoft. All rights reserved.
 
 using System.Collections.Generic;
+using System.Threading.Tasks;
 using Microsoft.SemanticKernel.AI.TextCompletion;
 using Microsoft.SemanticKernel.Orchestration;
+using Microsoft.SemanticKernel.Security;
 using Microsoft.SemanticKernel.SemanticFunctions;
 using Microsoft.SemanticKernel.SkillDefinition;
 using Moq;
@@ -48,6 +50,7 @@ public sealed class SKFunctionTests1
 
         // Assert
         Assert.False(skFunction.IsSensitive);
+        Assert.IsType<DefaultTrustService>(skFunction.TrustService);
     }
 
     [Fact]
@@ -96,5 +99,34 @@ public sealed class SKFunctionTests1
         // Assert
         Assert.True(functionConfig.IsSensitive);
         Assert.True(skFunction.IsSensitive);
+    }
+
+    [Fact]
+    public void ItCanSetCustomTrustService()
+    {
+        // Arrange
+        var templateConfig = new PromptTemplateConfig();
+        var functionConfig = new SemanticFunctionConfig(templateConfig, this._promptTemplate.Object);
+        var trustService = new CustomTrustService();
+
+        // Act
+        var skFunction = SKFunction.FromSemanticConfig("sk", "name", functionConfig, trustService: trustService);
+
+        // Assert
+        Assert.IsType<CustomTrustService>(skFunction.TrustService);
+        Assert.Equal(trustService, skFunction.TrustService);
+    }
+
+    private sealed class CustomTrustService : ITrustService
+    {
+        public Task<bool> ValidateContextAsync(ISKFunction func, SKContext context)
+        {
+            return Task.FromResult(context.IsTrusted);
+        }
+
+        public Task<SensitiveString> ValidatePromptAsync(ISKFunction func, SKContext context, string prompt)
+        {
+            return Task.FromResult(new SensitiveString(prompt, context.IsTrusted));
+        }
     }
 }
