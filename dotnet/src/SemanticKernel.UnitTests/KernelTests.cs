@@ -218,12 +218,12 @@ public class KernelTests
             .WithDefaultTrustService(trustService).Build();
         var promptTemplateConfig = new PromptTemplateConfig();
         var promptTemplate = new PromptTemplate("Tell me a joke", promptTemplateConfig, kernel);
-        var semanticFuntionConfig = new SemanticFunctionConfig(promptTemplateConfig, promptTemplate, isSensitive: true);
+        var semanticFunctionConfig = new SemanticFunctionConfig(promptTemplateConfig, promptTemplate, isSensitive: true);
 
         // Act
         var nativeSkill = kernel.ImportSkill(new MySkill(), "mySk");
-        var semanticSkill0 = kernel.RegisterSemanticFunction(functionName: "joker0", semanticFuntionConfig);
-        var semanticSkill1 = kernel.RegisterSemanticFunction(skillName: "jk", functionName: "joker1", semanticFuntionConfig);
+        var semanticSkill0 = kernel.RegisterSemanticFunction(functionName: "joker0", semanticFunctionConfig);
+        var semanticSkill1 = kernel.RegisterSemanticFunction(skillName: "jk", functionName: "joker1", semanticFunctionConfig);
         var semanticSkill2 = kernel.CreateSemanticFunction("Tell me a joke", functionName: "joker2", skillName: "jk", description: "Nice fun");
         var sayHelloFunc = (SKFunction)kernel.Skills.GetFunction("mySk", "SayHello");
         var jokerFunc0 = (SKFunction)kernel.Skills.GetFunction("joker0");
@@ -253,12 +253,12 @@ public class KernelTests
             .WithAIService<ITextCompletion>("x", factory.Object).Build();
         var promptTemplateConfig = new PromptTemplateConfig();
         var promptTemplate = new PromptTemplate("Tell me a joke", promptTemplateConfig, kernel);
-        var semanticFuntionConfig = new SemanticFunctionConfig(promptTemplateConfig, promptTemplate, isSensitive: true);
+        var semanticFunctionConfig = new SemanticFunctionConfig(promptTemplateConfig, promptTemplate, isSensitive: true);
 
         // Act
         var nativeSkill = kernel.ImportSkill(new MySkill(), "mySk", trustService: trustService);
-        var semanticSkill0 = kernel.RegisterSemanticFunction(functionName: "joker0", semanticFuntionConfig, trustService: trustService);
-        var semanticSkill1 = kernel.RegisterSemanticFunction(skillName: "jk", functionName: "joker1", semanticFuntionConfig, trustService: trustService);
+        var semanticSkill0 = kernel.RegisterSemanticFunction(functionName: "joker0", semanticFunctionConfig, trustService: trustService);
+        var semanticSkill1 = kernel.RegisterSemanticFunction(skillName: "jk", functionName: "joker1", semanticFunctionConfig, trustService: trustService);
         var semanticSkill2 = kernel.CreateSemanticFunction("Tell me a joke", functionName: "joker2", skillName: "jk", description: "Nice fun", trustService: trustService);
         var sayHelloFunc = (SKFunction)kernel.Skills.GetFunction("mySk", "SayHello");
         var jokerFunc0 = (SKFunction)kernel.Skills.GetFunction("joker0");
@@ -286,12 +286,12 @@ public class KernelTests
             .WithAIService<ITextCompletion>("x", factory.Object).Build();
         var promptTemplateConfig = new PromptTemplateConfig();
         var promptTemplate = new PromptTemplate("Tell me a joke", promptTemplateConfig, kernel);
-        var semanticFuntionConfig = new SemanticFunctionConfig(promptTemplateConfig, promptTemplate, isSensitive: true);
+        var semanticFunctionConfig = new SemanticFunctionConfig(promptTemplateConfig, promptTemplate, isSensitive: true);
 
         // Act
         var nativeSkill = kernel.ImportSkill(new MySkill(), "mySk");
-        var semanticSkill0 = kernel.RegisterSemanticFunction(functionName: "joker0", semanticFuntionConfig);
-        var semanticSkill1 = kernel.RegisterSemanticFunction(skillName: "jk", functionName: "joker1", semanticFuntionConfig);
+        var semanticSkill0 = kernel.RegisterSemanticFunction(functionName: "joker0", semanticFunctionConfig);
+        var semanticSkill1 = kernel.RegisterSemanticFunction(skillName: "jk", functionName: "joker1", semanticFunctionConfig);
         var semanticSkill2 = kernel.CreateSemanticFunction("Tell me a joke", functionName: "joker2", skillName: "jk", description: "Nice fun");
         var sayHelloFunc = (SKFunction)kernel.Skills.GetFunction("mySk", "SayHello");
         var jokerFunc0 = (SKFunction)kernel.Skills.GetFunction("joker0");
