@@ -194,7 +194,7 @@ public class ContextVariablesTests
 
         // Assert
         Assert.Equal(anyContent, target.Input);
-        Assert.True(target.IsInputTrusted);
+        AssertContextVariable(target, ContextVariables.MainKey, anyContent, true);
     }
 
     [Theory]
@@ -208,7 +208,7 @@ public class ContextVariablesTests
 
         // Assert
         Assert.Equal(anyContent, target.Input);
-        Assert.Equal(isTrusted, target.IsInputTrusted);
+        AssertContextVariable(target, ContextVariables.MainKey, anyContent, isTrusted);
     }
 
     [Theory]
@@ -222,14 +222,14 @@ public class ContextVariablesTests
 
         // Assert
         Assert.Equal(anyContent, target.Input);
-        Assert.Equal(!isTrusted, target.IsInputTrusted);
+        AssertContextVariable(target, ContextVariables.MainKey, anyContent, !isTrusted);
 
         // Act
         target.Update(target.Input, isTrusted);
 
         // Assert
         Assert.Equal(anyContent, target.Input);
-        Assert.Equal(isTrusted, target.IsInputTrusted);
+        AssertContextVariable(target, ContextVariables.MainKey, anyContent, isTrusted);
     }
 
     [Theory]
@@ -244,14 +244,41 @@ public class ContextVariablesTests
 
         // Assert
         Assert.Equal(anyContent, target.Input);
-        Assert.Equal(!isTrusted, target.IsInputTrusted);
+        AssertContextVariable(target, ContextVariables.MainKey, anyContent, !isTrusted);
 
         // Act
         target.Update(newContent, isTrusted);
 
         // Assert
         Assert.Equal(newContent, target.Input);
-        Assert.Equal(isTrusted, target.IsInputTrusted);
+        AssertContextVariable(target, ContextVariables.MainKey, newContent, isTrusted);
+    }
+
+    [Fact]
+    public void UpdateWithTrustCheckSucceeds()
+    {
+        // Arrange
+        string anyContent = Guid.NewGuid().ToString();
+        string newContent = Guid.NewGuid().ToString();
+        string someOtherNewContent = Guid.NewGuid().ToString();
+        ContextVariables target = new(anyContent, true);
+
+        // Assert
+        AssertContextVariable(target, ContextVariables.MainKey, anyContent, true);
+
+        // Act
+        target.UpdateWithTrustCheck(newContent, false);
+
+        // Assert
+        // Should be now false after the update
+        AssertContextVariable(target, ContextVariables.MainKey, newContent, false);
+
+        // Act
+        target.UpdateWithTrustCheck(someOtherNewContent, true);
+
+        // Assert
+        // Should be kept false because it is already untrusted
+        AssertContextVariable(target, ContextVariables.MainKey, someOtherNewContent, false);
     }
 
     [Theory]
