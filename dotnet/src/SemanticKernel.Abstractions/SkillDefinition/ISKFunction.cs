@@ -40,6 +40,8 @@ public interface ISKFunction
 
     /// <summary>
     /// Whether the function is set to be sensitive (default false).
+    /// When a function is sensitive, the default trust service will throw an exception
+    /// if the function is invoked passing in some untrusted input (or context, or prompt).
     /// </summary>
     bool IsSensitive { get; }
 
