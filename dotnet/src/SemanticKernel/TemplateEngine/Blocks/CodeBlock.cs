@@ -1,5 +1,6 @@
 ﻿// Copyright (c) Microsoft. All rights reserved.
 
+using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Threading.Tasks;
@@ -112,7 +113,7 @@ internal sealed class CodeBlock : Block, ICodeRendering
             throw new TemplateException(TemplateException.ErrorCodes.FunctionNotFound, errorMsg);
         }
 
-        ContextVariables variablesClone = context.Variables.Clone();
+        SKContext contextClone = context.Clone();
 
         // If the code syntax is {{functionName $varName}} use $varName instead of $input
         // If the code syntax is {{functionName 'value'}} use "value" instead of $input
@@ -120,17 +121,21 @@ internal sealed class CodeBlock : Block, ICodeRendering
         {
             // TODO: PII
             this.Log.LogTrace("Passing variable/value: `{0}`", this._tokens[1].Content);
-            string input = ((ITextRendering)this._tokens[1]).Render(variablesClone);
+            string input = ((ITextRendering)this._tokens[1]).Render(contextClone.Variables);
             // Keep previous trust information when updating the input
-            variablesClone.Update(input, variablesClone.IsAllTrusted());
+            contextClone.Variables.Update(input, contextClone.Variables.IsAllTrusted());
         }
 
-        SKContext result = await function.InvokeWithCustomInputAsync(
-            variablesClone,
-            context.Memory,
-            context.Skills,
-            this.Log,
-            context.CancellationToken).ConfigureAwait(false);
+        try
+        {
+            contextClone = await function.InvokeAsync(contextClone).ConfigureAwait(false);
+        }
+        catch (Exception ex) when (!ex.IsCriticalException())
+        {
+            this.Log.LogError(ex, "Something went wrong when invoking function with custom input: {0}.{1}. Error: {2}",
+                function.SkillName, function.Name, ex.Message);
+            contextClone.Fail(ex.Message, ex);
+        }
 
         // If the output of the function is not trusted, tag the main context as untrusted as well.
         // This is important for cases where there is a function call within a prompt template and
@@ -140,19 +145,19 @@ internal sealed class CodeBlock : Block, ICodeRendering
         // include trust information. This way, the rendered prompt will be a TrustAwareString that already
         // carries trust information, so this won't be needed.
         // (e.g. concatenating strings A (trusted) and B (untrusted), will result in a string that is untrusted)
-        if (!result.IsTrusted)
+        if (!contextClone.IsTrusted)
         {
             context.MakeAllUntrusted();
         }
 
-        if (result.ErrorOccurred)
+        if (contextClone.ErrorOccurred)
         {
-            var errorMsg = $"Function `{fBlock.Content}` execution failed. {result.LastException?.GetType().FullName}: {result.LastErrorDescription}";
+            var errorMsg = $"Function `{fBlock.Content}` execution failed. {contextClone.LastException?.GetType().FullName}: {contextClone.LastErrorDescription}";
             this.Log.LogError(errorMsg);
-            throw new TemplateException(TemplateException.ErrorCodes.RuntimeError, errorMsg, result.LastException);
+            throw new TemplateException(TemplateException.ErrorCodes.RuntimeError, errorMsg, contextClone.LastException);
         }
 
-        return result.Result;
+        return contextClone.Result;
     }
 
     private bool GetFunctionFromSkillCollection(
