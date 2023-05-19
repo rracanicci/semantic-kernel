@@ -105,6 +105,7 @@ public sealed class SKFunction : ISKFunction, IDisposable
     /// <param name="functionName">SK function name</param>
     /// <param name="description">SK function description</param>
     /// <param name="parameters">SK function parameters</param>
+    /// <param name="isSensitive">Whether the function is set to be sensitive (default false)</param>
     /// <param name="trustService">Service used for trust checks, if null the DefaultTrustService implementation will be used</param>
     /// <param name="log">Application logger</param>
     /// <returns>SK function instance</returns>
@@ -114,6 +115,7 @@ public sealed class SKFunction : ISKFunction, IDisposable
         string functionName,
         string description,
         IEnumerable<ParameterView>? parameters = null,
+        bool isSensitive = false,
         ITrustService? trustService = null,
         ILogger? log = null)
     {
@@ -127,6 +129,8 @@ public sealed class SKFunction : ISKFunction, IDisposable
             skillName: skillName,
             functionName: functionName,
             isSemantic: false,
+            // For native functions, do not read this from the methodDetails
+            isSensitive: isSensitive,
             trustService: trustService,
             log: log);
     }

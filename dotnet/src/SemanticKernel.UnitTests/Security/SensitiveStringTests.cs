@@ -9,7 +9,7 @@ namespace SemanticKernel.UnitTests.Security;
 /// <summary>
 /// Unit tests of <see cref="SensitiveString"/>.
 /// </summary>
-public class SensitiveStringTest
+public sealed class SensitiveStringTest
 {
     [Fact]
     public void CreateNewWithDefaultTrustedSucceeds()

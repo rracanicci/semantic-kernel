@@ -49,8 +49,8 @@ public class DefaultTrustService : ITrustService
     /// </summary>
     /// <param name="func">Instance of the function being called</param>
     /// <param name="context">The current execution context</param>
-    /// <returns>Should return true if the context is to be considered trusted, or false otherwise.</returns>
-    /// <exception cref="UntrustedContentException">Raised when the context is untrusted and the function is sensitive.</exception>
+    /// <returns>Should return true if the context is to be considered trusted, or false otherwise</returns>
+    /// <exception cref="UntrustedContentException">Raised when the context is untrusted and the function is sensitive</exception>
     public Task<bool> ValidateContextAsync(ISKFunction func, SKContext context)
     {
         if (func.IsSensitive && !context.IsTrusted)
@@ -79,14 +79,14 @@ public class DefaultTrustService : ITrustService
     ///
     /// NOTE: This is only a simple example implementation that propagates the trust checks using the trust flags from
     /// the variables. Another implementations might consider analyzing the content of the rendered prompt and the variables to decide if the prompt
-    /// is trusted or not, or even, update the content of the variable/return a new prompt string with something considered trusted (sanitization).
+    /// is trusted or not, or even, update the content of the variables/return a new prompt string with something considered trusted (sanitization).
     /// </summary>
     /// <param name="func">Instance of the function being called</param>
     /// <param name="context">The current execution context</param>
-    /// <param name="prompt">The current rendered prompt to be used with the completion client.</param>
+    /// <param name="prompt">The current rendered prompt to be used with the completion client</param>
     /// <returns>Should return a SensitiveString representing the final prompt to be used with the completion client.
-    /// The SensitiveString includes trust information.</returns>
-    /// <exception cref="UntrustedContentException">Raised when the context is untrusted and the function is sensitive.</exception>
+    /// The SensitiveString includes trust information</returns>
+    /// <exception cref="UntrustedContentException">Raised when the context is untrusted and the function is sensitive</exception>
     public async Task<SensitiveString> ValidatePromptAsync(ISKFunction func, SKContext context, string prompt)
     {
         return new SensitiveString(
