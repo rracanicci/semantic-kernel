@@ -92,12 +92,12 @@ public sealed class SKFunctionTests1
     public void ItAllowsFunctionToBeSensitive()
     {
         // Arrange
-        var templateConfig = new PromptTemplateConfig();
-        var functionConfig = new SemanticFunctionConfig(templateConfig, this._promptTemplate.Object, isSensitive: true);
+        var templateConfig = new PromptTemplateConfig { IsSensitive = true };
+        var functionConfig = new SemanticFunctionConfig(templateConfig, this._promptTemplate.Object);
         var skFunction = SKFunction.FromSemanticConfig("sk", "name", functionConfig);
 
         // Assert
-        Assert.True(functionConfig.IsSensitive);
+        Assert.True(functionConfig.PromptTemplateConfig.IsSensitive);
         Assert.True(skFunction.IsSensitive);
     }
 

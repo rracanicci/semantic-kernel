@@ -178,6 +178,7 @@ public static class KernelGrpcExtensions
             description: operation.Name,
             skillName: skillName,
             functionName: operation.Name,
+            isSensitive: false,
             log: kernel.Log);
 
         return kernel.RegisterCustomFunction(skillName, function);

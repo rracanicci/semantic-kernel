@@ -359,7 +359,7 @@ public class CodeBlockTests
         var funcId = new FunctionIdBlock(Func);
 
         // Assert
-        // At start, the contexct is expected to be trusted
+        // At start, the context is expected to be trusted
         Assert.True(context.IsTrusted);
 
         var function = new Mock<ISKFunction>();
@@ -390,6 +390,7 @@ public class CodeBlockTests
         {
             return new SensitiveString(value, isTrusted);
         }
+
         return null;
     }
 }

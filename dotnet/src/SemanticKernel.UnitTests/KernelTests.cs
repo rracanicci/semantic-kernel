@@ -216,9 +216,9 @@ public class KernelTests
         var kernel = Kernel.Builder
             .WithAIService<ITextCompletion>("x", factory.Object)
             .WithDefaultTrustService(trustService).Build();
-        var promptTemplateConfig = new PromptTemplateConfig();
+        var promptTemplateConfig = new PromptTemplateConfig() { IsSensitive = true };
         var promptTemplate = new PromptTemplate("Tell me a joke", promptTemplateConfig, kernel);
-        var semanticFunctionConfig = new SemanticFunctionConfig(promptTemplateConfig, promptTemplate, isSensitive: true);
+        var semanticFunctionConfig = new SemanticFunctionConfig(promptTemplateConfig, promptTemplate);
 
         // Act
         var nativeSkill = kernel.ImportSkill(new MySkill(), "mySk");
@@ -251,9 +251,9 @@ public class KernelTests
         var factory = new Mock<Func<(ILogger, KernelConfig), ITextCompletion>>();
         var kernel = Kernel.Builder
             .WithAIService<ITextCompletion>("x", factory.Object).Build();
-        var promptTemplateConfig = new PromptTemplateConfig();
+        var promptTemplateConfig = new PromptTemplateConfig { IsSensitive = true };
         var promptTemplate = new PromptTemplate("Tell me a joke", promptTemplateConfig, kernel);
-        var semanticFunctionConfig = new SemanticFunctionConfig(promptTemplateConfig, promptTemplate, isSensitive: true);
+        var semanticFunctionConfig = new SemanticFunctionConfig(promptTemplateConfig, promptTemplate);
 
         // Act
         var nativeSkill = kernel.ImportSkill(new MySkill(), "mySk", trustService: trustService);
@@ -284,9 +284,9 @@ public class KernelTests
         var factory = new Mock<Func<(ILogger, KernelConfig), ITextCompletion>>();
         var kernel = Kernel.Builder
             .WithAIService<ITextCompletion>("x", factory.Object).Build();
-        var promptTemplateConfig = new PromptTemplateConfig();
+        var promptTemplateConfig = new PromptTemplateConfig { IsSensitive = true };
         var promptTemplate = new PromptTemplate("Tell me a joke", promptTemplateConfig, kernel);
-        var semanticFunctionConfig = new SemanticFunctionConfig(promptTemplateConfig, promptTemplate, isSensitive: true);
+        var semanticFunctionConfig = new SemanticFunctionConfig(promptTemplateConfig, promptTemplate);
 
         // Act
         var nativeSkill = kernel.ImportSkill(new MySkill(), "mySk");

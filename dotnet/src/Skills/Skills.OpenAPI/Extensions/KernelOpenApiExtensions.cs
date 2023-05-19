@@ -324,6 +324,7 @@ public static class KernelOpenApiExtensions
             description: operation.Description,
             skillName: skillName,
             functionName: operation.Id,
+            isSensitive: false,
             log: kernel.Log);
 
         return kernel.RegisterCustomFunction(skillName, function);

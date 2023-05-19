@@ -126,7 +126,7 @@ public sealed class DefaultTrustServiceTests
     {
         // Arrange
         var trustService = new DefaultTrustService(true);
-        var promptTemplateConfig = new PromptTemplateConfig();
+        var promptTemplateConfig = new PromptTemplateConfig { IsSensitive = true };
         var promptTemplate = new Mock<IPromptTemplate>();
 
         // Mock this to make the context untrusted when the template is rendered
@@ -138,7 +138,7 @@ public sealed class DefaultTrustServiceTests
             .Setup(x => x.GetParameters())
             .Returns(new List<ParameterView>());
 
-        var functionConfig = new SemanticFunctionConfig(promptTemplateConfig, promptTemplate.Object, isSensitive: true);
+        var functionConfig = new SemanticFunctionConfig(promptTemplateConfig, promptTemplate.Object);
         var func = SKFunction.FromSemanticConfig(
             "exampleSkill",
             "exampleFunction",
@@ -217,7 +217,8 @@ public sealed class DefaultTrustServiceTests
     {
         [SKFunction("Function1", isSensitive: true)]
         public void Function1()
-        { }
+        {
+        }
     }
 
     private static Mock<ITextCompletion> MockAIService()
