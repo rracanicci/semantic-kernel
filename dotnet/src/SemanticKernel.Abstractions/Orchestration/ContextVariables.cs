@@ -173,6 +173,7 @@ public sealed class ContextVariables : IEnumerable<KeyValuePair<string, string>>
         // iterating in the map while updating it
         foreach (var item in this._variables.ToList())
         {
+            // Note: we don't use an internal setter for better multi-threading
             this._variables[item.Key] = new SensitiveString(item.Value.Value, false);
         }
     }
