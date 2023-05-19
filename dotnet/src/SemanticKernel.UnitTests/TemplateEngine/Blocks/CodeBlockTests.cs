@@ -327,7 +327,8 @@ public class CodeBlockTests
                 canary0 = GetAsTrustAwareString(ctx, "input");
                 canary1 = GetAsTrustAwareString(ctx, "var1");
                 canary2 = GetAsTrustAwareString(ctx, "var2");
-            });
+            })
+            .ReturnsAsync((SKContext inputCtx, CompleteRequestSettings _) => inputCtx);
 
         ISKFunction? outFunc = function.Object;
         this._skills.Setup(x => x.TryGetFunction(Func, out outFunc)).Returns(true);
@@ -370,7 +371,8 @@ public class CodeBlockTests
                 // Create a untrusted variable in the cloned context
                 // We expected this to make the main context also untrusted
                 ctx!.Variables.Set("untrusted key", "unstrusted content", false);
-            });
+            })
+            .ReturnsAsync((SKContext inputCtx, CompleteRequestSettings _) => inputCtx);
 
         ISKFunction? outFunc = function.Object;
         this._skills.Setup(x => x.TryGetFunction(Func, out outFunc)).Returns(true);

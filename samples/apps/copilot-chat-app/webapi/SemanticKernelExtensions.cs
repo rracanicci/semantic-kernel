@@ -122,6 +122,7 @@ internal static class SemanticKernelExtensions
                     {
                         httpClient.DefaultRequestHeaders.Add("api-key", config.Qdrant.Key);
                     }
+
                     return new QdrantMemoryStore(new QdrantVectorDbClient(
                         config.Qdrant.Host, config.Qdrant.VectorSize, port: config.Qdrant.Port, httpClient: httpClient, log: sp.GetRequiredService<ILogger<IQdrantVectorDbClient>>()));
                 });
