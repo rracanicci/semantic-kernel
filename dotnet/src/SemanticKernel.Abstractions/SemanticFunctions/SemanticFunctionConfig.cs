@@ -18,23 +18,15 @@ public sealed class SemanticFunctionConfig
     public IPromptTemplate PromptTemplate { get; }
 
     /// <summary>
-    /// Whether the function is set to be sensitive (default false).
-    /// </summary>
-    public bool IsSensitive { get; }
-
-    /// <summary>
     /// Constructor for SemanticFunctionConfig.
     /// </summary>
     /// <param name="config">Prompt template configuration.</param>
     /// <param name="template">Prompt template.</param>
-    /// <param name="isSensitive">Whether the function is set to be sensitive (default false).</param>
     public SemanticFunctionConfig(
         PromptTemplateConfig config,
-        IPromptTemplate template,
-        bool isSensitive = false)
+        IPromptTemplate template)
     {
         this.PromptTemplateConfig = config;
         this.PromptTemplate = template;
-        this.IsSensitive = isSensitive;
     }
 }
