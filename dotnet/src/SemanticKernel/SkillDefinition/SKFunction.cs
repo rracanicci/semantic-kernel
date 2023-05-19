@@ -158,7 +158,7 @@ public sealed class SKFunction : ISKFunction, IDisposable
             // Start with an empty delegate, so we can have a reference to func
             // to be used in the LocalFunc below
             // Before returning the delegateFunction will be updated to be LocalFunc
-            delegateFunction: delegate () { },
+            delegateFunction: delegate() { },
             parameters: functionConfig.PromptTemplate.GetParameters(),
             description: functionConfig.PromptTemplateConfig.Description,
             skillName: skillName,
