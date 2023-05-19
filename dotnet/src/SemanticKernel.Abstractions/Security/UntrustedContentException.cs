@@ -8,7 +8,9 @@ namespace Microsoft.SemanticKernel.Security;
 #pragma warning disable RCS1194 // Implement standard exception constructors
 
 /// <summary>
-/// Untrusted content exception.
+/// Untrusted content exception, used to warn about:
+/// - untrusted content in the context passed to any function
+/// - unstrusted prompts when using semantic functions
 /// </summary>
 public class UntrustedContentException : SKException
 {
