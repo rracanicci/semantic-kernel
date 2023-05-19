@@ -7,9 +7,9 @@ using Xunit;
 namespace SemanticKernel.UnitTests.Security;
 
 /// <summary>
-/// Unit tests of <see cref="SensitiveString"/>.
+/// Unit tests of <see cref="TrustAwareString"/>.
 /// </summary>
-public sealed class SensitiveStringTest
+public sealed class TrustAwareStringTest
 {
     [Fact]
     public void CreateNewWithDefaultTrustedSucceeds()
@@ -18,7 +18,7 @@ public sealed class SensitiveStringTest
         string anyValue = Guid.NewGuid().ToString();
 
         // Act
-        SensitiveString value = new SensitiveString(anyValue);
+        TrustAwareString value = new TrustAwareString(anyValue);
 
         // Assert
         Assert.Equal(anyValue, value.ToString());
@@ -30,7 +30,7 @@ public sealed class SensitiveStringTest
     public void CreateEmptySucceeds()
     {
         // Act
-        SensitiveString value = SensitiveString.Empty;
+        TrustAwareString value = TrustAwareString.Empty;
 
         // Assert
         Assert.Empty(value.ToString());
@@ -47,7 +47,7 @@ public sealed class SensitiveStringTest
         string anyValue = Guid.NewGuid().ToString();
 
         // Act
-        SensitiveString value = new SensitiveString(anyValue, isTrusted);
+        TrustAwareString value = new TrustAwareString(anyValue, isTrusted);
 
         // Assert
         Assert.Equal(anyValue, value.ToString());

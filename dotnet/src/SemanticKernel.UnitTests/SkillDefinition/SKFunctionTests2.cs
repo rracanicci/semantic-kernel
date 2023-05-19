@@ -1171,9 +1171,9 @@ public sealed class SKFunctionTests2
             return Task.FromResult(context.IsTrusted);
         }
 
-        public Task<SensitiveString> ValidatePromptAsync(ISKFunction func, SKContext context, string prompt)
+        public Task<TrustAwareString> ValidatePromptAsync(ISKFunction func, SKContext context, string prompt)
         {
-            return Task.FromResult(new SensitiveString(prompt, context.IsTrusted));
+            return Task.FromResult(new TrustAwareString(prompt, context.IsTrusted));
         }
     }
 }

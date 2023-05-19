@@ -67,7 +67,7 @@ public class DefaultTrustService : ITrustService
     /// but might have became untrusted by a function call included as part of the prompt template. So this sample implementation will
     /// check the context again using the sample ValidateContextAsync implementation.
     ///
-    /// Returns the prompt wrapped in a SensitiveString.
+    /// Returns the prompt wrapped in a TrustAwareString.
     ///
     /// NOTE: This is only a simple example implementation that propagates the trust checks using the trust flags from
     /// the variables. Another implementations might consider analyzing the content of the rendered prompt and the variables to decide if the prompt
@@ -76,13 +76,13 @@ public class DefaultTrustService : ITrustService
     /// <param name="func">Instance of the function being called</param>
     /// <param name="context">The current execution context</param>
     /// <param name="prompt">The current rendered prompt to be used with the completion client</param>
-    /// <returns>Should return a SensitiveString representing the final prompt to be used with the completion client.
-    /// The SensitiveString includes trust information</returns>
+    /// <returns>Should return a TrustAwareString representing the final prompt to be used with the completion client.
+    /// The TrustAwareString includes trust information</returns>
     /// <exception cref="UntrustedContentException">Raised when the context is untrusted and the function is sensitive</exception>
-    public Task<SensitiveString> ValidatePromptAsync(ISKFunction func, SKContext context, string prompt)
+    public Task<TrustAwareString> ValidatePromptAsync(ISKFunction func, SKContext context, string prompt)
     {
         var isTrusted = this.InternalValidation(func, context);
-        return Task.FromResult(new SensitiveString(
+        return Task.FromResult(new TrustAwareString(
             // This is only a sample implementation that directly returns the prompt
             prompt,
             // The content of the prompt will not be used in this example validation

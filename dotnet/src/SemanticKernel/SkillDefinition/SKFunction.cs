@@ -158,7 +158,7 @@ public sealed class SKFunction : ISKFunction, IDisposable
             // Start with an empty delegate, so we can have a reference to func
             // to be used in the LocalFunc below
             // Before returning the delegateFunction will be updated to be LocalFunc
-            delegateFunction: delegate() { },
+            delegateFunction: delegate () { },
             parameters: functionConfig.PromptTemplate.GetParameters(),
             description: functionConfig.PromptTemplateConfig.Description,
             skillName: skillName,
@@ -186,7 +186,7 @@ public sealed class SKFunction : ISKFunction, IDisposable
                 // Validates the rendered prompt before executing the completion
                 // The prompt template might have function calls that could result in the context becoming untrusted,
                 // this way this hook should check again if the context became untrusted
-                SensitiveString prompt = await func.TrustService.ValidatePromptAsync(func, context, renderedPrompt).ConfigureAwait(false);
+                TrustAwareString prompt = await func.TrustService.ValidatePromptAsync(func, context, renderedPrompt).ConfigureAwait(false);
 
                 string completion = await client.CompleteAsync(prompt.Value, requestSettings, context.CancellationToken).ConfigureAwait(false);
 

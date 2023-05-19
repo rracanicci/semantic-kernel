@@ -363,7 +363,7 @@ public class KernelTests
             throw new NotImplementedException();
         }
 
-        public Task<SensitiveString> ValidatePromptAsync(ISKFunction func, SKContext context, string prompt)
+        public Task<TrustAwareString> ValidatePromptAsync(ISKFunction func, SKContext context, string prompt)
         {
             throw new NotImplementedException();
         }

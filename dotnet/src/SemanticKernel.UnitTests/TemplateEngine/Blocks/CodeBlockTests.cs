@@ -315,18 +315,18 @@ public class CodeBlockTests
         variables.Set("input", "zero", false);
         variables.Set("var2", "due", false);
 
-        SensitiveString? canary0 = SensitiveString.Empty;
-        SensitiveString? canary1 = SensitiveString.Empty;
-        SensitiveString? canary2 = SensitiveString.Empty;
+        TrustAwareString? canary0 = TrustAwareString.Empty;
+        TrustAwareString? canary1 = TrustAwareString.Empty;
+        TrustAwareString? canary2 = TrustAwareString.Empty;
         var function = new Mock<ISKFunction>();
         function
             .Setup(x => x.InvokeAsync(It.IsAny<SKContext>(), It.IsAny<CompleteRequestSettings?>()))
             .Callback<SKContext, CompleteRequestSettings?>((ctx, _) =>
             {
                 // Capture the variables to check below
-                canary0 = GetAsSensitiveString(ctx, "input");
-                canary1 = GetAsSensitiveString(ctx, "var1");
-                canary2 = GetAsSensitiveString(ctx, "var2");
+                canary0 = GetAsTrustAwareString(ctx, "input");
+                canary1 = GetAsTrustAwareString(ctx, "var1");
+                canary2 = GetAsTrustAwareString(ctx, "var2");
             });
 
         ISKFunction? outFunc = function.Object;
@@ -384,11 +384,11 @@ public class CodeBlockTests
         Assert.False(context.IsTrusted);
     }
 
-    private static SensitiveString? GetAsSensitiveString(SKContext context, string name)
+    private static TrustAwareString? GetAsTrustAwareString(SKContext context, string name)
     {
         if (context.Variables.Get(name, out string value, out bool isTrusted))
         {
-            return new SensitiveString(value, isTrusted);
+            return new TrustAwareString(value, isTrusted);
         }
 
         return null;
