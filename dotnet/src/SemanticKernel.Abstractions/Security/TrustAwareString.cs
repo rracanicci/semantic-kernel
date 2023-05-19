@@ -6,12 +6,12 @@ namespace Microsoft.SemanticKernel.Security;
 /// A string wrapper that carries trust information.
 /// All field are readonly.
 /// </summary>
-public class SensitiveString
+public class TrustAwareString
 {
     /// <summary>
-    /// Create a new empty sensitive string (default trusted).
+    /// Create a new empty trust aware string (default trusted).
     /// </summary>
-    public static SensitiveString Empty => new SensitiveString(string.Empty, true);
+    public static TrustAwareString Empty => new TrustAwareString(string.Empty, true);
 
     /// <summary>
     /// The raw string value.
@@ -24,11 +24,11 @@ public class SensitiveString
     public bool IsTrusted { get; }
 
     /// <summary>
-    /// Create a new sensitive string.
+    /// Create a new trust aware string.
     /// </summary>
     /// <param name="value">The raw string value</param>
     /// <param name="isTrusted">Whether the raw string value is trusted or not</param>
-    public SensitiveString(string value, bool isTrusted = true)
+    public TrustAwareString(string value, bool isTrusted = true)
     {
         this.Value = value;
         this.IsTrusted = isTrusted;
