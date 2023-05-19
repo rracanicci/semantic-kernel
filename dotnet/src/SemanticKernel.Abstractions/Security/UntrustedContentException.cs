@@ -10,7 +10,7 @@ namespace Microsoft.SemanticKernel.Security;
 /// <summary>
 /// Untrusted content exception, used to warn about:
 /// - untrusted content in the context passed to any function
-/// - unstrusted prompts when using semantic functions
+/// - untrusted prompts when using semantic functions
 /// </summary>
 public class UntrustedContentException : SKException
 {
