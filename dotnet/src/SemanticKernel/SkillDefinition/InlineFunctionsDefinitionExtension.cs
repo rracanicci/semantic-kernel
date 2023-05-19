@@ -58,6 +58,7 @@ public static class InlineFunctionsDefinitionExtension
         {
             Description = description ?? "Generic function, unknown purpose",
             Type = "completion",
+            IsSensitive = isSensitive,
             Completion = new PromptTemplateConfig.CompletionConfig
             {
                 Temperature = temperature,
@@ -74,7 +75,6 @@ public static class InlineFunctionsDefinitionExtension
             config: config,
             functionName: functionName,
             skillName: skillName,
-            isSensitive: isSensitive,
             trustService: trustService);
     }
 
@@ -87,7 +87,6 @@ public static class InlineFunctionsDefinitionExtension
     /// <param name="functionName">A name for the given function. The name can be referenced in templates and used by the pipeline planner.</param>
     /// <param name="skillName">An optional skill name, e.g. to namespace functions with the same name. When empty,
     /// the function is added to the global namespace, overwriting functions with the same name</param>
-    /// <param name="isSensitive">Whether the function is set to be sensitive or not (default false)</param>
     /// <param name="trustService">Service used for trust checks (if null will use the default registered in the kernel)</param>
     /// <returns>A function ready to use</returns>
     public static ISKFunction CreateSemanticFunction(
@@ -96,7 +95,6 @@ public static class InlineFunctionsDefinitionExtension
         PromptTemplateConfig config,
         string? functionName = null,
         string skillName = "",
-        bool isSensitive = false,
         ITrustService? trustService = null)
     {
         functionName ??= RandomFunctionName();
@@ -106,7 +104,7 @@ public static class InlineFunctionsDefinitionExtension
         var template = new PromptTemplate(promptTemplate, config, kernel.PromptTemplateEngine);
 
         // Prepare lambda wrapping AI logic
-        var functionConfig = new SemanticFunctionConfig(config, template, isSensitive);
+        var functionConfig = new SemanticFunctionConfig(config, template);
 
         // TODO: manage overwrites, potentially error out
         return string.IsNullOrEmpty(skillName)

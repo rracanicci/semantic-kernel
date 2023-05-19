@@ -164,7 +164,7 @@ public sealed class SKFunction : ISKFunction, IDisposable
             skillName: skillName,
             functionName: functionName,
             isSemantic: true,
-            isSensitive: functionConfig.IsSensitive,
+            isSensitive: functionConfig.PromptTemplateConfig.IsSensitive,
             trustService: trustService,
             log: log
         );

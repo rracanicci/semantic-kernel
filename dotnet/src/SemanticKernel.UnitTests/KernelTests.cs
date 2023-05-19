@@ -167,9 +167,9 @@ public class KernelTests
         ITrustService trustService = new CustomTrustService();
         var kernel = Kernel.Builder.WithDefaultTrustService(trustService).Build();
         var factory = new Mock<Func<IKernel, ITextCompletion>>();
-        var promptTemplateConfig = new PromptTemplateConfig();
+        var promptTemplateConfig = new PromptTemplateConfig() { IsSensitive = true };
         var promptTemplate = new PromptTemplate("Tell me a joke", promptTemplateConfig, kernel);
-        var semanticFunctionConfig = new SemanticFunctionConfig(promptTemplateConfig, promptTemplate, isSensitive: true);
+        var semanticFunctionConfig = new SemanticFunctionConfig(promptTemplateConfig, promptTemplate);
 
         kernel.Config.AddTextCompletionService(factory.Object);
 
@@ -203,9 +203,9 @@ public class KernelTests
         ITrustService trustService = new CustomTrustService();
         var kernel = Kernel.Builder.Build();
         var factory = new Mock<Func<IKernel, ITextCompletion>>();
-        var promptTemplateConfig = new PromptTemplateConfig();
+        var promptTemplateConfig = new PromptTemplateConfig { IsSensitive = true };
         var promptTemplate = new PromptTemplate("Tell me a joke", promptTemplateConfig, kernel);
-        var semanticFunctionConfig = new SemanticFunctionConfig(promptTemplateConfig, promptTemplate, isSensitive: true);
+        var semanticFunctionConfig = new SemanticFunctionConfig(promptTemplateConfig, promptTemplate);
 
         kernel.Config.AddTextCompletionService(factory.Object);
 
@@ -237,9 +237,9 @@ public class KernelTests
         // Arrange
         var kernel = Kernel.Builder.Build();
         var factory = new Mock<Func<IKernel, ITextCompletion>>();
-        var promptTemplateConfig = new PromptTemplateConfig();
+        var promptTemplateConfig = new PromptTemplateConfig { IsSensitive = true };
         var promptTemplate = new PromptTemplate("Tell me a joke", promptTemplateConfig, kernel);
-        var semanticFunctionConfig = new SemanticFunctionConfig(promptTemplateConfig, promptTemplate, isSensitive: true);
+        var semanticFunctionConfig = new SemanticFunctionConfig(promptTemplateConfig, promptTemplate);
 
         kernel.Config.AddTextCompletionService(factory.Object);
 
