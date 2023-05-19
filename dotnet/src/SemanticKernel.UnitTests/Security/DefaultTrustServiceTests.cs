@@ -15,6 +15,9 @@ using Xunit;
 
 namespace SemanticKernel.UnitTests.Security;
 
+/// <summary>
+/// Unit tests of <see cref="DefaultTrustService"/>.
+/// </summary>
 public sealed class DefaultTrustServiceTests
 {
     [Fact]
