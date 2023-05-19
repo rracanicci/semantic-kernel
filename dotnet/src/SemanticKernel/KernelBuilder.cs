@@ -157,7 +157,7 @@ public sealed class KernelBuilder
     }
 
     /// <summary>
-    /// Use the given default trust service with the kernel to be build.
+    /// Use the given default trust service with the kernel to be built.
     /// Functions directly created through the kernel will use this trust service.
     /// If null, the created functions will rely on the DefaultTrustService implementation.
     /// </summary>
