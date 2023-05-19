@@ -24,7 +24,7 @@ public class DefaultTrustService : ITrustService
     private readonly bool _defaultTrusted;
 
     /// <summary>
-    /// Creates a new default trust handler.
+    /// Creates a new default trust service.
     /// </summary>
     /// <param name="defaultTrusted">If set to:
     /// - false: will cause the context/prompt to always be considered untrusted, meaning the output of the function will always be considered untrusted.
