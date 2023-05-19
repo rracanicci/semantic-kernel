@@ -94,8 +94,40 @@ public sealed class SKFunctionTests3
 
         // Assert
         Assert.IsType<DefaultTrustService>(function.TrustService);
+        Assert.False(function.IsSensitive);
         Assert.Equal("YES", context["canary"]);
         Assert.Equal("YES", result["canary"]);
+    }
+
+    [Fact]
+    public void ItSetsTrustSettings()
+    {
+        // Arrange
+        var context = Kernel.Builder.Build().CreateNewContext();
+
+        async Task<SKContext> ExecuteAsync(SKContext contextIn)
+        {
+            await Task.Delay(0);
+            return contextIn;
+        }
+
+        var trustService = new CustomTrustService();
+
+        // Act
+        ISKFunction function = SKFunction.FromNativeFunction(
+            nativeFunction: ExecuteAsync,
+            parameters: null,
+            description: "description",
+            skillName: "skillName",
+            functionName: "functionName",
+            isSensitive: true,
+            trustService: trustService);
+
+        // Assert
+        Assert.NotNull(function);
+        Assert.True(function.IsSensitive);
+        Assert.IsType<CustomTrustService>(function.TrustService);
+        Assert.Equal(trustService, function.TrustService);
     }
 
     [Fact]
