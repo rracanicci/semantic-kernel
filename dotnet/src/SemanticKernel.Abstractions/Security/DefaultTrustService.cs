@@ -41,7 +41,7 @@ public class DefaultTrustService : ITrustService
     /// an UntrustedContentException will be thrown to stop execution.
     ///
     /// This will return true if all the variables in context are flagged as trusted and if the service was created with defaultTrusted = true.
-    /// Meaning that if we want to force the result of a function to be unstrusted, we could create this service with defaultTrusted = false.
+    /// Meaning that if we want to force the result of a function to be untrusted, we could create this service with defaultTrusted = false.
     ///
     /// NOTE: This is only a simple example implementation that propagates the trust checks using the trust flags from
     /// the variables. Another implementations might consider analyzing the content of the variables to decide if the context is trusted or not, or even, update
@@ -53,15 +53,7 @@ public class DefaultTrustService : ITrustService
     /// <exception cref="UntrustedContentException">Raised when the context is untrusted and the function is sensitive</exception>
     public Task<bool> ValidateContextAsync(ISKFunction func, SKContext context)
     {
-        if (func.IsSensitive && !context.IsTrusted)
-        {
-            throw new UntrustedContentException(
-                UntrustedContentException.ErrorCodes.SensitiveFunctionWithUntrustedContent,
-                $"Could not run {func.SkillName}.{func.Name}, the function is sensitive and the input untrusted"
-            );
-        }
-        // If defaultTrusted == false, will always return false
-        return Task.FromResult(context.IsTrusted && this._defaultTrusted);
+        return Task.FromResult(this.InternalValidation(func, context));
     }
 
     /// <summary>
@@ -87,13 +79,29 @@ public class DefaultTrustService : ITrustService
     /// <returns>Should return a SensitiveString representing the final prompt to be used with the completion client.
     /// The SensitiveString includes trust information</returns>
     /// <exception cref="UntrustedContentException">Raised when the context is untrusted and the function is sensitive</exception>
-    public async Task<SensitiveString> ValidatePromptAsync(ISKFunction func, SKContext context, string prompt)
+    public Task<SensitiveString> ValidatePromptAsync(ISKFunction func, SKContext context, string prompt)
     {
-        return new SensitiveString(
+        var isTrusted = this.InternalValidation(func, context);
+        return Task.FromResult(new SensitiveString(
             // This is only a sample implementation that directly returns the prompt
             prompt,
             // The content of the prompt will not be used in this example validation
-            isTrusted: await this.ValidateContextAsync(func, context).ConfigureAwait(false)
-        );
+            isTrusted: isTrusted
+        ));
+    }
+
+    private bool InternalValidation(ISKFunction func, SKContext context)
+    {
+        bool contextIsTrusted = context.IsTrusted;
+        if (func.IsSensitive && !contextIsTrusted)
+        {
+            throw new UntrustedContentException(
+                UntrustedContentException.ErrorCodes.SensitiveFunctionWithUntrustedContent,
+                $"Could not run {func.SkillName}.{func.Name}, the function is sensitive and the input untrusted"
+            );
+        }
+
+        // If defaultTrusted == false, will always return false
+        return contextIsTrusted && this._defaultTrusted;
     }
 }

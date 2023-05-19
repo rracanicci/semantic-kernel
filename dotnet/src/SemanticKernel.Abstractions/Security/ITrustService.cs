@@ -36,7 +36,7 @@ public interface ITrustService
     /// consider the context to be trusted.
     ///
     /// This also gives an opportunity for the context to be updated or actions to be taken if
-    /// potention untrusted content is found. For example, sanitizing an untrusted variable and turning it into trusted.
+    /// potentially untrusted content is found. For example, sanitizing an untrusted variable and turning it into trusted.
     /// </summary>
     /// <param name="func">Instance of the function being called</param>
     /// <param name="context">The current execution context</param>
