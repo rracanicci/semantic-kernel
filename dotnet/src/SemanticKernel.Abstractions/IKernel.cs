@@ -47,9 +47,9 @@ public interface IKernel
     /// <summary>
     /// Default service for trust check events in case a specific one is not provided at function creation.
     /// Functions directly created through the kernel will use this trust service if no other is provided.
-    /// If null, the created functions will rely on the DefaultTrustService implementation.
+    /// If null, the created functions will rely on the TrustService.DefaultTrusted implementation.
     /// </summary>
-    ITrustService? DefaultTrustService { get; }
+    ITrustService? TrustServiceInstance { get; }
 
     /// <summary>
     /// Build and register a function in the internal skill collection, in a global generic skill.

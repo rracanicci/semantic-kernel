@@ -27,7 +27,7 @@ public sealed class KernelBuilder
     private IDelegatingHandlerFactory? _httpHandlerFactory = null;
     private IPromptTemplateEngine? _promptTemplateEngine;
     private readonly AIServiceCollection _aiServices = new();
-    private ITrustService? _defaultTrustService = null;
+    private ITrustService? _trustService = null;
 
     /// <summary>
     /// Create a new kernel instance
@@ -57,7 +57,7 @@ public sealed class KernelBuilder
             this._memory,
             this._config,
             this._logger,
-            this._defaultTrustService
+            this._trustService
         );
 
         // TODO: decouple this from 'UseMemory' kernel extension
@@ -159,13 +159,13 @@ public sealed class KernelBuilder
     /// <summary>
     /// Use the given default trust service with the kernel to be built.
     /// Functions directly created through the kernel will use this trust service.
-    /// If null, the created functions will rely on the DefaultTrustService implementation.
+    /// If null, the created functions will rely on the TrustService.DefaultTrusted implementation.
     /// </summary>
-    /// <param name="defaultTrustService">Default trust service to use.</param>
+    /// <param name="trustService">Trust service to use.</param>
     /// <returns>Updated kernel builder including the given service.</returns>
-    public KernelBuilder WithDefaultTrustService(ITrustService? defaultTrustService)
+    public KernelBuilder WithTrustService(ITrustService? trustService)
     {
-        this._defaultTrustService = defaultTrustService;
+        this._trustService = trustService;
         return this;
     }
 

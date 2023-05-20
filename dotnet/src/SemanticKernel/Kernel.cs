@@ -52,7 +52,7 @@ public sealed class Kernel : IKernel, IDisposable
     public IPromptTemplateEngine PromptTemplateEngine { get; }
 
     /// <inheritdoc/>
-    public ITrustService? DefaultTrustService => this._defaultTrustService;
+    public ITrustService? TrustServiceInstance => this._trustService;
 
     /// <summary>
     /// Return a new instance of the kernel builder, used to build and configure kernel instances.
@@ -68,7 +68,7 @@ public sealed class Kernel : IKernel, IDisposable
     /// <param name="memory"></param>
     /// <param name="config"></param>
     /// <param name="log"></param>
-    /// <param name="defaultTrustService"></param>
+    /// <param name="trustService"></param>
     public Kernel(
         ISkillCollection skillCollection,
         IAIServiceProvider aiServiceProvider,
@@ -76,7 +76,7 @@ public sealed class Kernel : IKernel, IDisposable
         ISemanticTextMemory memory,
         KernelConfig config,
         ILogger log,
-        ITrustService? defaultTrustService = null)
+        ITrustService? trustService = null)
     {
         this.Log = log;
         this.Config = config;
@@ -85,7 +85,7 @@ public sealed class Kernel : IKernel, IDisposable
         this._aiServiceProvider = aiServiceProvider;
         this._promptTemplateEngine = promptTemplateEngine;
         this._skillCollection = skillCollection;
-        this._defaultTrustService = defaultTrustService;
+        this._trustService = trustService;
     }
 
     /// <inheritdoc/>
@@ -124,7 +124,7 @@ public sealed class Kernel : IKernel, IDisposable
             skillInstance,
             skillName,
             // Use the default trust service registered if none is provided
-            trustService ?? this.DefaultTrustService,
+            trustService ?? this.TrustServiceInstance,
             this.Log
         );
         foreach (KeyValuePair<string, ISKFunction> f in skill)
@@ -325,7 +325,7 @@ public sealed class Kernel : IKernel, IDisposable
     private ISemanticTextMemory _memory;
     private readonly IPromptTemplateEngine _promptTemplateEngine;
     private readonly IAIServiceProvider _aiServiceProvider;
-    private ITrustService? _defaultTrustService;
+    private ITrustService? _trustService;
 
     private ISKFunction CreateSemanticFunction(
         string skillName,
@@ -345,7 +345,7 @@ public sealed class Kernel : IKernel, IDisposable
             functionName,
             functionConfig,
             // Use the default trust service registered if none is provided
-            trustService ?? this.DefaultTrustService,
+            trustService ?? this.TrustServiceInstance,
             this.Log
         );
 

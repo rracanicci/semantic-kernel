@@ -208,14 +208,14 @@ public class KernelTests
     }
 
     [Fact]
-    public void ItConfiguresCustomTrustServiceInFunctionsBySettingKernelDefaultTrustService()
+    public void ItConfiguresCustomTrustServiceInFunctionsBySettingKernelTrustService()
     {
         // Arrange
         ITrustService trustService = new CustomTrustService();
         var factory = new Mock<Func<(ILogger, KernelConfig), ITextCompletion>>();
         var kernel = Kernel.Builder
             .WithAIService<ITextCompletion>("x", factory.Object)
-            .WithDefaultTrustService(trustService).Build();
+            .WithTrustService(trustService).Build();
         var promptTemplateConfig = new PromptTemplateConfig() { IsSensitive = true };
         var promptTemplate = new PromptTemplate("Tell me a joke", promptTemplateConfig, kernel);
         var semanticFunctionConfig = new SemanticFunctionConfig(promptTemplateConfig, promptTemplate);
@@ -231,16 +231,16 @@ public class KernelTests
         var jokerFunc2 = (SKFunction)kernel.Skills.GetFunction("jk", "joker2");
 
         // Assert
-        Assert.NotNull(kernel.DefaultTrustService);
-        Assert.NotNull(sayHelloFunc.TrustService);
-        Assert.NotNull(jokerFunc0.TrustService);
-        Assert.NotNull(jokerFunc1.TrustService);
-        Assert.NotNull(jokerFunc1.TrustService);
-        Assert.Equal(trustService, kernel.DefaultTrustService);
-        Assert.Equal(trustService, sayHelloFunc.TrustService);
-        Assert.Equal(trustService, jokerFunc0.TrustService);
-        Assert.Equal(trustService, jokerFunc1.TrustService);
-        Assert.Equal(trustService, jokerFunc2.TrustService);
+        Assert.NotNull(kernel.TrustServiceInstance);
+        Assert.NotNull(sayHelloFunc.TrustServiceInstance);
+        Assert.NotNull(jokerFunc0.TrustServiceInstance);
+        Assert.NotNull(jokerFunc1.TrustServiceInstance);
+        Assert.NotNull(jokerFunc1.TrustServiceInstance);
+        Assert.Equal(trustService, kernel.TrustServiceInstance);
+        Assert.Equal(trustService, sayHelloFunc.TrustServiceInstance);
+        Assert.Equal(trustService, jokerFunc0.TrustServiceInstance);
+        Assert.Equal(trustService, jokerFunc1.TrustServiceInstance);
+        Assert.Equal(trustService, jokerFunc2.TrustServiceInstance);
     }
 
     [Fact]
@@ -266,15 +266,15 @@ public class KernelTests
         var jokerFunc2 = (SKFunction)kernel.Skills.GetFunction("jk", "joker2");
 
         // Assert
-        Assert.Null(kernel.DefaultTrustService);
-        Assert.NotNull(sayHelloFunc.TrustService);
-        Assert.NotNull(jokerFunc0.TrustService);
-        Assert.NotNull(jokerFunc1.TrustService);
-        Assert.NotNull(jokerFunc1.TrustService);
-        Assert.Equal(trustService, sayHelloFunc.TrustService);
-        Assert.Equal(trustService, jokerFunc0.TrustService);
-        Assert.Equal(trustService, jokerFunc1.TrustService);
-        Assert.Equal(trustService, jokerFunc2.TrustService);
+        Assert.Null(kernel.TrustServiceInstance);
+        Assert.NotNull(sayHelloFunc.TrustServiceInstance);
+        Assert.NotNull(jokerFunc0.TrustServiceInstance);
+        Assert.NotNull(jokerFunc1.TrustServiceInstance);
+        Assert.NotNull(jokerFunc1.TrustServiceInstance);
+        Assert.Equal(trustService, sayHelloFunc.TrustServiceInstance);
+        Assert.Equal(trustService, jokerFunc0.TrustServiceInstance);
+        Assert.Equal(trustService, jokerFunc1.TrustServiceInstance);
+        Assert.Equal(trustService, jokerFunc2.TrustServiceInstance);
     }
 
     [Fact]
@@ -299,15 +299,15 @@ public class KernelTests
         var jokerFunc2 = (SKFunction)kernel.Skills.GetFunction("jk", "joker2");
 
         // Assert
-        Assert.Null(kernel.DefaultTrustService);
-        Assert.NotNull(sayHelloFunc.TrustService);
-        Assert.NotNull(jokerFunc0.TrustService);
-        Assert.NotNull(jokerFunc1.TrustService);
-        Assert.NotNull(jokerFunc1.TrustService);
-        Assert.IsType<DefaultTrustService>(sayHelloFunc.TrustService);
-        Assert.IsType<DefaultTrustService>(jokerFunc0.TrustService);
-        Assert.IsType<DefaultTrustService>(jokerFunc1.TrustService);
-        Assert.IsType<DefaultTrustService>(jokerFunc2.TrustService);
+        Assert.Null(kernel.TrustServiceInstance);
+        Assert.NotNull(sayHelloFunc.TrustServiceInstance);
+        Assert.NotNull(jokerFunc0.TrustServiceInstance);
+        Assert.NotNull(jokerFunc1.TrustServiceInstance);
+        Assert.NotNull(jokerFunc1.TrustServiceInstance);
+        Assert.IsType<TrustService>(sayHelloFunc.TrustServiceInstance);
+        Assert.IsType<TrustService>(jokerFunc0.TrustServiceInstance);
+        Assert.IsType<TrustService>(jokerFunc1.TrustServiceInstance);
+        Assert.IsType<TrustService>(jokerFunc2.TrustServiceInstance);
     }
 
     public class MySkill
