@@ -36,15 +36,40 @@ public sealed class ContextVariables : IEnumerable<KeyValuePair<string, string>>
 
     /// <summary>
     /// Updates the main input text with the new value after a function is complete.
+    /// This overrides the trust state of the input with the isTrusted value.
     /// </summary>
     /// <param name="content">The new input value, for the next function in the pipeline, or as a result for the user
     /// if the pipeline reached the end.</param>
-    /// <param name="isTrusted">Whether the content is trusted or not (default true).</param>
+    /// <param name="isTrusted">Whether the content is trusted or not</param>
     /// <returns>The current instance</returns>
-    public ContextVariables Update(string? content, bool isTrusted = true)
+    public ContextVariables Update(string? content, bool isTrusted)
     {
         this._variables[MainKey] = new TrustAwareString(content ?? string.Empty, isTrusted);
         return this;
+    }
+
+    /// <summary>
+    /// Updates the main input text with the new value after a function is complete.
+    /// This keeps the current trust state of the main input.
+    /// </summary>
+    /// <param name="content">The new input value, for the next function in the pipeline, or as a result for the user
+    /// if the pipeline reached the end.</param>
+    /// <returns>The current instance</returns>
+    public ContextVariables Update(string? content)
+    {
+        return this.Update(content, this._variables[MainKey].IsTrusted);
+    }
+
+    /// <summary>
+    /// Updates the main input text with the new value after a function is complete.
+    /// This sets the main input as untrusted.
+    /// </summary>
+    /// <param name="content">The new input value, for the next function in the pipeline, or as a result for the user
+    /// if the pipeline reached the end.</param>
+    /// <returns>The current instance</returns>
+    public ContextVariables UpdateUntrusted(string? content)
+    {
+        return this.Update(content, false);
     }
 
     /// <summary>
@@ -227,21 +252,6 @@ public sealed class ContextVariables : IEnumerable<KeyValuePair<string, string>>
         this._variables.TryGetValue(MainKey, out var input) && !string.IsNullOrEmpty(input.Value)
             ? $"Variables = {this._variables.Count}, Input = {input}"
             : $"Variables = {this._variables.Count}";
-
-    /// <summary>
-    /// Updates the main input text with the new value after a function is complete.
-    /// Retain the trust boolean, e.g. don't allow to switch from Not Trusted to Trusted.
-    /// </summary>
-    /// <param name="content">The new input value, for the next function in the pipeline, or as a result for the user
-    /// if the pipeline reached the end.</param>
-    /// <param name="isTrusted">Whether the content is trusted or not (default true).</param>
-    /// <returns>The current instance</returns>
-    internal ContextVariables UpdateWithTrustCheck(string? content, bool isTrusted)
-    {
-        var currentTrust = this._variables[MainKey].IsTrusted;
-        this._variables[MainKey] = new TrustAwareString(content ?? string.Empty, currentTrust && isTrusted);
-        return this;
-    }
 
     #region private ================================================================================
 
