@@ -136,9 +136,9 @@ public sealed class SKContext
     /// <summary>
     /// Make all the variables stored in the context untrusted.
     /// </summary>
-    public void MakeAllUntrusted()
+    public void UntrustAll()
     {
-        this.Variables.MakeAllUntrusted();
+        this.Variables.UntrustAll();
     }
 
     /// <summary>
