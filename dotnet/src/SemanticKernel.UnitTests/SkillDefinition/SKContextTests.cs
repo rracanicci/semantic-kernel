@@ -65,7 +65,7 @@ public class SKContextTests
     }
 
     [Fact]
-    public void ItCanMakeAllUntrusted()
+    public void ItCanUntrustAll()
     {
         // Arrange
         var variables = new ContextVariables();
@@ -76,7 +76,7 @@ public class SKContextTests
         AssertIsInputTrusted(target.Variables, true);
 
         // Act
-        target.MakeAllUntrusted();
+        target.UntrustAll();
 
         // Assert
         Assert.False(target.IsTrusted);

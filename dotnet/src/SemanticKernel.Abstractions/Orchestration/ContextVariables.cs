@@ -192,7 +192,7 @@ public sealed class ContextVariables : IEnumerable<KeyValuePair<string, string>>
     /// <summary>
     /// Make all the variables stored in the context untrusted.
     /// </summary>
-    public void MakeAllUntrusted()
+    public void UntrustAll()
     {
         // Create a copy of the variables map iterator with ToList to avoid
         // iterating in the map while updating it

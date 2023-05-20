@@ -376,7 +376,7 @@ public class ContextVariablesTests
     }
 
     [Fact]
-    public void CallMakeAllUntrustedSucceeds()
+    public void CallUntrustAllSucceeds()
     {
         // Arrange
         string mainContent = Guid.NewGuid().ToString();
@@ -398,7 +398,7 @@ public class ContextVariablesTests
         AssertContextVariable(target, anyName1, anyContent1, true);
 
         // Act
-        target.MakeAllUntrusted();
+        target.UntrustAll();
 
         // Assert
         // Assert everything is now untrusted

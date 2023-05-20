@@ -644,7 +644,7 @@ public sealed class SKFunctionTests2
             cx.Variables.Update("x y z");
             cx["canary"] = s_expected;
             // Make all variables untrusted
-            cx.MakeAllUntrusted();
+            cx.UntrustAll();
         }
 
         var context = this.MockContext("");
