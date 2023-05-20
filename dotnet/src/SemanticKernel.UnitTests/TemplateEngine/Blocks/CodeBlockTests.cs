@@ -315,9 +315,9 @@ public class CodeBlockTests
         variables.Set("input", "zero", false);
         variables.Set("var2", "due", false);
 
-        TrustAwareString? canary0 = TrustAwareString.Empty;
-        TrustAwareString? canary1 = TrustAwareString.Empty;
-        TrustAwareString? canary2 = TrustAwareString.Empty;
+        TrustAwareString canary0 = TrustAwareString.Empty;
+        TrustAwareString canary1 = TrustAwareString.Empty;
+        TrustAwareString canary2 = TrustAwareString.Empty;
         var function = new Mock<ISKFunction>();
         function
             .Setup(x => x.InvokeAsync(It.IsAny<SKContext>(), It.IsAny<CompleteRequestSettings?>()))
@@ -386,13 +386,12 @@ public class CodeBlockTests
         Assert.False(context.IsTrusted);
     }
 
-    private static TrustAwareString? GetAsTrustAwareString(SKContext context, string name)
+    private static TrustAwareString GetAsTrustAwareString(SKContext context, string name)
     {
-        if (context.Variables.Get(name, out string value, out bool isTrusted))
-        {
-            return new TrustAwareString(value, isTrusted);
-        }
+        var exists = context.Variables.Get(name, out string value, out bool isTrusted);
 
-        return null;
+        Assert.True(exists);
+
+        return new TrustAwareString(value, isTrusted);
     }
 }

@@ -1,12 +1,14 @@
 ﻿// Copyright (c) Microsoft. All rights reserved.
 
+using System;
+
 namespace Microsoft.SemanticKernel.Security;
 
 /// <summary>
 /// A string wrapper that carries trust information.
 /// All field are readonly.
 /// </summary>
-public class TrustAwareString
+public class TrustAwareString : IEquatable<TrustAwareString>
 {
     /// <summary>
     /// Create a new empty trust aware string (default trusted).
@@ -37,5 +39,30 @@ public class TrustAwareString
     public override string ToString()
     {
         return this.Value;
+    }
+
+    public override bool Equals(object obj)
+    {
+        return (obj is TrustAwareString other) && this.Equals(other);
+    }
+
+    public bool Equals(TrustAwareString other)
+    {
+        return this.Value == other.Value && this.IsTrusted == other.IsTrusted;
+    }
+
+    public override int GetHashCode()
+    {
+        return HashCode.Combine(this.Value, this.IsTrusted);
+    }
+
+    public static bool operator ==(TrustAwareString left, TrustAwareString right)
+    {
+        return left.Equals(right);
+    }
+
+    public static bool operator !=(TrustAwareString left, TrustAwareString right)
+    {
+        return !(left == right);
     }
 }
