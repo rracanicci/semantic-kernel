@@ -219,10 +219,7 @@ public sealed class ContextVariables : IEnumerable<KeyValuePair<string, string>>
     public IEnumerator<KeyValuePair<string, string>> GetEnumerator()
     {
         // For now, return an iterator that does not directly expose the trust aware string
-        foreach (KeyValuePair<string, TrustAwareString> kv in this._variables)
-        {
-            yield return new KeyValuePair<string, string>(kv.Key, kv.Value.Value);
-        }
+        return this._variables.ToDictionary(kv => kv.Key, kv => kv.Value.Value).GetEnumerator();
     }
 
     IEnumerator IEnumerable.GetEnumerator()
