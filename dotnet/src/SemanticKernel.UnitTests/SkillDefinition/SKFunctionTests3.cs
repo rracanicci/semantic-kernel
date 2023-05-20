@@ -93,7 +93,7 @@ public sealed class SKFunctionTests3
         SKContext result = await function.InvokeAsync(context);
 
         // Assert
-        Assert.IsType<DefaultTrustService>(function.TrustService);
+        Assert.IsType<TrustService>(function.TrustServiceInstance);
         Assert.False(function.IsSensitive);
         Assert.Equal("YES", context["canary"]);
         Assert.Equal("YES", result["canary"]);
@@ -126,8 +126,8 @@ public sealed class SKFunctionTests3
         // Assert
         Assert.NotNull(function);
         Assert.True(function.IsSensitive);
-        Assert.IsType<CustomTrustService>(function.TrustService);
-        Assert.Equal(trustService, function.TrustService);
+        Assert.IsType<CustomTrustService>(function.TrustServiceInstance);
+        Assert.Equal(trustService, function.TrustServiceInstance);
     }
 
     [Fact]
@@ -187,8 +187,8 @@ public sealed class SKFunctionTests3
             trustService: trustService);
 
         // Assert
-        Assert.IsType<CustomTrustService>(function.TrustService);
-        Assert.Equal(trustService, function.TrustService);
+        Assert.IsType<CustomTrustService>(function.TrustServiceInstance);
+        Assert.Equal(trustService, function.TrustServiceInstance);
     }
 
     private sealed class InvalidSkill

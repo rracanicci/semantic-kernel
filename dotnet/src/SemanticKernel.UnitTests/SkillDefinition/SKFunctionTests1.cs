@@ -50,7 +50,7 @@ public sealed class SKFunctionTests1
 
         // Assert
         Assert.False(skFunction.IsSensitive);
-        Assert.IsType<DefaultTrustService>(skFunction.TrustService);
+        Assert.IsType<TrustService>(skFunction.TrustServiceInstance);
     }
 
     [Fact]
@@ -113,8 +113,8 @@ public sealed class SKFunctionTests1
         var skFunction = SKFunction.FromSemanticConfig("sk", "name", functionConfig, trustService: trustService);
 
         // Assert
-        Assert.IsType<CustomTrustService>(skFunction.TrustService);
-        Assert.Equal(trustService, skFunction.TrustService);
+        Assert.IsType<CustomTrustService>(skFunction.TrustServiceInstance);
+        Assert.Equal(trustService, skFunction.TrustServiceInstance);
     }
 
     private sealed class CustomTrustService : ITrustService

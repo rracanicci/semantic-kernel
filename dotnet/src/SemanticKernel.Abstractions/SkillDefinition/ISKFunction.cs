@@ -47,9 +47,9 @@ public interface ISKFunction
 
     /// <summary>
     /// Service used for trust check events.
-    /// This can be provided at function creation, if not, the DefaultTrustService implementation will be used.
+    /// This can be provided at function creation, if not, the TrustService.DefaultTrusted implementation will be used.
     /// </summary>
-    ITrustService TrustService { get; }
+    ITrustService TrustServiceInstance { get; }
 
     /// <summary>
     /// AI service settings

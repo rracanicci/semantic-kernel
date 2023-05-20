@@ -45,7 +45,7 @@ public sealed class SKFunction : ISKFunction, IDisposable
     public bool IsSensitive { get; }
 
     /// <inheritdoc/>
-    public ITrustService TrustService => this._trustService;
+    public ITrustService TrustServiceInstance => this._trustService;
 
     /// <inheritdoc/>
     public CompleteRequestSettings RequestSettings
@@ -64,7 +64,7 @@ public sealed class SKFunction : ISKFunction, IDisposable
     /// <param name="methodSignature">Signature of the method to invoke</param>
     /// <param name="methodContainerInstance">Object containing the method to invoke</param>
     /// <param name="skillName">SK skill name</param>
-    /// <param name="trustService">Service used for trust checks, if null the DefaultTrustService implementation will be used</param>
+    /// <param name="trustService">Service used for trust checks, if null the TrustService.DefaultTrusted implementation will be used</param>
     /// <param name="log">Application logger</param>
     /// <returns>SK function instance</returns>
     public static ISKFunction? FromNativeMethod(
@@ -106,7 +106,7 @@ public sealed class SKFunction : ISKFunction, IDisposable
     /// <param name="description">SK function description</param>
     /// <param name="parameters">SK function parameters</param>
     /// <param name="isSensitive">Whether the function is set to be sensitive (default false)</param>
-    /// <param name="trustService">Service used for trust checks, if null the DefaultTrustService implementation will be used</param>
+    /// <param name="trustService">Service used for trust checks, if null the TrustService.DefaultTrusted implementation will be used</param>
     /// <param name="log">Application logger</param>
     /// <returns>SK function instance</returns>
     public static ISKFunction FromNativeFunction(
@@ -141,7 +141,7 @@ public sealed class SKFunction : ISKFunction, IDisposable
     /// <param name="skillName">Name of the skill to which the function to create belongs.</param>
     /// <param name="functionName">Name of the function to create.</param>
     /// <param name="functionConfig">Semantic function configuration.</param>
-    /// <param name="trustService">Service used for trust checks, if null the DefaultTrustService implementation will be used</param>
+    /// <param name="trustService">Service used for trust checks, if null the TrustService.DefaultTrusted implementation will be used</param>
     /// <param name="log">Optional logger for the function.</param>
     /// <returns>SK function instance.</returns>
     public static ISKFunction FromSemanticConfig(
@@ -177,7 +177,7 @@ public sealed class SKFunction : ISKFunction, IDisposable
             Verify.NotNull(client);
 
             // Validates if the context is trusted before rendering the prompt
-            var isContextTrusted = await func.TrustService.ValidateContextAsync(func, context).ConfigureAwait(false);
+            var isContextTrusted = await func.TrustServiceInstance.ValidateContextAsync(func, context).ConfigureAwait(false);
 
             try
             {
@@ -186,7 +186,7 @@ public sealed class SKFunction : ISKFunction, IDisposable
                 // Validates the rendered prompt before executing the completion
                 // The prompt template might have function calls that could result in the context becoming untrusted,
                 // this way this hook should check again if the context became untrusted
-                TrustAwareString prompt = await func.TrustService.ValidatePromptAsync(func, context, renderedPrompt).ConfigureAwait(false);
+                TrustAwareString prompt = await func.TrustServiceInstance.ValidatePromptAsync(func, context, renderedPrompt).ConfigureAwait(false);
 
                 string completion = await client.CompleteAsync(prompt.Value, requestSettings, context.CancellationToken).ConfigureAwait(false);
 
@@ -378,7 +378,7 @@ public sealed class SKFunction : ISKFunction, IDisposable
         this._log = log ?? NullLogger.Instance;
 
         // If no trust service is specified, use the default implementation
-        this._trustService = trustService ?? new DefaultTrustService(true);
+        this._trustService = trustService ?? TrustService.DefaultTrusted;
 
         this._delegateType = delegateType;
         this._function = delegateFunction;
@@ -442,7 +442,7 @@ public sealed class SKFunction : ISKFunction, IDisposable
 
         // Validates if the context is trusted before executing the native call
         // In here, since there is no prompt to be rendered, ValidatePromptAsync is not called
-        var isContextTrusted = await this.TrustService.ValidateContextAsync(this, context).ConfigureAwait(false);
+        var isContextTrusted = await this.TrustServiceInstance.ValidateContextAsync(this, context).ConfigureAwait(false);
 
         switch (this._delegateType)
         {

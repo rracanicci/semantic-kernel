@@ -16,16 +16,16 @@ using Xunit;
 namespace SemanticKernel.UnitTests.Security;
 
 /// <summary>
-/// Unit tests of <see cref="DefaultTrustService"/>.
+/// Unit tests of <see cref="TrustService"/>.
 /// </summary>
-public sealed class DefaultTrustServiceTests
+public sealed class TrustServiceTests
 {
     [Fact]
     public async Task SemanticSensitiveFunctionShouldNotFailWithTrustedInputAsync()
     {
         // Arrange
-        ITrustService trustService = new DefaultTrustService(true);
-        var kernel = Kernel.Builder.WithDefaultTrustService(trustService).Build();
+        ITrustService trustService = TrustService.DefaultTrusted;
+        var kernel = Kernel.Builder.WithTrustService(trustService).Build();
         var factory = new Mock<Func<IKernel, ITextCompletion>>();
         var aiService = MockAIService();
         var context = new ContextVariables("my input");
@@ -54,8 +54,8 @@ public sealed class DefaultTrustServiceTests
     public async Task SemanticSensitiveFunctionShouldFailWithUntrustedInputAsync()
     {
         // Arrange
-        ITrustService trustService = new DefaultTrustService(true);
-        var kernel = Kernel.Builder.WithDefaultTrustService(trustService).Build();
+        ITrustService trustService = TrustService.DefaultTrusted;
+        var kernel = Kernel.Builder.WithTrustService(trustService).Build();
         var factory = new Mock<Func<IKernel, ITextCompletion>>();
         var aiService = MockAIService();
         // The input here is set as untrusted
@@ -76,7 +76,7 @@ public sealed class DefaultTrustServiceTests
         var result = await kernel.RunAsync(context, func);
 
         // Assert
-        // We expect the UntrustedContentException to be thrown using the DefaultTrustService
+        // We expect the UntrustedContentException to be thrown using the TrustService.DefaultTrusted
         Assert.True(result.ErrorOccurred);
         Assert.IsType<UntrustedContentException>(result.LastException);
         Assert.Equal(
@@ -91,8 +91,8 @@ public sealed class DefaultTrustServiceTests
         // Arrange
         // Here we are forcing the output of the function to always be untrusted with
         // defaultTrusted = false
-        ITrustService trustService = new DefaultTrustService(defaultTrusted: false);
-        var kernel = Kernel.Builder.WithDefaultTrustService(trustService).Build();
+        ITrustService trustService = TrustService.DefaultUntrusted;
+        var kernel = Kernel.Builder.WithTrustService(trustService).Build();
         var factory = new Mock<Func<IKernel, ITextCompletion>>();
         var aiService = MockAIService();
         var context = new ContextVariables("my input");
@@ -125,7 +125,7 @@ public sealed class DefaultTrustServiceTests
     public async Task SemanticSensitiveFunctionShouldFailWithUntrustedTemplateRenderAsync()
     {
         // Arrange
-        var trustService = new DefaultTrustService(true);
+        var trustService = TrustService.DefaultTrusted;
         var promptTemplateConfig = new PromptTemplateConfig { IsSensitive = true };
         var promptTemplate = new Mock<IPromptTemplate>();
 
@@ -166,8 +166,8 @@ public sealed class DefaultTrustServiceTests
     public async Task NativeSensitiveFunctionShouldNotFailWithTrustedInputAsync()
     {
         // Arrange
-        ITrustService trustService = new DefaultTrustService(true);
-        var kernel = Kernel.Builder.WithDefaultTrustService(trustService).Build();
+        ITrustService trustService = TrustService.DefaultTrusted;
+        var kernel = Kernel.Builder.WithTrustService(trustService).Build();
         var factory = new Mock<Func<IKernel, ITextCompletion>>();
         var aiService = MockAIService();
         var context = new ContextVariables("my input");
@@ -188,8 +188,8 @@ public sealed class DefaultTrustServiceTests
     public async Task NativeSensitiveFunctionShouldFailWithUntrustedInputAsync()
     {
         // Arrange
-        ITrustService trustService = new DefaultTrustService(true);
-        var kernel = Kernel.Builder.WithDefaultTrustService(trustService).Build();
+        ITrustService trustService = TrustService.DefaultTrusted;
+        var kernel = Kernel.Builder.WithTrustService(trustService).Build();
         var factory = new Mock<Func<IKernel, ITextCompletion>>();
         var aiService = MockAIService();
         // Here the input is untrusted
@@ -204,7 +204,7 @@ public sealed class DefaultTrustServiceTests
         var result = await kernel.RunAsync(context, func);
 
         // Assert
-        // We expect the DefaultTrustService to throw because the context became untrusted
+        // We expect the TrustService.DefaultTrusted to throw because the context became untrusted
         Assert.True(result.ErrorOccurred);
         Assert.IsType<UntrustedContentException>(result.LastException);
         Assert.Equal(
