@@ -13,8 +13,21 @@ namespace Microsoft.SemanticKernel.Security;
 ///
 /// When set, throws an exception to stop execution when sensitive functions try to run with untrusted content.
 /// </summary>
-public class DefaultTrustService : ITrustService
+public sealed class TrustService : ITrustService
 {
+    /// <summary>
+    /// Creates the default trusted implementation of the trust service.
+    /// The default trusted version will use the trust information of the variables in the context to decide
+    /// whether the result of the function call should be trusted or not.
+    /// </summary>
+    public static TrustService DefaultTrusted => new TrustService(true);
+
+    /// <summary>
+    /// Creates the default untrusted implementation of the trust service.
+    /// The default untrusted version will always force the result of the function call to be untrusted.
+    /// </summary>
+    public static TrustService DefaultUntrusted => new TrustService(false);
+
     /// <summary>
     /// If set to:
     /// - false: will cause the context/prompt to always be considered untrusted, meaning the output of the function will always be considered untrusted.
@@ -22,18 +35,6 @@ public class DefaultTrustService : ITrustService
     /// (trusted only if all the variables within the context are trusted).
     /// </summary>
     private readonly bool _defaultTrusted;
-
-    /// <summary>
-    /// Creates a new default trust service.
-    /// </summary>
-    /// <param name="defaultTrusted">If set to:
-    /// - false: will cause the context/prompt to always be considered untrusted, meaning the output of the function will always be considered untrusted.
-    /// - true: will use the trust information of the variables in the context to decide whether the context/prompt is trusted or not
-    /// (trusted only if all the variables within the context are trusted).</param>
-    public DefaultTrustService(bool defaultTrusted)
-    {
-        this._defaultTrusted = defaultTrusted;
-    }
 
     /// <summary>
     /// It will check if the provided context is trusted or not by only analysing the trust flag of all the variables stored on it. It will not look at the actual
@@ -88,6 +89,11 @@ public class DefaultTrustService : ITrustService
             // The content of the prompt will not be used in this example validation
             isTrusted: isTrusted
         ));
+    }
+
+    private TrustService(bool defaultTrusted)
+    {
+        this._defaultTrusted = defaultTrusted;
     }
 
     private bool InternalValidation(ISKFunction func, SKContext context)

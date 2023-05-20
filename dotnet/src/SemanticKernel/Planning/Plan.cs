@@ -87,7 +87,7 @@ public sealed class Plan : ISKFunction
 
     /// <inheritdoc/>
     [JsonIgnore]
-    public ITrustService TrustService { get; private set; } = new DefaultTrustService(true);
+    public ITrustService TrustServiceInstance { get; private set; } = TrustService.DefaultTrusted;
 
     /// <inheritdoc/>
     [JsonIgnore]
@@ -588,7 +588,7 @@ public sealed class Plan : ISKFunction
         this.Description = function.Description;
         this.IsSemantic = function.IsSemantic;
         this.IsSensitive = function.IsSensitive;
-        this.TrustService = function.TrustService;
+        this.TrustServiceInstance = function.TrustServiceInstance;
         this.RequestSettings = function.RequestSettings;
     }
 
