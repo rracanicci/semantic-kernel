@@ -224,7 +224,7 @@ public sealed class ContextVariables : IEnumerable<KeyValuePair<string, string>>
 
     [DebuggerBrowsable(DebuggerBrowsableState.Never)]
     internal string DebuggerDisplay =>
-        this._variables.TryGetValue(MainKey, out SensitiveString input) && !string.IsNullOrEmpty(input.Value) ?
+        this._variables.TryGetValue(MainKey, out var input) && !string.IsNullOrEmpty(input.Value) ?
             $"Variables = {this._variables.Count}, Input = {input.Value}" :
             $"Variables = {this._variables.Count}";
 
