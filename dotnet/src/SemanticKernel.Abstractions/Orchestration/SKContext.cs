@@ -210,12 +210,18 @@ public sealed class SKContext
     /// <param name="isResultTrusted">Whether the new result is trusted or not</param>
     internal void UpdateResult(string? stringResult, bool isResultTrusted)
     {
-        this.Variables.UpdateWithTrustCheck(
-            // Keep previous result if one is not provided
-            stringResult ?? this.Result,
-            // Use previous trust information to update
-            isTrusted: isResultTrusted
-        );
+        // Keep previous result if one is not provided
+        string newResult = stringResult ?? this.Result;
+
+        if (isResultTrusted)
+        {
+            this.Variables.Update(newResult);
+        }
+        else
+        {
+            // Force the result to be untrusted
+            this.Variables.UpdateUntrusted(newResult);
+        }
     }
 
     #endregion

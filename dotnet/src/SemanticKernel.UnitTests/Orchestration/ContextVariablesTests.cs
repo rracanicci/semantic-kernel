@@ -255,30 +255,39 @@ public class ContextVariablesTests
     }
 
     [Fact]
-    public void UpdateWithTrustCheckSucceeds()
+    public void UpdateAndKeepTrustSucceeds()
     {
         // Arrange
-        string anyContent = Guid.NewGuid().ToString();
-        string newContent = Guid.NewGuid().ToString();
-        string someOtherNewContent = Guid.NewGuid().ToString();
-        ContextVariables target = new(anyContent, true);
-
-        // Assert
-        AssertContextVariable(target, ContextVariables.MainKey, anyContent, true);
+        string trustedContent = Guid.NewGuid().ToString();
+        string untrustedContent = Guid.NewGuid().ToString();
+        ContextVariables trustedVar = new(Guid.NewGuid().ToString(), true);
+        ContextVariables untrustedVar = new(Guid.NewGuid().ToString(), false);
 
         // Act
-        target.UpdateWithTrustCheck(newContent, false);
+        trustedVar.Update(trustedContent);
+        untrustedVar.Update(untrustedContent);
 
         // Assert
-        // Should be now false after the update
-        AssertContextVariable(target, ContextVariables.MainKey, newContent, false);
+        AssertContextVariable(trustedVar, ContextVariables.MainKey, trustedContent, true);
+        AssertContextVariable(untrustedVar, ContextVariables.MainKey, untrustedContent, false);
+    }
+
+    [Fact]
+    public void UpdateUntrustedSucceeds()
+    {
+        // Arrange
+        string trustedContent = Guid.NewGuid().ToString();
+        string untrustedContent = Guid.NewGuid().ToString();
+        ContextVariables trustedVar = new(Guid.NewGuid().ToString(), true);
+        ContextVariables untrustedVar = new(Guid.NewGuid().ToString(), false);
 
         // Act
-        target.UpdateWithTrustCheck(someOtherNewContent, true);
+        trustedVar.UpdateUntrusted(trustedContent);
+        untrustedVar.UpdateUntrusted(untrustedContent);
 
         // Assert
-        // Should be kept false because it is already untrusted
-        AssertContextVariable(target, ContextVariables.MainKey, someOtherNewContent, false);
+        AssertContextVariable(trustedVar, ContextVariables.MainKey, trustedContent, false);
+        AssertContextVariable(untrustedVar, ContextVariables.MainKey, untrustedContent, false);
     }
 
     [Theory]
