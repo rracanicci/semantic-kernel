@@ -147,7 +147,7 @@ internal sealed class CodeBlock : Block, ICodeRendering
         // (e.g. concatenating strings A (trusted) and B (untrusted), will result in a string that is untrusted)
         if (!contextClone.IsTrusted)
         {
-            context.MakeAllUntrusted();
+            context.UntrustAll();
         }
 
         if (contextClone.ErrorOccurred)
