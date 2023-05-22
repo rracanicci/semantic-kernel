@@ -11,7 +11,7 @@ public class TrustAwareString
     /// <summary>
     /// Create a new empty trust aware string (default trusted).
     /// </summary>
-    public static TrustAwareString Empty => new TrustAwareString(string.Empty, true);
+    public static TrustAwareString Empty => new(string.Empty, true);
 
     /// <summary>
     /// The raw string value.
