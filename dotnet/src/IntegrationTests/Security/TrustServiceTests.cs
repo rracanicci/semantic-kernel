@@ -34,13 +34,13 @@ public sealed class TrustServiceTests
             kernel,
             functionName: "DefaultUntrustedEchoFunction",
             isSensitive: false,
-            trustService: new DefaultTrustService(false)
+            trustService: TrustService.DefaultUntrusted
         );
         var defaultTrustedEchoFunction = this.CreateSemanticEchoFunction(
             kernel,
             functionName: "DefaultTrustedEchoFunction",
             isSensitive: false,
-            trustService: new DefaultTrustService(true)
+            trustService: TrustService.DefaultTrusted
         );
 
         // Act
@@ -63,13 +63,13 @@ public sealed class TrustServiceTests
             kernel,
             functionName: "NotSensitiveEchoFunction",
             isSensitive: false,
-            trustService: new DefaultTrustService(false)
+            trustService: TrustService.DefaultUntrusted
         );
         var sensitiveEchoFunction = this.CreateSemanticEchoFunction(
             kernel,
             functionName: "SensitiveEchoFunction",
             isSensitive: true,
-            trustService: new DefaultTrustService(true)
+            trustService: TrustService.DefaultTrusted
         );
 
         // Act
@@ -89,12 +89,12 @@ public sealed class TrustServiceTests
         var defaultUntrustedEchoFunction = this.CreateNativeEchoFunction(
             kernel,
             isSensitive: false,
-            trustService: new DefaultTrustService(false)
+            trustService: TrustService.DefaultUntrusted
         );
         var defaultTrustedEchoFunction = this.CreateNativeEchoFunction(
             kernel,
             isSensitive: false,
-            trustService: new DefaultTrustService(true)
+            trustService: TrustService.DefaultTrusted
         );
 
         // Act
@@ -115,12 +115,12 @@ public sealed class TrustServiceTests
         var notSensitiveEchoFunction = this.CreateNativeEchoFunction(
             kernel,
             isSensitive: false,
-            trustService: new DefaultTrustService(false)
+            trustService: TrustService.DefaultUntrusted
         );
         var sensitiveEchoFunction = this.CreateNativeEchoFunction(
             kernel,
             isSensitive: true,
-            trustService: new DefaultTrustService(true)
+            trustService: TrustService.DefaultTrusted
         );
 
         // Act
@@ -244,7 +244,7 @@ public sealed class TrustServiceTests
         this.CreateNativeEchoFunction(
             kernel,
             isSensitive: true,
-            trustService: new DefaultTrustService(true)
+            trustService: TrustService.DefaultTrusted
         );
 
         var sensitiveEchoWithFunctionCallFunction = this.CreateSemanticEchoWithFunctionCallFunction(
@@ -272,7 +272,7 @@ public sealed class TrustServiceTests
         this.CreateNativeEchoFunction(
             kernel,
             isSensitive: true,
-            trustService: new DefaultTrustService(false) // Forces output to be untrusted
+            trustService: TrustService.DefaultUntrusted // Forces output to be untrusted
         );
 
         var sensitiveEchoWithFunctionCallFunction = this.CreateSemanticEchoWithFunctionCallFunction(
