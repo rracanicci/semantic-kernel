@@ -43,11 +43,15 @@ public class TrustAwareString : IEquatable<TrustAwareString>
 
     public override bool Equals(object obj)
     {
+        if (obj is null) return false;
+
         return (obj is TrustAwareString other) && this.Equals(other);
     }
 
-    public bool Equals(TrustAwareString other)
+    public bool Equals(TrustAwareString? other)
     {
+        if (other is null) return false;
+
         return this.Value == other.Value && this.IsTrusted == other.IsTrusted;
     }
 
@@ -56,12 +60,17 @@ public class TrustAwareString : IEquatable<TrustAwareString>
         return HashCode.Combine(this.Value, this.IsTrusted);
     }
 
-    public static bool operator ==(TrustAwareString left, TrustAwareString right)
+    public static bool operator ==(TrustAwareString? left, TrustAwareString? right)
     {
+        if (left is null)
+        {
+            return right is null;
+        }
+
         return left.Equals(right);
     }
 
-    public static bool operator !=(TrustAwareString left, TrustAwareString right)
+    public static bool operator !=(TrustAwareString? left, TrustAwareString? right)
     {
         return !(left == right);
     }

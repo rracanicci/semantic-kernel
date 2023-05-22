@@ -104,7 +104,7 @@ public class ContextVariablesTests
         target.Set(anyName, anyContent);
 
         // Assert
-        Assert.True(target.Get(anyName, out string _));
+        Assert.True(target.Get(anyName, out _));
     }
 
     [Fact]
@@ -120,7 +120,7 @@ public class ContextVariablesTests
         target.Set(anyName, anyContent);
 
         // Assert
-        Assert.True(target.Get(anyName, out string _));
+        Assert.True(target.Get(anyName, out _));
     }
 
     [Fact]
@@ -136,7 +136,7 @@ public class ContextVariablesTests
         target[anyName] = anyContent;
 
         // Assert
-        Assert.True(target.Get(anyName, out string _));
+        Assert.True(target.Get(anyName, out _));
     }
 
     [Fact]
@@ -152,7 +152,7 @@ public class ContextVariablesTests
         target.Set(anyName, anyContent);
 
         // Assert
-        Assert.True(target.Get(anyName, out string _));
+        Assert.True(target.Get(anyName, out _));
     }
 
     [Fact]
@@ -167,7 +167,7 @@ public class ContextVariablesTests
         target.Set(anyName, anyContent);
 
         // Assert
-        Assert.True(target.Get(anyName, out string _));
+        Assert.True(target.Get(anyName, out _));
     }
 
     [Fact]
@@ -182,7 +182,28 @@ public class ContextVariablesTests
         target.Set(anyName, anyContent);
 
         // Assert
-        Assert.True(target.Get(anyName, out string _));
+        Assert.True(target.Get(anyName, out _));
+    }
+
+    [Fact]
+    public void SetWithNullValueErasesSucceeds()
+    {
+        // Arrange
+        string anyName = Guid.NewGuid().ToString();
+        string anyContent = Guid.NewGuid().ToString();
+        ContextVariables target = new();
+
+        // Act
+        target.Set(anyName, anyContent);
+
+        // Assert
+        AssertContextVariable(target, anyName, anyContent, true);
+
+        // Act - Erase entry
+        target.Set(anyName, null);
+
+        // Assert - Should have been erased
+        Assert.False(target.Get(anyName, out _));
     }
 
     [Fact]
