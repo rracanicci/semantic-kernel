@@ -86,12 +86,12 @@ public sealed class TrustServiceTests
         var valueToEcho = "Hello AI :)";
         var kernel = this.InitializeKernel();
 
-        var defaultUntrustedEchoFunction = CreateNativeEchoFunction(
+        var defaultUntrustedEchoFunction = this.CreateNativeEchoFunction(
             kernel,
             isSensitive: false,
             trustService: new DefaultTrustService(false)
         );
-        var defaultTrustedEchoFunction = CreateNativeEchoFunction(
+        var defaultTrustedEchoFunction = this.CreateNativeEchoFunction(
             kernel,
             isSensitive: false,
             trustService: new DefaultTrustService(true)
@@ -112,12 +112,12 @@ public sealed class TrustServiceTests
         var valueToEcho = "Hello AI :)";
         var kernel = this.InitializeKernel();
 
-        var notSensitiveEchoFunction = CreateNativeEchoFunction(
+        var notSensitiveEchoFunction = this.CreateNativeEchoFunction(
             kernel,
             isSensitive: false,
             trustService: new DefaultTrustService(false)
         );
-        var sensitiveEchoFunction = CreateNativeEchoFunction(
+        var sensitiveEchoFunction = this.CreateNativeEchoFunction(
             kernel,
             isSensitive: true,
             trustService: new DefaultTrustService(true)
@@ -381,9 +381,7 @@ public sealed class TrustServiceTests
         [SKFunction("Echoes a given text", isSensitive: false)]
         public string NotSensitiveEcho(SKContext context)
         {
-            string extraVar;
-
-            context.Variables.Get("extraVar", out extraVar);
+            context.Variables.Get("extraVar", out string extraVar);
 
             return context.Variables.Input + extraVar;
         }
@@ -391,9 +389,7 @@ public sealed class TrustServiceTests
         [SKFunction("Echoes a given text", isSensitive: true)]
         public string SensitiveEcho(SKContext context)
         {
-            string extraVar;
-
-            context.Variables.Get("extraVar", out extraVar);
+            context.Variables.Get("extraVar", out string extraVar);
 
             return context.Variables.Input + extraVar;
         }

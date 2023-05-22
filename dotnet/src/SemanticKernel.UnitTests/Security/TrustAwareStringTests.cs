@@ -18,7 +18,7 @@ public sealed class TrustAwareStringTest
         string anyValue = Guid.NewGuid().ToString();
 
         // Act
-        TrustAwareString value = new TrustAwareString(anyValue);
+        TrustAwareString value = new(anyValue);
 
         // Assert
         Assert.Equal(anyValue, value.ToString());
@@ -47,7 +47,7 @@ public sealed class TrustAwareStringTest
         string anyValue = Guid.NewGuid().ToString();
 
         // Act
-        TrustAwareString value = new TrustAwareString(anyValue, isTrusted);
+        TrustAwareString value = new(anyValue, isTrusted);
 
         // Assert
         Assert.Equal(anyValue, value.ToString());
