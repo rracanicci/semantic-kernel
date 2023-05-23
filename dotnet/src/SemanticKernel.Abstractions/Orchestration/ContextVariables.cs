@@ -38,7 +38,7 @@ public sealed class ContextVariables : IEnumerable<KeyValuePair<string, TrustAwa
     /// By default the content will be trusted.
     /// </summary>
     /// <param name="content">Optional value for the main variable of the context.</param>
-    public ContextVariables(string content) : this(TrustAwareString.Trusted(content)) { }
+    public ContextVariables(string? content) : this(TrustAwareString.Trusted(content)) { }
 
     /// <summary>
     /// Updates the main input text with the new value after a function is complete.
@@ -127,22 +127,17 @@ public sealed class ContextVariables : IEnumerable<KeyValuePair<string, TrustAwa
     /// Fetch a variable value and if its content is trusted from the context variables.
     /// </summary>
     /// <param name="name">Variable name</param>
-    /// <param name="value">Value</param>
-    /// <param name="isTrusted">Whether the variable value is trusted or not</param>
+    /// <param name="trustAwareValue">Variable value as a string with trust information</param>
     /// <returns>Whether the value exists in the context variables</returns>
-    public bool Get(string name, out string value, out bool isTrusted)
+    public bool Get(string name, out TrustAwareString trustAwareValue)
     {
-        TrustAwareString result;
-
-        if (this._variables.TryGetValue(name, out result!))
+        if (this._variables.TryGetValue(name, out TrustAwareString result))
         {
-            value = result.Value;
-            isTrusted = result.IsTrusted;
+            trustAwareValue = result;
             return true;
         }
 
-        value = string.Empty;
-        isTrusted = true;
+        trustAwareValue = TrustAwareString.Empty;
 
         return false;
     }
@@ -155,7 +150,11 @@ public sealed class ContextVariables : IEnumerable<KeyValuePair<string, TrustAwa
     /// <returns>Whether the value exists in the context variables</returns>
     public bool Get(string name, out string value)
     {
-        return this.Get(name, out value, out _);
+        var exists = this.Get(name, out TrustAwareString trustAwareValue);
+
+        value = trustAwareValue.Value;
+
+        return exists;
     }
 
     /// <summary>

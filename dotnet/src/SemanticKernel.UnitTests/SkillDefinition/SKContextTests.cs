@@ -169,11 +169,7 @@ public class SKContextTests
 
     private static void AssertIsInputTrusted(ContextVariables variables, bool expectedIsTrusted)
     {
-        var exists = variables.Get(ContextVariables.MainKey, out _, out bool isTrusted);
-
-        // Assert the variable exists
-        Assert.True(exists);
         // Assert isTrusted matches
-        Assert.Equal(expectedIsTrusted, isTrusted);
+        Assert.Equal(expectedIsTrusted, variables.Input.IsTrusted);
     }
 }

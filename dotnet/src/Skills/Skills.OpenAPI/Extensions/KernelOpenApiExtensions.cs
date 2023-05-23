@@ -273,7 +273,7 @@ public static class KernelOpenApiExtensions
                 foreach (var parameter in restOperationParameters)
                 {
                     // A try to resolve argument by alternative parameter name
-                    if (!string.IsNullOrEmpty(parameter.AlternativeName) && context.Variables.Get(parameter.AlternativeName!, out var value))
+                    if (!string.IsNullOrEmpty(parameter.AlternativeName) && context.Variables.Get(parameter.AlternativeName!, out string value))
                     {
                         arguments.Add(parameter.Name, value);
                         continue;

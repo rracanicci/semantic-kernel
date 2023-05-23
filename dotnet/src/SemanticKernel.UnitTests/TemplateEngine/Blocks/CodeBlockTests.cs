@@ -388,10 +388,10 @@ public class CodeBlockTests
 
     private static TrustAwareString GetAsTrustAwareString(SKContext context, string name)
     {
-        var exists = context.Variables.Get(name, out string value, out bool isTrusted);
+        var exists = context.Variables.Get(name, out TrustAwareString trustAwareValue);
 
         Assert.True(exists);
 
-        return new TrustAwareString(value, isTrusted);
+        return trustAwareValue;
     }
 }

@@ -105,7 +105,8 @@ public class ContextVariablesTests
         target.Set(anyName, anyContent);
 
         // Assert
-        Assert.True(target.Get(anyName, out _));
+        Assert.True(target.Get(anyName, out string _));
+        Assert.True(target.Get(anyName, out TrustAwareString _));
     }
 
     [Fact]
@@ -121,7 +122,8 @@ public class ContextVariablesTests
         target.Set(anyName, anyContent);
 
         // Assert
-        Assert.True(target.Get(anyName, out _));
+        Assert.True(target.Get(anyName, out string _));
+        Assert.True(target.Get(anyName, out TrustAwareString _));
     }
 
     [Fact]
@@ -137,7 +139,8 @@ public class ContextVariablesTests
         target[anyName] = anyContent;
 
         // Assert
-        Assert.True(target.Get(anyName, out _));
+        Assert.True(target.Get(anyName, out string _));
+        Assert.True(target.Get(anyName, out TrustAwareString _));
     }
 
     [Fact]
@@ -153,7 +156,8 @@ public class ContextVariablesTests
         target.Set(anyName, anyContent);
 
         // Assert
-        Assert.True(target.Get(anyName, out _));
+        Assert.True(target.Get(anyName, out string _));
+        Assert.True(target.Get(anyName, out TrustAwareString _));
     }
 
     [Fact]
@@ -168,7 +172,8 @@ public class ContextVariablesTests
         target.Set(anyName, anyContent);
 
         // Assert
-        Assert.True(target.Get(anyName, out _));
+        Assert.True(target.Get(anyName, out string _));
+        Assert.True(target.Get(anyName, out TrustAwareString _));
     }
 
     [Fact]
@@ -183,7 +188,8 @@ public class ContextVariablesTests
         target.Set(anyName, anyContent);
 
         // Assert
-        Assert.True(target.Get(anyName, out _));
+        Assert.True(target.Get(anyName, out string _));
+        Assert.True(target.Get(anyName, out TrustAwareString _));
     }
 
     [Fact]
@@ -204,7 +210,45 @@ public class ContextVariablesTests
         target.Set(anyName, null);
 
         // Assert - Should have been erased
-        Assert.False(target.Get(anyName, out _));
+        Assert.False(target.Get(anyName, out string _));
+        Assert.False(target.Get(anyName, out TrustAwareString _));
+    }
+
+    [Fact]
+    public void GetWithTrustAwareStringSucceeds()
+    {
+        // Arrange
+        string mainContent = Guid.NewGuid().ToString();
+        string anyName = Guid.NewGuid().ToString();
+        string anyContent = Guid.NewGuid().ToString();
+        ContextVariables target = new(mainContent);
+
+        // Act
+        target.Set(anyName, TrustAwareString.Untrusted(anyContent));
+
+        // Assert
+        Assert.True(target.Get(anyName, out TrustAwareString trustAwareValue));
+        Assert.Equal(anyContent, trustAwareValue.Value);
+        Assert.False(trustAwareValue.IsTrusted);
+        Assert.Equal(mainContent, target.Input.Value);
+    }
+
+    [Fact]
+    public void GetWithStringSucceeds()
+    {
+        // Arrange
+        string mainContent = Guid.NewGuid().ToString();
+        string anyName = Guid.NewGuid().ToString();
+        string anyContent = Guid.NewGuid().ToString();
+        ContextVariables target = new(mainContent);
+
+        // Act
+        target.Set(anyName, TrustAwareString.Untrusted(anyContent));
+
+        // Assert
+        Assert.True(target.Get(anyName, out string value));
+        Assert.Equal(anyContent, value);
+        Assert.Equal(mainContent, target.Input.Value);
     }
 
     [Fact]
@@ -350,12 +394,19 @@ public class ContextVariablesTests
         ContextVariables target = new();
 
         // Act
-        var exists = target.Get(anyName, out string value, out bool isTrusted);
+        var exists = target.Get(anyName, out TrustAwareString trustAwareValue);
+
+        // Assert
+        Assert.False(exists);
+        Assert.Empty(trustAwareValue.Value);
+        Assert.True(trustAwareValue.IsTrusted);
+
+        // Act
+        exists = target.Get(anyName, out string value);
 
         // Assert
         Assert.False(exists);
         Assert.Empty(value);
-        Assert.True(isTrusted);
     }
 
     [Fact]
@@ -445,13 +496,13 @@ public class ContextVariablesTests
 
     private static void AssertContextVariable(ContextVariables variables, string name, string expectedValue, bool expectedIsTrusted)
     {
-        var exists = variables.Get(name, out var value, out bool isTrusted);
+        var exists = variables.Get(name, out TrustAwareString trustAwareValue);
 
         // Assert the variable exists
         Assert.True(exists);
         // Assert the value matches
-        Assert.Equal(expectedValue, value);
+        Assert.Equal(expectedValue, trustAwareValue.Value);
         // Assert isTrusted matches
-        Assert.Equal(expectedIsTrusted, isTrusted);
+        Assert.Equal(expectedIsTrusted, trustAwareValue.IsTrusted);
     }
 }
