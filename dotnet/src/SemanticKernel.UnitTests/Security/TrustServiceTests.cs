@@ -4,6 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
+using Microsoft.Extensions.Logging;
 using Microsoft.SemanticKernel;
 using Microsoft.SemanticKernel.AI.TextCompletion;
 using Microsoft.SemanticKernel.Orchestration;
@@ -25,13 +26,14 @@ public sealed class TrustServiceTests
     {
         // Arrange
         ITrustService trustService = TrustService.DefaultTrusted;
-        var kernel = Kernel.Builder.WithTrustService(trustService).Build();
-        var factory = new Mock<Func<IKernel, ITextCompletion>>();
+        var factory = new Mock<Func<(ILogger, KernelConfig), ITextCompletion>>();
+        var kernel = Kernel.Builder
+            .WithAIService<ITextCompletion>("x", factory.Object)
+            .WithTrustService(trustService).Build();
         var aiService = MockAIService();
         var context = new ContextVariables("my input");
 
-        factory.Setup(x => x.Invoke(kernel)).Returns(aiService.Object);
-        kernel.Config.AddTextCompletionService(factory.Object);
+        factory.Setup(x => x.Invoke(It.IsAny<(ILogger, KernelConfig)>())).Returns(aiService.Object);
 
         var func = kernel.CreateSemanticFunction(
             "Tell me a joke",
@@ -55,14 +57,15 @@ public sealed class TrustServiceTests
     {
         // Arrange
         ITrustService trustService = TrustService.DefaultTrusted;
-        var kernel = Kernel.Builder.WithTrustService(trustService).Build();
-        var factory = new Mock<Func<IKernel, ITextCompletion>>();
+        var factory = new Mock<Func<(ILogger, KernelConfig), ITextCompletion>>();
+        var kernel = Kernel.Builder
+            .WithAIService<ITextCompletion>("x", factory.Object)
+            .WithTrustService(trustService).Build();
         var aiService = MockAIService();
         // The input here is set as untrusted
         var context = new ContextVariables("my input", false);
 
-        factory.Setup(x => x.Invoke(kernel)).Returns(aiService.Object);
-        kernel.Config.AddTextCompletionService(factory.Object);
+        factory.Setup(x => x.Invoke(It.IsAny<(ILogger, KernelConfig)>())).Returns(aiService.Object);
 
         var func = kernel.CreateSemanticFunction(
             "Tell me a joke",
@@ -92,13 +95,14 @@ public sealed class TrustServiceTests
         // Here we are forcing the output of the function to always be untrusted with
         // defaultTrusted = false
         ITrustService trustService = TrustService.DefaultUntrusted;
-        var kernel = Kernel.Builder.WithTrustService(trustService).Build();
-        var factory = new Mock<Func<IKernel, ITextCompletion>>();
+        var factory = new Mock<Func<(ILogger, KernelConfig), ITextCompletion>>();
+        var kernel = Kernel.Builder
+            .WithAIService<ITextCompletion>("x", factory.Object)
+            .WithTrustService(trustService).Build();
         var aiService = MockAIService();
         var context = new ContextVariables("my input");
 
-        factory.Setup(x => x.Invoke(kernel)).Returns(aiService.Object);
-        kernel.Config.AddTextCompletionService(factory.Object);
+        factory.Setup(x => x.Invoke(It.IsAny<(ILogger, KernelConfig)>())).Returns(aiService.Object);
 
         var func = kernel.CreateSemanticFunction(
             "Tell me a joke",
@@ -167,13 +171,14 @@ public sealed class TrustServiceTests
     {
         // Arrange
         ITrustService trustService = TrustService.DefaultTrusted;
-        var kernel = Kernel.Builder.WithTrustService(trustService).Build();
-        var factory = new Mock<Func<IKernel, ITextCompletion>>();
+        var factory = new Mock<Func<(ILogger, KernelConfig), ITextCompletion>>();
+        var kernel = Kernel.Builder
+            .WithAIService<ITextCompletion>("x", factory.Object)
+            .WithTrustService(trustService).Build();
         var aiService = MockAIService();
         var context = new ContextVariables("my input");
 
-        factory.Setup(x => x.Invoke(kernel)).Returns(aiService.Object);
-        kernel.Config.AddTextCompletionService(factory.Object);
+        factory.Setup(x => x.Invoke(It.IsAny<(ILogger, KernelConfig)>())).Returns(aiService.Object);
 
         var func = kernel.ImportSkill(new MySkill(), nameof(MySkill))["Function1"];
 
@@ -189,14 +194,15 @@ public sealed class TrustServiceTests
     {
         // Arrange
         ITrustService trustService = TrustService.DefaultTrusted;
-        var kernel = Kernel.Builder.WithTrustService(trustService).Build();
-        var factory = new Mock<Func<IKernel, ITextCompletion>>();
+        var factory = new Mock<Func<(ILogger, KernelConfig), ITextCompletion>>();
+        var kernel = Kernel.Builder
+            .WithAIService<ITextCompletion>("x", factory.Object)
+            .WithTrustService(trustService).Build();
         var aiService = MockAIService();
         // Here the input is untrusted
         var context = new ContextVariables("my input", false);
 
-        factory.Setup(x => x.Invoke(kernel)).Returns(aiService.Object);
-        kernel.Config.AddTextCompletionService(factory.Object);
+        factory.Setup(x => x.Invoke(It.IsAny<(ILogger, KernelConfig)>())).Returns(aiService.Object);
 
         var func = kernel.ImportSkill(new MySkill(), nameof(MySkill))["Function1"];
 

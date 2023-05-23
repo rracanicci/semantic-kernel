@@ -295,13 +295,13 @@ public sealed class TrustServiceTests
         Assert.NotNull(azureOpenAIConfiguration);
 
         var builder = Kernel.Builder
-            .Configure(config =>
-            {
-                config.AddAzureTextCompletionService(
-                            deploymentName: azureOpenAIConfiguration.DeploymentName,
-                            endpoint: azureOpenAIConfiguration.Endpoint,
-                            apiKey: azureOpenAIConfiguration.ApiKey);
-            });
+            .WithAzureTextCompletionService(
+                deploymentName: azureOpenAIConfiguration.DeploymentName,
+                endpoint: azureOpenAIConfiguration.Endpoint,
+                apiKey: azureOpenAIConfiguration.ApiKey,
+                serviceId: azureOpenAIConfiguration.ServiceId,
+                setAsDefault: true
+            );
 
         return builder.Build();
     }
