@@ -16,6 +16,20 @@ public class TrustAwareString : IEquatable<TrustAwareString>
     public static TrustAwareString Empty => new(string.Empty, true);
 
     /// <summary>
+    /// Create a new trusted string.
+    /// </summary>
+    /// <param name="value">The raw string value</param>
+    /// <returns>TrustAwareString</returns>
+    public static TrustAwareString Trusted(string? value) => new(value, true);
+
+    /// <summary>
+    /// Create a new untrusted string.
+    /// </summary>
+    /// <param name="value">The raw string value</param>
+    /// <returns>TrustAwareString</returns>
+    public static TrustAwareString Untrusted(string? value) => new(value, false);
+
+    /// <summary>
     /// The raw string value.
     /// </summary>
     public string Value { get; }
@@ -30,9 +44,9 @@ public class TrustAwareString : IEquatable<TrustAwareString>
     /// </summary>
     /// <param name="value">The raw string value</param>
     /// <param name="isTrusted">Whether the raw string value is trusted or not</param>
-    public TrustAwareString(string value, bool isTrusted = true)
+    public TrustAwareString(string? value, bool isTrusted = true)
     {
-        this.Value = value;
+        this.Value = value ?? string.Empty;
         this.IsTrusted = isTrusted;
     }
 
@@ -47,8 +61,14 @@ public class TrustAwareString : IEquatable<TrustAwareString>
         {
             return false;
         }
-
-        return (obj is TrustAwareString other) && this.Equals(other);
+        else if (obj is string str)
+        {
+            return this.Value == str;
+        }
+        else
+        {
+            return (obj is TrustAwareString trustAwareStr) && this.Equals(trustAwareStr);
+        }
     }
 
     public bool Equals(TrustAwareString? other)
@@ -80,4 +100,6 @@ public class TrustAwareString : IEquatable<TrustAwareString>
     {
         return !(left == right);
     }
+
+    public static implicit operator string(TrustAwareString s) => s.Value;
 }

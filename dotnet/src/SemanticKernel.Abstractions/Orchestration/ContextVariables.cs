@@ -17,12 +17,12 @@ namespace Microsoft.SemanticKernel.Orchestration;
 /// </summary>
 [DebuggerDisplay("{DebuggerDisplay,nq}")]
 [DebuggerTypeProxy(typeof(ContextVariables.TypeProxy))]
-public sealed class ContextVariables : IEnumerable<KeyValuePair<string, string>>
+public sealed class ContextVariables : IEnumerable<KeyValuePair<string, TrustAwareString>>
 {
     /// <summary>
     /// In the simplest scenario, the data is an input string, stored here.
     /// </summary>
-    public string Input => this._variables[MainKey].Value;
+    public TrustAwareString Input => this._variables[MainKey];
 
     /// <summary>
     /// Constructor for context variables.
@@ -166,7 +166,7 @@ public sealed class ContextVariables : IEnumerable<KeyValuePair<string, string>>
             // TODO: we could plan to replace string usages in the kernel
             // with TrustAwareString, so here "value" could directly be a trust aware string
             // including trust information
-            this._variables[name] = new TrustAwareString(value);
+            this._variables[name] = TrustAwareString.Trusted(value);
         }
     }
 
@@ -199,7 +199,7 @@ public sealed class ContextVariables : IEnumerable<KeyValuePair<string, string>>
         foreach (var item in this._variables.ToList())
         {
             // Note: we don't use an internal setter for better multi-threading
-            this._variables[item.Key] = new TrustAwareString(item.Value.Value, false);
+            this._variables[item.Key] = TrustAwareString.Untrusted(item.Value.Value);
         }
     }
 
@@ -216,10 +216,9 @@ public sealed class ContextVariables : IEnumerable<KeyValuePair<string, string>>
     /// Get an enumerator that iterates through the context variables.
     /// </summary>
     /// <returns>An enumerator that iterates through the context variables</returns>
-    public IEnumerator<KeyValuePair<string, string>> GetEnumerator()
+    public IEnumerator<KeyValuePair<string, TrustAwareString>> GetEnumerator()
     {
-        // For now, return an iterator that does not directly expose the trust aware string
-        return this._variables.ToDictionary(kv => kv.Key, kv => kv.Value.Value).GetEnumerator();
+        return this._variables.GetEnumerator();
     }
 
     IEnumerator IEnumerable.GetEnumerator()
@@ -264,7 +263,7 @@ public sealed class ContextVariables : IEnumerable<KeyValuePair<string, string>>
         public TypeProxy(ContextVariables variables) => this._variables = variables;
 
         [DebuggerBrowsable(DebuggerBrowsableState.RootHidden)]
-        public KeyValuePair<string, string>[] Items => this._variables._variables.ToDictionary(kv => kv.Key, kv => kv.Value.Value).ToArray();
+        public KeyValuePair<string, TrustAwareString>[] Items => this._variables._variables.ToArray();
     }
 
     #endregion

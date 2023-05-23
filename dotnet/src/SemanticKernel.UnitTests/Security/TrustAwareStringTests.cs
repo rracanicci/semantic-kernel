@@ -59,13 +59,14 @@ public sealed class TrustAwareStringTest
     public void EqualsAndGetHashCodeSucceeds()
     {
         // Arrange
-        var trustedValue0 = new TrustAwareString("some value 0", true);
-        var trustedValue0Copy = new TrustAwareString("some value 0", true);
-        var untrustedValue0 = new TrustAwareString("some value 0", false);
-        var untrustedValue0Copy = new TrustAwareString("some value 0", false);
-        var trustedValue1 = new TrustAwareString("some value 1", true);
-        var untrustedValue1 = new TrustAwareString("some value 1", true);
+        var trustedValue0 = TrustAwareString.Trusted("some value 0");
+        var trustedValue0Copy = TrustAwareString.Trusted("some value 0");
+        var untrustedValue0 = TrustAwareString.Untrusted("some value 0");
+        var untrustedValue0Copy = TrustAwareString.Untrusted("some value 0");
+        var trustedValue1 = TrustAwareString.Trusted("some value 1");
+        var untrustedValue1 = TrustAwareString.Trusted("some value 1");
         var stringValue0 = "some value 0";
+        int someObj = 10;
 
         // Act and assert
         Assert.True(trustedValue0.Equals(trustedValue0Copy));
@@ -80,7 +81,15 @@ public sealed class TrustAwareStringTest
         Assert.True(trustedValue0 != trustedValue1);
         Assert.True(untrustedValue0 != untrustedValue1);
 
-        Assert.False(trustedValue0.Equals(stringValue0));
+        // Uses override with object
+        // Comparison with string should work
+        Assert.True(trustedValue0.Equals(stringValue0));
+        // Comparison with int should not work
+        Assert.False(trustedValue0.Equals(someObj));
+
+        // Uses the implicit conversion
+        Assert.True(trustedValue0 == stringValue0);
+        Assert.True(stringValue0 == trustedValue0);
 
         Assert.Equal(trustedValue0.GetHashCode(), trustedValue0Copy.GetHashCode());
         Assert.NotEqual(trustedValue0.GetHashCode(), untrustedValue0.GetHashCode());
