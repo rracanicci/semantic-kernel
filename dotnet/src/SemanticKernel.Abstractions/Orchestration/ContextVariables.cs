@@ -92,22 +92,35 @@ public sealed class ContextVariables : IEnumerable<KeyValuePair<string, TrustAwa
     /// This method allows to store additional data in the context variables, e.g. variables needed by functions in the
     /// pipeline. These "variables" are visible also to semantic functions using the "{{varName}}" syntax, allowing
     /// to inject more information into prompt templates.
+    /// The string value includes trust information and will overwrite the trust information already stored for the variable.
     /// </summary>
     /// <param name="name">Variable name</param>
-    /// <param name="value">Value to store. If the value is NULL the variable is deleted.</param>
-    /// <param name="isTrusted">Whether the value's content is trusted or not (default true).</param>
-    /// TODO: support for more complex data types, and plan for rendering these values into prompt templates.
-    public void Set(string name, string? value, bool isTrusted = true)
+    /// <param name="trustAwareValue">Value to store. If the value is NULL the variable is deleted.</param>
+    public void Set(string name, TrustAwareString? trustAwareValue)
     {
         Verify.NotNullOrWhiteSpace(name);
-        if (value != null)
+        if (trustAwareValue != null)
         {
-            this._variables[name] = new TrustAwareString(value, isTrusted);
+            this._variables[name] = trustAwareValue;
         }
         else
         {
             this._variables.TryRemove(name, out _);
         }
+    }
+
+    /// <summary>
+    /// This method allows to store additional data in the context variables, e.g. variables needed by functions in the
+    /// pipeline. These "variables" are visible also to semantic functions using the "{{varName}}" syntax, allowing
+    /// to inject more information into prompt templates.
+    /// By default the variables' value will be trusted.
+    /// </summary>
+    /// <param name="name">Variable name</param>
+    /// <param name="value">Value to store</param>
+    /// TODO: support for more complex data types, and plan for rendering these values into prompt templates.
+    public void Set(string name, string value)
+    {
+        this.Set(name, TrustAwareString.Trusted(value));
     }
 
     /// <summary>
@@ -228,7 +241,7 @@ public sealed class ContextVariables : IEnumerable<KeyValuePair<string, TrustAwa
         var clone = new ContextVariables();
         foreach (KeyValuePair<string, TrustAwareString> x in this._variables)
         {
-            clone.Set(x.Key, x.Value.Value, x.Value.IsTrusted);
+            clone.Set(x.Key, x.Value);
         }
 
         return clone;

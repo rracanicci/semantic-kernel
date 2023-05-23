@@ -336,7 +336,7 @@ public class ContextVariablesTests
         ContextVariables target = new();
 
         // Act
-        target.Set(anyName, anyContent, isTrusted);
+        target.Set(anyName, new TrustAwareString(anyContent, isTrusted));
 
         // Assert
         AssertContextVariable(target, anyName, anyContent, isTrusted);
@@ -370,14 +370,14 @@ public class ContextVariablesTests
         ContextVariables target = new();
         ContextVariables original = new(TrustAwareString.Untrusted(mainContent));
 
-        original.Set(anyName, anyContent, false);
+        original.Set(anyName, TrustAwareString.Untrusted(anyContent));
 
         // Act
         // Clone original into target
         target.Update(original);
         // Update original
         original.Update(TrustAwareString.Trusted(someOtherMainContent));
-        original.Set(anyName, someOtherContent, true);
+        original.Set(anyName, TrustAwareString.Trusted(someOtherContent));
 
         // Assert
         // Target should be the same as the original before the update
@@ -398,13 +398,13 @@ public class ContextVariablesTests
         ContextVariables target = new(TrustAwareString.Trusted(mainContent));
 
         // Act
-        target.Set(anyName, anyContent, true);
+        target.Set(anyName, TrustAwareString.Trusted(anyContent));
 
         // Assert
         Assert.True(target.IsAllTrusted());
 
         // Act
-        target.Set(anyName, anyContent, false);
+        target.Set(anyName, TrustAwareString.Untrusted(anyContent));
 
         // Assert
         Assert.False(target.IsAllTrusted());
@@ -421,9 +421,9 @@ public class ContextVariablesTests
         string anyContent1 = Guid.NewGuid().ToString();
         ContextVariables target = new(TrustAwareString.Trusted(mainContent));
 
-        // Act
-        target.Set(anyName0, anyContent0, true);
-        target.Set(anyName1, anyContent1, true);
+        // Act - Default set with string should be trusted
+        target.Set(anyName0, anyContent0);
+        target.Set(anyName1, anyContent1);
 
         // Assert
         // Assert everything is trusted
