@@ -43,14 +43,20 @@ public class TrustAwareString : IEquatable<TrustAwareString>
 
     public override bool Equals(object obj)
     {
-        if (obj is null) return false;
+        if (obj is null)
+        {
+            return false;
+        }
 
         return (obj is TrustAwareString other) && this.Equals(other);
     }
 
     public bool Equals(TrustAwareString? other)
     {
-        if (other is null) return false;
+        if (other is null)
+        {
+            return false;
+        }
 
         return this.Value == other.Value && this.IsTrusted == other.IsTrusted;
     }

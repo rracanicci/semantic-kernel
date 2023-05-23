@@ -20,13 +20,13 @@ public sealed class TrustService : ITrustService
     /// The default trusted version will use the trust information of the variables in the context to decide
     /// whether the result of the function call should be trusted or not.
     /// </summary>
-    public static TrustService DefaultTrusted => new TrustService(true);
+    public static TrustService DefaultTrusted => new(true);
 
     /// <summary>
     /// Creates the default untrusted implementation of the trust service.
     /// The default untrusted version will always force the result of the function call to be untrusted.
     /// </summary>
-    public static TrustService DefaultUntrusted => new TrustService(false);
+    public static TrustService DefaultUntrusted => new(false);
 
     /// <summary>
     /// If set to:

@@ -56,7 +56,8 @@ public sealed class TrustAwareStringTest
     }
 
     [Fact]
-    public void EqualsAndGetHashCodeSucceeds() {
+    public void EqualsAndGetHashCodeSucceeds()
+    {
         // Arrange
         var trustedValue0 = new TrustAwareString("some value 0", true);
         var trustedValue0Copy = new TrustAwareString("some value 0", true);
@@ -92,10 +93,10 @@ public sealed class TrustAwareStringTest
         // Arrange
         TrustAwareString? null1 = null;
         TrustAwareString? null2 = null;
-        TrustAwareString value = new TrustAwareString("value");
+        TrustAwareString value = new("value");
 
         // Act and assert
-        #pragma warning disable CA1508 // Avoid dead conditional code
+#pragma warning disable CA1508 // Avoid dead conditional code
         Assert.True(null1 == null2);
         Assert.False(null1 != null2);
         Assert.False(value.Equals(null1));
@@ -107,6 +108,6 @@ public sealed class TrustAwareStringTest
         Assert.False(value.Equals(null));
         Assert.False(value == null);
         Assert.True(value != null);
-        #pragma warning restore CA1508 // Avoid dead conditional code
+#pragma warning restore CA1508 // Avoid dead conditional code
     }
 }
