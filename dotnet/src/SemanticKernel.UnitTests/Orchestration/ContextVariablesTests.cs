@@ -4,6 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using Microsoft.SemanticKernel.Orchestration;
+using Microsoft.SemanticKernel.Security;
 using Xunit;
 
 namespace SemanticKernel.UnitTests.Orchestration;
@@ -225,7 +226,7 @@ public class ContextVariablesTests
     {
         // Arrange
         string anyContent = Guid.NewGuid().ToString();
-        ContextVariables target = new(anyContent, isTrusted);
+        ContextVariables target = new(new TrustAwareString(anyContent, isTrusted));
 
         // Assert
         Assert.Equal(anyContent, target.Input);
@@ -239,7 +240,7 @@ public class ContextVariablesTests
     {
         // Arrange
         string anyContent = Guid.NewGuid().ToString();
-        ContextVariables target = new(anyContent, !isTrusted);
+        ContextVariables target = new(new TrustAwareString(anyContent, !isTrusted));
 
         // Assert
         Assert.Equal(anyContent, target.Input);
@@ -261,7 +262,7 @@ public class ContextVariablesTests
         // Arrange
         string anyContent = Guid.NewGuid().ToString();
         string newContent = Guid.NewGuid().ToString();
-        ContextVariables target = new(anyContent, !isTrusted);
+        ContextVariables target = new(new TrustAwareString(anyContent, !isTrusted));
 
         // Assert
         Assert.Equal(anyContent, target.Input);
@@ -281,8 +282,8 @@ public class ContextVariablesTests
         // Arrange
         string trustedContent = Guid.NewGuid().ToString();
         string untrustedContent = Guid.NewGuid().ToString();
-        ContextVariables trustedVar = new(Guid.NewGuid().ToString(), true);
-        ContextVariables untrustedVar = new(Guid.NewGuid().ToString(), false);
+        ContextVariables trustedVar = new(TrustAwareString.Trusted(Guid.NewGuid().ToString()));
+        ContextVariables untrustedVar = new(TrustAwareString.Untrusted(Guid.NewGuid().ToString()));
 
         // Act
         trustedVar.Update(trustedContent);
@@ -299,8 +300,8 @@ public class ContextVariablesTests
         // Arrange
         string trustedContent = Guid.NewGuid().ToString();
         string untrustedContent = Guid.NewGuid().ToString();
-        ContextVariables trustedVar = new(Guid.NewGuid().ToString(), true);
-        ContextVariables untrustedVar = new(Guid.NewGuid().ToString(), false);
+        ContextVariables trustedVar = new(TrustAwareString.Trusted(Guid.NewGuid().ToString()));
+        ContextVariables untrustedVar = new(TrustAwareString.Untrusted(Guid.NewGuid().ToString()));
 
         // Act
         trustedVar.UpdateUntrusted(trustedContent);
@@ -354,7 +355,7 @@ public class ContextVariablesTests
         string someOtherMainContent = Guid.NewGuid().ToString();
         string someOtherContent = Guid.NewGuid().ToString();
         ContextVariables target = new();
-        ContextVariables original = new(mainContent, false);
+        ContextVariables original = new(TrustAwareString.Untrusted(mainContent));
 
         original.Set(anyName, anyContent, false);
 
@@ -381,7 +382,7 @@ public class ContextVariablesTests
         string mainContent = Guid.NewGuid().ToString();
         string anyName = Guid.NewGuid().ToString();
         string anyContent = Guid.NewGuid().ToString();
-        ContextVariables target = new(mainContent, true);
+        ContextVariables target = new(TrustAwareString.Trusted(mainContent));
 
         // Act
         target.Set(anyName, anyContent, true);
@@ -405,7 +406,7 @@ public class ContextVariablesTests
         string anyContent0 = Guid.NewGuid().ToString();
         string anyName1 = Guid.NewGuid().ToString();
         string anyContent1 = Guid.NewGuid().ToString();
-        ContextVariables target = new(mainContent, true);
+        ContextVariables target = new(TrustAwareString.Trusted(mainContent));
 
         // Act
         target.Set(anyName0, anyContent0, true);

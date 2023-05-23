@@ -1134,7 +1134,7 @@ public sealed class SKFunctionTests2
     private SKContext MockContext(string input, bool isTrusted = true)
     {
         return new SKContext(
-            new ContextVariables(input, isTrusted),
+            new ContextVariables(new TrustAwareString(input, isTrusted)),
             skills: this._skills.Object,
             logger: this._log.Object);
     }

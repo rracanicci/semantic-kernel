@@ -7,6 +7,7 @@ using Microsoft.Extensions.Logging;
 using Microsoft.SemanticKernel;
 using Microsoft.SemanticKernel.Memory;
 using Microsoft.SemanticKernel.Orchestration;
+using Microsoft.SemanticKernel.Security;
 using Microsoft.SemanticKernel.SkillDefinition;
 using Moq;
 using Xunit;
@@ -113,7 +114,7 @@ public class SKContextTests
         // Arrange
         string originalResult = Guid.NewGuid().ToString();
         string newResult = Guid.NewGuid().ToString();
-        var variables = new ContextVariables(originalResult, false);
+        var variables = new ContextVariables(TrustAwareString.Untrusted(originalResult));
         var target = new SKContext(variables);
 
         // Assert
@@ -138,7 +139,7 @@ public class SKContextTests
     {
         // Arrange
         string originalResult = Guid.NewGuid().ToString();
-        var variables = new ContextVariables(originalResult, true);
+        var variables = new ContextVariables(TrustAwareString.Trusted(originalResult));
         var target = new SKContext(variables);
 
         // Assert

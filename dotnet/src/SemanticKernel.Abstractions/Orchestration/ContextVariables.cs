@@ -27,12 +27,17 @@ public sealed class ContextVariables : IEnumerable<KeyValuePair<string, TrustAwa
     /// <summary>
     /// Constructor for context variables.
     /// </summary>
-    /// <param name="content">Optional value for the main variable of the context.</param>
-    /// <param name="isTrusted">Whether the content is trusted or not (default true).</param>
-    public ContextVariables(string? content = null, bool isTrusted = true)
+    /// <param name="trustAwareContent">Optional value for the main variable of the context including trust information.</param>
+    public ContextVariables(TrustAwareString? trustAwareContent = null)
     {
-        this._variables[MainKey] = new TrustAwareString(content ?? string.Empty, isTrusted);
+        this._variables[MainKey] = trustAwareContent ?? TrustAwareString.Empty;
     }
+
+    /// <summary>
+    /// Constructor for context variables. By default the content will be trusted.
+    /// </summary>
+    /// <param name="content">Optional value for the main variable of the context.</param>
+    public ContextVariables(string content) : this(TrustAwareString.Trusted(content)) { }
 
     /// <summary>
     /// Updates the main input text with the new value after a function is complete.

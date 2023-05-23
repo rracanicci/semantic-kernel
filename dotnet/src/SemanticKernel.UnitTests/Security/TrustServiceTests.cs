@@ -63,7 +63,7 @@ public sealed class TrustServiceTests
             .WithTrustService(trustService).Build();
         var aiService = MockAIService();
         // The input here is set as untrusted
-        var context = new ContextVariables("my input", false);
+        var context = new ContextVariables(TrustAwareString.Untrusted("my input"));
 
         factory.Setup(x => x.Invoke(It.IsAny<(ILogger, KernelConfig)>())).Returns(aiService.Object);
 
@@ -200,7 +200,7 @@ public sealed class TrustServiceTests
             .WithTrustService(trustService).Build();
         var aiService = MockAIService();
         // Here the input is untrusted
-        var context = new ContextVariables("my input", false);
+        var context = new ContextVariables(TrustAwareString.Untrusted("my input"));
 
         factory.Setup(x => x.Invoke(It.IsAny<(ILogger, KernelConfig)>())).Returns(aiService.Object);
 
