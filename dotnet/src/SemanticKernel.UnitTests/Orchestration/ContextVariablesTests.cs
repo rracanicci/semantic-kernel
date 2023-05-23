@@ -247,7 +247,7 @@ public class ContextVariablesTests
         AssertContextVariable(target, ContextVariables.MainKey, anyContent, !isTrusted);
 
         // Act
-        target.Update(target.Input, isTrusted);
+        target.Update(new TrustAwareString(target.Input, isTrusted));
 
         // Assert
         Assert.Equal(anyContent, target.Input);
@@ -269,7 +269,7 @@ public class ContextVariablesTests
         AssertContextVariable(target, ContextVariables.MainKey, anyContent, !isTrusted);
 
         // Act
-        target.Update(newContent, isTrusted);
+        target.Update(new TrustAwareString(newContent, isTrusted));
 
         // Assert
         Assert.Equal(newContent, target.Input);
@@ -277,21 +277,34 @@ public class ContextVariablesTests
     }
 
     [Fact]
-    public void UpdateAndKeepTrustSucceeds()
+    public void UpdateWithStringDefaultsToTrustedSucceeds()
     {
         // Arrange
-        string trustedContent = Guid.NewGuid().ToString();
-        string untrustedContent = Guid.NewGuid().ToString();
+        string content0 = Guid.NewGuid().ToString();
+        string content1 = Guid.NewGuid().ToString();
         ContextVariables trustedVar = new(TrustAwareString.Trusted(Guid.NewGuid().ToString()));
         ContextVariables untrustedVar = new(TrustAwareString.Untrusted(Guid.NewGuid().ToString()));
 
         // Act
-        trustedVar.Update(trustedContent);
-        untrustedVar.Update(untrustedContent);
+        trustedVar.Update(content0);
+        untrustedVar.Update(content1);
 
         // Assert
-        AssertContextVariable(trustedVar, ContextVariables.MainKey, trustedContent, true);
-        AssertContextVariable(untrustedVar, ContextVariables.MainKey, untrustedContent, false);
+        AssertContextVariable(trustedVar, ContextVariables.MainKey, content0, true);
+        AssertContextVariable(untrustedVar, ContextVariables.MainKey, content1, true);
+    }
+
+    [Fact]
+    public void UpdateWithNullDefaultsToEmptyTrustedSucceeds()
+    {
+        // Arrange
+        ContextVariables untrustedVar = new(TrustAwareString.Untrusted(Guid.NewGuid().ToString()));
+
+        // Act
+        untrustedVar.Update(null);
+
+        // Assert
+        AssertContextVariable(untrustedVar, ContextVariables.MainKey, string.Empty, true);
     }
 
     [Fact]
@@ -304,8 +317,8 @@ public class ContextVariablesTests
         ContextVariables untrustedVar = new(TrustAwareString.Untrusted(Guid.NewGuid().ToString()));
 
         // Act
-        trustedVar.UpdateUntrusted(trustedContent);
-        untrustedVar.UpdateUntrusted(untrustedContent);
+        trustedVar.Update(TrustAwareString.Untrusted(trustedContent));
+        untrustedVar.Update(TrustAwareString.Untrusted(untrustedContent));
 
         // Assert
         AssertContextVariable(trustedVar, ContextVariables.MainKey, trustedContent, false);
@@ -363,7 +376,7 @@ public class ContextVariablesTests
         // Clone original into target
         target.Update(original);
         // Update original
-        original.Update(someOtherMainContent, true);
+        original.Update(TrustAwareString.Trusted(someOtherMainContent));
         original.Set(anyName, someOtherContent, true);
 
         // Assert

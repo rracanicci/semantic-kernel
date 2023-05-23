@@ -6,6 +6,7 @@ using System.Diagnostics.CodeAnalysis;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
 using Microsoft.SemanticKernel.Orchestration;
+using Microsoft.SemanticKernel.Security;
 using Microsoft.SemanticKernel.SkillDefinition;
 
 namespace Microsoft.SemanticKernel.TemplateEngine.Blocks;
@@ -123,7 +124,7 @@ internal sealed class CodeBlock : Block, ICodeRendering
             this.Log.LogTrace("Passing variable/value: `{0}`", this._tokens[1].Content);
             string input = ((ITextRendering)this._tokens[1]).Render(contextClone.Variables);
             // Keep previous trust information when updating the input
-            contextClone.Variables.Update(input, contextClone.Variables.IsAllTrusted());
+            contextClone.Variables.Update(new TrustAwareString(input, contextClone.Variables.IsAllTrusted()));
         }
 
         try

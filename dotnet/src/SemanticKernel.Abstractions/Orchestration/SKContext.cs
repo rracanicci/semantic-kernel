@@ -6,6 +6,7 @@ using System.Threading;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Abstractions;
 using Microsoft.SemanticKernel.Memory;
+using Microsoft.SemanticKernel.Security;
 using Microsoft.SemanticKernel.SkillDefinition;
 
 namespace Microsoft.SemanticKernel.Orchestration;
@@ -215,12 +216,13 @@ public sealed class SKContext
 
         if (isResultTrusted)
         {
-            this.Variables.Update(newResult);
+            // Keeps previous trust state
+            this.Variables.Update(new TrustAwareString(newResult, this.Variables.Input.IsTrusted));
         }
         else
         {
             // Force the result to be untrusted
-            this.Variables.UpdateUntrusted(newResult);
+            this.Variables.Update(TrustAwareString.Untrusted(newResult));
         }
     }
 

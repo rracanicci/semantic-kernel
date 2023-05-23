@@ -135,7 +135,7 @@ public sealed class TrustServiceTests
 
         // Mock this to make the context untrusted when the template is rendered
         promptTemplate.Setup(x => x.RenderAsync(It.IsAny<SKContext>()))
-            .Callback<SKContext>(ctx => ctx.Variables.Update("some untrusted content", false))
+            .Callback<SKContext>(ctx => ctx.Variables.Update(TrustAwareString.Untrusted("some untrusted content")))
             .ReturnsAsync("unsafe prompt");
 
         promptTemplate
